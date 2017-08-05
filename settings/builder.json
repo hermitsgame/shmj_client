@@ -1,0 +1,24 @@
+{
+  "appKey": "",
+  "appSecret": "",
+  "excludeScenes": [],
+  "includeAnySDK": false,
+  "includeSdk": [
+    "anysdk"
+  ],
+  "inlineSpriteFrames": true,
+  "mergeStartScene": false,
+  "oauthLoginServer": "",
+  "orientation": {
+    "landscapeLeft": true,
+    "landscapeRight": true,
+    "portrait": false,
+    "upsideDown": false
+  },
+  "packageName": "org.cocos2d.shmj_client",
+  "privateKey": "",
+  "renderMode": "0",
+  "startScene": "ebb7014e-8b54-4b5d-b304-c02685b8e05c",
+  "title": "SHMJ",
+  "webOrientation": "auto"
+}
