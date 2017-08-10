@@ -416,7 +416,6 @@ cc.Class({
 	initChis:function(pengangroot, side, index, mjid) {
         var pgroot = null;
         var mgr = cc.vv.mahjongmgr;
-		var wc = cc.vv.gameNetMgr.wildcard;
 
         pgroot = this.getPengGangItem(pengangroot, side, index);
         pgroot.active = true;

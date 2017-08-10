@@ -105,7 +105,7 @@ cc.Class({
 			self.initSeats();
 		});
 
-        this.node.on('ming_notify', function(data) {
+        this.node.on('ting_notify', function(data) {
             self.initSingleSeat(data.detail);
         });
 
@@ -168,6 +168,7 @@ cc.Class({
         var isOffline = !seat.online;
         var isZhuang = (seat.seatindex == net.button);
 		var ready = (net.gamestate == '') ? seat.ready : false;
+        var flowers = seat.flowers;
 
         this._seats[index].setInfo(seat.name, seat.score);
         this._seats[index].setOffline(isOffline);
@@ -175,6 +176,7 @@ cc.Class({
         this._seats[index].voiceMsg(false);
         this._seats[index].setZhuang(isZhuang);
 		this._seats[index].setReady(ready);
+        this._seats[index].setFlowers(flowers);
     },
 
     onBtnSettingsClicked:function(){

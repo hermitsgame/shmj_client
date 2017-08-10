@@ -62,6 +62,8 @@ cc.Class({
             return;
         }
 
+        cc.vv.anysdkMgr.setPortrait();
+
 /*
         this.initLabels();
 		this.sprHeadImg.getComponent("ImageLoader").setUserID(cc.vv.userMgr.userId);

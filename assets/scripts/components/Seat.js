@@ -26,6 +26,8 @@ cc.Class({
         _isZhuang:false,
         _piao: 0,
         _userId:null,
+
+        _lblFlower: null
     },
 
     // use this for initialization
@@ -39,6 +41,11 @@ cc.Class({
         this._lblScore = this.node.getChildByName("score").getComponent(cc.Label);
         this._voicemsg = this.node.getChildByName("voicemsg");
         this._info = this.node.getChildByName("info");
+
+        var flower = this.node.getChildByName("flower");
+        if (flower) {
+            this._lblFlower = flower.getComponent(cc.Label);
+        }
 
         var bg = this.node.getChildByName("bg");
         if (bg) {
@@ -206,6 +213,12 @@ cc.Class({
         this._isReady = isReady;
         if(this._ready){
             this._ready.active = this._isReady && (cc.vv.gameNetMgr.numOfGames > 0); 
+        }
+    },
+
+    setFlowers: function(flowers) {
+        if (this._lblFlower && flowers != null) {
+            this._lblFlower.string = '花x' + flowers.length;
         }
     },
     

@@ -110,6 +110,7 @@ cc.Class({
 		path = path.format(speaker[this.speakerID], name);
 		this.playSFX(path, cb);
 */
+        cb();
     },
 
     playBackGround : function() {

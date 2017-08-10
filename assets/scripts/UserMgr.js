@@ -1,5 +1,5 @@
 
-var shopURL = 'http://ip.rt155.com:12580';
+var shopURL = 'http://test.wzmj.com:12580';
 
 cc.Class({
     extends: cc.Component,

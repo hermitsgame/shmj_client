@@ -95,14 +95,6 @@ cc.Class({
             ting.active = status;
         }
     },
-
-	setWildcard: function(status) {
-        var wc = this.node.getChildByName("wc");
-
-        if (wc) {
-            wc.active = status;
-        }
-    },
     
     setKou: function(status) {
         var kou = this.node.getChildByName("kou");

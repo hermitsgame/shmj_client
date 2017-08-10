@@ -8,14 +8,12 @@ cc.Class({
         maxNumOfGames:0,
         numOfGames:0,
         numOfMJ:0,
-        numOfHolds: 13,
         seatIndex:-1,
         seats: null,
         numOfSeats: 0,
         turn:-1,
         button:-1,
-        wildcard: -1,
-        chupai: -1,
+        chupai:-1,
         gamestate: '',
         dices: null,
         isOver: false,
@@ -28,7 +26,6 @@ cc.Class({
         this.turn = -1;
         this.chupai = -1,
         this.button = -1;
-		this.wildcard = -1;
         this.gamestate = '';
         this.curaction = null;
 		this.dices = null;
@@ -43,10 +40,8 @@ cc.Class({
             this.seats[i].ready = false;
             this.seats[i].hued = false;
             this.seats[i].tings = [];
-            this.seats[i].hasmingpai = false;
-            this.seats[i].kou = [];
-			this.seats[i].maidi = false;
-			this.seats[i].dingdi = false;
+            this.seats[i].hastingpai = false;
+            this.seats[i].flowers = [];
         }
 
         this.dissoveData = null;
@@ -146,7 +141,7 @@ cc.Class({
         this.numOfSeats = roomInfo.seats.length;
         this.turn = detailOfGame.base_info.button;
         var baseInfo = detailOfGame.base_info;
-		this.wildcard = baseInfo.wc || -1;
+
 		this.gamestate = 'playing';
         for(var i = 0; i < this.seats.length; ++i){
             var s = this.seats[i];
@@ -160,10 +155,8 @@ cc.Class({
             s.wangangs = [];
             s.folds = [];
             s.tings = [];
-            s.hasmingpai = false;
-            s.kou = [];
-			s.maidi = false;
-			s.dingdi = false;
+            s.hastingpai = false;
+            s.flowers = [];
 
             if (cc.vv.userMgr.userId == s.userid) {
                 this.seatIndex = i;
@@ -173,8 +166,7 @@ cc.Class({
 		var conf = baseInfo.conf;
         this.conf = conf;
 
-		this.checkType();
-
+        this.numOfHolds = 13;
 		this.numOfGames = baseInfo.index + 1;
 		this.maxNumOfGames = conf.maxGames;
     },
@@ -194,17 +186,7 @@ cc.Class({
 
         return '';
 	},
-
-	checkType: function() {
-		var conf = this.conf;
-		var num = 13;
-
-		if (conf.type == 'wzmj') {
-			num = 16;
-		}
-
-		this.numOfHolds = num;
-	},
+	
 
 	getGameType: function() {
 		var conf = this.conf;
@@ -216,9 +198,6 @@ cc.Class({
 		return '';
 	},
 
-	needBigFolds: function() {
-		return (2 == this.numOfSeats && 'wzmj' == this.getGameType());
-	},
 
     initHandlers: function() {
         var self = this;
@@ -236,8 +215,7 @@ cc.Class({
                 self.numOfSeats = data.numofseats;
                 self.seatIndex = self.getSeatIndexByID(cc.vv.userMgr.userId);
                 self.isOver = false;
-
-				self.checkType();
+                self.numOfHolds = 13;
             }
             else{
                 console.log(data.errmsg);
@@ -266,7 +244,7 @@ cc.Class({
         });
 
         net.addHandler("dispress_push",function(data){
-            console.log("get event dispress_push");
+
             self.roomId = null;
             self.turn = -1;
             self.seats = null;
@@ -378,18 +356,6 @@ cc.Class({
 			self.dispatchEvent('game_dice', data);
         });
 
-		net.addHandler("game_wildcard_push",function(data) {
-			self.wildcard = data.value;
-			self.dispatchEvent('game_wildcard', data.value);
-        });
-
-        net.addHandler("user_dingpiao_push",function(data) {
-            var userId = data.userid;
-            var seat = self.getSeatByID(userId);
-            seat.dingpiao = data.dingpiao;
-            console.log("user_dingpiao_push: " + data.dingpiao);
-            self.dispatchEvent('user_state_changed', seat);
-        });
 
         net.addHandler("game_holds_push",function(data) {
             var seat = self.seats[self.seatIndex];
@@ -405,7 +371,7 @@ cc.Class({
                     s.pengs = [];
                 }
 
-				if(s.chis == null){
+                if(s.chis == null){
                     s.chis = [];
                 }
 
@@ -423,8 +389,8 @@ cc.Class({
                     s.tings = [];
                 }
 
-                if (s.kou == null) {
-                    s.kou = [];
+                if (s.flowers == null) {
+                    s.flowers = [];
                 }
 
                 s.ready = false;
@@ -471,27 +437,6 @@ cc.Class({
 			self.dispatchEvent('game_state');
 		});
 
-		net.addHandler('game_maidi_push', function(data) {
-			console.log('game_maidi_push');
-			console.log(data);
-
-			var seatindex = data.seatindex;
-			var seat = self.seats[seatindex];
-
-			seat.maidi = true;
-			self.dispatchEvent('game_maidi', seat);
-		});
-
-		net.addHandler('game_dingdi_push', function(data) {
-			console.log('game_dingdi_push');
-			console.log(data);
-
-			var seatindex = data.seatindex;
-			var seat = self.seats[seatindex];
-
-			seat.dingdi = true;
-			self.dispatchEvent('game_dingdi', seat);
-		});
 
         net.addHandler("game_begin_push", function(data) {
             console.log('game_begin_push');
@@ -509,7 +454,7 @@ cc.Class({
                     s.pengs = [];
                 }
 
-				if (s.chis == null) {
+                if (s.chis == null) {
                     s.chis = [];
                 }
 
@@ -529,8 +474,8 @@ cc.Class({
                     s.tings = [];
                 }
 
-                if (s.kou == null) {
-                    s.kou = [];
+                if (s.flowers == null) {
+                    s.flowers = [];
                 }
 
                 s.ready = false;
@@ -555,7 +500,6 @@ cc.Class({
 
             self.turn = data.turn;
             self.button = data.button;
-			self.wildcard = data.wildcard || -1;
             self.chupai = data.chuPai;
             self.numOfSeats = data.numOfSeats;
             for (var i = 0; i < self.numOfSeats; ++i) {
@@ -568,18 +512,14 @@ cc.Class({
                 seat.diangangs = sd.diangangs;
                 seat.wangangs = sd.wangangs;
                 seat.pengs = sd.pengs;
-				seat.chis = sd.chis;
+                seat.chis = sd.chis;
                 seat.hued = sd.hued;
                 seat.iszimo = sd.iszimo;
                 seat.huinfo = sd.huinfo;
+                seat.hastingpai = sd.tingpai;
                 seat.tings = sd.tings;
-                seat.hasmingpai = sd.mingpai;
-                seat.dingpiao = sd.dingpiao;
-                seat.kou = sd.kou;
-				seat.maidi = sd.maidi;
-				seat.dingdi = sd.dingdi;
-
-				seat.ready = false;
+                seat.flowers = sd.flowers;
+                seat.ready = false;
            }
 
             for(var i = 0; i < self.numOfSeats; ++i) {
@@ -638,7 +578,7 @@ cc.Class({
 
         net.addHandler("mj_count_push",function(data){
             console.log('mj_count_push');
-            self.numOfMJ = data.value
+            self.numOfMJ = data.value;
             self.dispatchEvent('mj_count',data.value);
         });
 
@@ -660,8 +600,16 @@ cc.Class({
             console.log(data);
             var userId = data.userId;
             var pai = data.pai;
+            var flowers = data.flowers;
             var si = self.getSeatIndexByID(userId);
             self.doMopai(si, pai);
+
+            if (flowers != null) {
+                var sd = self.seats[si];
+
+                sd.flowers = sd.flowers.concat(flowers);
+                self.dispatchEvent('user_state_changed', sd);
+            }
         });
 
         net.addHandler("guo_notify_push",function(data){
@@ -691,7 +639,7 @@ cc.Class({
             self.doPeng(si,data.pai);
         });
 
-		net.addHandler("chi_notify_push", function(data) {
+        net.addHandler("chi_notify_push", function(data) {
             console.log('chi_notify_push');
             console.log(data);
             var userId = data.userid;
@@ -715,14 +663,27 @@ cc.Class({
             self.doGang(si, pai, data.gangtype);
         });
 
-        net.addHandler("ming_notify_push",function(data){
-            console.log('ming_notify_push');
+        net.addHandler('game_hf_push', function(data) {
+            console.log('game_hf_push');
+            console.log(data);
+
+            var hf = data.hf;
+
+            for (var i = 0; i < self.seats.length; i++) {
+                var seat = self.seats[i];
+
+                seat.flowers = hf[i];
+                self.dispatchEvent('user_state_changed', seat);
+            }
+        });
+
+        net.addHandler("ting_notify_push",function(data) {
+            console.log('ting_notify_push');
+            console.log(data);
             var userId = data.userid;
             var tings = data.tings;
-            var holds = data.holds;
-            var kou = data.kou;
             var si = self.getSeatIndexByID(userId);
-            self.doMing(si, holds, tings, kou);
+            self.doTing(si, tings);
         });
 
         net.addHandler("chat_push",function(data){
@@ -742,7 +703,7 @@ cc.Class({
             self.dispatchEvent("dissolve_notice",data);
         });
 
-		net.addHandler("dissolve_done_push",function(data){
+        net.addHandler("dissolve_done_push",function(data){
             self.dissoveData = null;
             self.dispatchEvent("dissolve_done", data);
         });
@@ -805,11 +766,6 @@ cc.Class({
 	getChiArr: function(pai, ign) {
 		var type = parseInt(pai / 100);
 		var c = pai % 100;
-		var wc = this.wildcard;
-
-		if (c == 47) {
-			c = wc;
-		}
 
 		var begin = c - type;
 
@@ -818,10 +774,6 @@ cc.Class({
 			var k = begin + i;
 			if (ign && k == c) {
 				continue;
-			}
-
-			if (k == wc) {
-				k = 47;
 			}
 
 			arr.push(k);
@@ -882,27 +834,19 @@ cc.Class({
         this.dispatchEvent('peng_notify', { seatData: seatData, pai: pai });
     },
 
-    doMing:function(seatIndex, holds, tings, kou, skip) {
+    doTing:function(seatIndex, tings, skip) {
         var seatData = this.seats[seatIndex];
 
-        seatData.hasmingpai = true;
+        seatData.hastingpai = true;
         if (tings) {
             seatData.tings = tings;
-        }
-
-        if (kou) {
-            seatData.kou = kou;
-        }
-
-        if (seatIndex != this.seatIndex && holds) {
-            seatData.holds = holds;
         }
 
 		if (skip) {
 			return;
 		}
 
-        this.dispatchEvent('ming_notify', seatData);
+        this.dispatchEvent('ting_notify', seatData);
     },
 
     getGangType: function(seatData, pai) {
@@ -1038,97 +982,15 @@ cc.Class({
         return !found;
     },
 
-	convert: function(holds, wc) {
-		if (wc < 0) {
-			return;
-		}
-
-        for (var i = 0; i < holds.length; i++) {
-                var pai = holds[i];
-                if (pai == wc) {
-                        pai = 1;
-                } else if (pai == 47) {
-                        pai = wc;
-                }
-
-				holds[i] = pai;
-        }
-	},
-
-	revert: function(holds, wc) {
-		if (wc < 0) {
-			return;
-		}
-
-        for (var i = 0; i < holds.length; i++) {
-                var pai = holds[i];
-                if (pai == 1) {
-                        pai = wc;
-                } else if (pai == wc) {
-                        pai = 47;
-                }
-
-				holds[i] = pai;
-        }
-	},
-
-	sortMJ: function(holds,  wildcard) {
-		var wc = wildcard;
-		if (null == wc) {
-			wc = this.wildcard;
-		}
-
-		this.convert(holds, wc);
-
+	sortMJ: function(holds) {
         holds.sort(function(a, b) {
             return a - b;
         });
-
-		this.revert(holds, wc);
     },
 
 	getChuPaiList: function() {
-		var seat = this.seats[this.seatIndex];
-		var holds = seat.holds;
-		var chupais = [];
-		var wc = this.wildcard;
-
-		var map = { '41': 0, '42': 0, '43': 0, '44': 0, '45': 0, '46': 0 };
-		var _holds = holds.slice(0);
-
-		this.convert(_holds, wc);
-
-		for (var i = 0; i < _holds.length; i++) {
-			var pai = _holds[i];
-
-			if (pai >= 41 && pai <= 46) {
-				map[pai] += 1;
-			}
-		}
-
-		for (var k in map) {
-			var pai = parseInt(k);
-			var num = map[k];
-
-			if (1 == num) {
-				chupais.push(pai);
-			}
-		}
-
-		if (chupais.length > 0) {
-			this.revert(chupais, wc);
-			return chupais;
-		}
-
-		for (var i = 0; i < holds.length; i++) {
-			var pai = holds[i];
-
-			if (pai != wc) {
-				chupais.push(pai);
-			}
-		}
-
-		return chupais;
+        // TODO
+        return [];
     },
 
     refreshMJ: function(data) {

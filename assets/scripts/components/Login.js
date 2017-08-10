@@ -45,6 +45,8 @@ cc.Class({
             return;
         }
 
+        cc.vv.anysdkMgr.setPortrait();
+
         cc.vv.http.url = cc.vv.http.master_url;
 
         //cc.vv.audioMgr.playBackGround(); // TODO

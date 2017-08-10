@@ -163,7 +163,7 @@ cc.Class({
 		}
 */
 		var conf = {
-			type: 'zzmj',
+			type: 'shmj',
 			gamenum: 4,
 			playernum: 2,
 			pay: 0,

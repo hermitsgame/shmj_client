@@ -143,42 +143,5 @@ cc.Class({
 
 		return desc;
     },
-
-	setPortrait: function() {
-		var view = cc.view;
-		if (cc.sys.isNative && cc.sys.os === cc.sys.OS_ANDROID) {
-			jsb.reflection.callStaticMethod("org/cocos2dx/javascript/AppActivity", "changeOrientation", "(I)V", 1);
-        } else if (cc.sys.isNative && cc.sys.os === cc.sys.OS_IOS) {
-            jsb.reflection.callStaticMethod("IOSHelper", "changeOrientation:", 1);
-        }
-        else {
-            view.setOrientation(cc.macro.ORIENTATION_PORTRAIT);
-        }
-
-        let width = view.getFrameSize().height > view.getFrameSize().width ? view.getFrameSize().width : view.getFrameSize().height;
-        let height = view.getFrameSize().height < view.getFrameSize().width ? view.getFrameSize().width : view.getFrameSize().height;
-
-		view.setFrameSize(width, height);
-        view.setDesignResolutionSize(720, 1280, cc.ResolutionPolicy.FIXED_HEIGHT);
-    },
-
-    setLandscape: function() {
-    	var view = cc.view;
-        if (cc.sys.isNative && cc.sys.os === cc.sys.OS_ANDROID) {
-            jsb.reflection.callStaticMethod("org/cocos2dx/javascript/AppActivity", "changeOrientation", "(I)V", 0);
-        } else if (cc.sys.isNative && cc.sys.os === cc.sys.OS_IOS) {
-            jsb.reflection.callStaticMethod("IOSHelper", "changeOrientation:", 0);
-        }
-        else {
-            view.setOrientation(cc.macro.ORIENTATION_LANDSCAPE);
-        }
-
-        let width = view.getFrameSize().height < view.getFrameSize().width ? view.getFrameSize().width : view.getFrameSize().height;
-        let height = view.getFrameSize().height > view.getFrameSize().width ? view.getFrameSize().width : view.getFrameSize().height;
-
-		cc.view.setFrameSize(width, height);
-        cc.view.setDesignResolutionSize(1280, 720, cc.ResolutionPolicy.FIXED_WIDTH);
-    },
-	
 });
 
