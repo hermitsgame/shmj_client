@@ -9,9 +9,13 @@ cc.Class({
         _pay: null,
         _idx: 0,
         _costs: null,
+
+		slider: cc.Slider
     },
 
     onLoad: function() {
+
+	
 /*
         this._wanfa = [];
         var t = cc.find("body/grpGame", this.node);
@@ -59,10 +63,20 @@ cc.Class({
             self.showWanfa(id);
         });
 */
+
+		var score = this.slider;
+
+		score.node.on('slide', this.onScoreChanged, this);
 	},
 
-	start: function() {
+	onScoreChanged: function(event) {
+		var slide = event.detail;
 
+		console.log(slide);
+
+		var flower = cc.find('base/flower', this.node).getComponent(cc.Label);
+
+		flower.string = 1 + slide.progress * 19;
 	},
 
     onBtnClose:function() {

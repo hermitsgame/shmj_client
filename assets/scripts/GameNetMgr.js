@@ -760,6 +760,11 @@ cc.Class({
 			return;
 		}
 
+		if (seatIndex == this.seatIndex) {
+			seatData.lastChiPai = null;
+			console.log('set lastChiPai=null');
+		}
+
         this.dispatchEvent('game_chupai_notify', { seatData: seatData, pai: pai });
     },
 
@@ -804,6 +809,11 @@ cc.Class({
 
 		if (skip) {
 			return;
+		}
+
+		if (seatIndex == this.seatIndex && holds.length > 2) {
+			seatData.lastChiPai = pai % 100;
+			console.log('set lastChiPai=' + pai);
 		}
 
         this.dispatchEvent('chi_notify', { seatData: seatData, pai: pai });

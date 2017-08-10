@@ -1131,12 +1131,13 @@ cc.Class({
 
     checkChuPai: function(check) {
         var net = cc.vv.gameNetMgr;
-        var seats = net.seats;
-        var seatData = seats[net.seatIndex];
+        var seatData = net.getSelfData();
         var hastingpai = seatData.hastingpai;
 
         var holds = cc.find("game/south/layout/holds", this.node);
         var mjcnt = holds.childrenCount;
+
+		console.log('checkChuPai');
 
         if (check) {
             if (hastingpai) {
@@ -1149,14 +1150,21 @@ cc.Class({
                     }
                 }
             } else {
-                // TODO
+                for (var i = 0; i < mjcnt; ++i) {
+                    var mjnode = holds.children[i];
+                    var mj = mjnode.getComponent('SmartMJ');
+					var mjid = mj.mjid;
+
+					var can = !(seatData.lastChiPai && seatData.lastChiPai == mjid);
+                    mj.setInteractable(can);
+                }
 	        }
 		} else {
 			for (var i = 0; i < mjcnt; ++i) {
 	                var mjnode = holds.children[i];
 	                var mj = mjnode.getComponent('SmartMJ');
 
-	                mj.setInteractable(!hastingpai);
+	                mj.setInteractable(false);
 	            }
 		}
     },
