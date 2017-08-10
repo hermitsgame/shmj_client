@@ -3,31 +3,18 @@ cc.Class({
     extends: cc.Component,
 
     properties: {
-        _wanfa: null,
         _gamenum: null,
-        _playernum: null,
-        _pay: null,
-        _idx: 0,
-        _costs: null,
-
-		slider: cc.Slider
+        _maxfan: null,
+        _flowers: 0,
+        _maima: null,
+        _allpairs: null,
+        _bao: null,
+		slider: cc.Slider,		
     },
 
     onLoad: function() {
-
-	
-/*
-        this._wanfa = [];
-        var t = cc.find("body/grpGame", this.node);
-        for (var i = 0; i < t.childrenCount; i++) {
-            var n = t.children[i].getComponent("RadioButton");
-            if (n != null) {
-                this._wanfa.push(n);
-            }
-        }
-
         this._gamenum = [];
-        var t = cc.find("body/grpGameNum", this.node);
+		var t = this.node.getChildByName('game_num');
         for (var i = 0; i < t.childrenCount; i++) {
             var n = t.children[i].getComponent("RadioButton");
             if (n != null) {
@@ -35,35 +22,19 @@ cc.Class({
             }
         }
 
-        this._playernum = [];
-        var t = cc.find("body/grpPlayerNum", this.node);
+        this._maxfan = [];
+		var t = this.node.getChildByName('maxfan');
         for (var i = 0; i < t.childrenCount; i++) {
             var n = t.children[i].getComponent("RadioButton");
             if (n != null) {
-                this._playernum.push(n);
+                this._maxfan.push(n);
             }
         }
 
-        this._pay = [];
-        var t = cc.find("body/grpPay", this.node);
-        for (var i = 0; i < t.childrenCount; i++) {
-            var n = t.children[i].getComponent("RadioButton");
-            if (n != null) {
-                this._pay.push(n);
-            }
-        }
-
-		var self = this;
-
-		this.wanfas = [ 'wzmj', 'zzmj' ];
-		this.showWanfa(this._idx);
-
-		this.node.on("rb-updated", function(event) {
-            var id = event.detail.id;
-            self.showWanfa(id);
-        });
-*/
-
+		this._maima = cc.find('wanfa/horse', this.node);
+		this._allpairs = cc.find('wanfa/allpairs', this.node);
+		this._bao = cc.find('wanfa/bao', this.node);
+		
 		var score = this.slider;
 
 		score.node.on('slide', this.onScoreChanged, this);
@@ -72,11 +43,11 @@ cc.Class({
 	onScoreChanged: function(event) {
 		var slide = event.detail;
 
-		console.log(slide);
-
 		var flower = cc.find('base/flower', this.node).getComponent(cc.Label);
+		var flowers = 1 + Math.round(slide.progress * 19);
 
-		flower.string = 1 + slide.progress * 19;
+		flower.string = flowers;
+		this._flowers = flowers;
 	},
 
     onBtnClose:function() {
@@ -93,15 +64,6 @@ cc.Class({
 
     createRoom: function() {
         var self = this;
-/*
-        var wanfas = [ 'wzmj', 'zzmj' ];
-        var wanfa = null;
-        for (var i = 0; i < self._wanfa.length; ++i) {
-            if (self._wanfa[i].checked) {
-                wanfa = wanfas[i];
-                break;
-            }
-        }
 
         var gamenum = 0;
 		var gamenums = [ 4, 8, 16 ];
@@ -112,78 +74,29 @@ cc.Class({
             }
         }
 
-        var playernum = 0;
-        var playernums = [ 4, 2 ];
-        for (var i = 0; i < self._playernum.length; ++i) {
-            if (self._playernum[i].checked) {
-                playernum = playernums[i];
+        var maxfan = 0;
+        var maxfans = [ 2, 3, 4, 100 ];
+        for (var i = 0; i < self._maxfan.length; ++i) {
+            if (self._maxfan[i].checked) {
+                maxfan = maxfans[i];
                 break;
             }
         }
 
-        var pay = 0;
-        for (var i = 0; i < self._pay.length; i++) {
-            if (self._pay[i].checked) {
-                pay = i;
-                break;
-            }
-        }
+		var flowers = this._flowers;
+		var maima = this._maima.getComponent('CheckBox').checked;
+		var allpairs = this._allpairs.getComponent('CheckBox').checked;
+		var bao = this._bao.getComponent('CheckBox').checked;
 
         var conf = {
-            type: wanfa,
+            type: 'shmj',
             gamenum: gamenum,
-            playernum: playernum,
-            pay: pay,
+            maxfan: maxfan,
+            huafen: flowers,
+            playernum: bao ? 2 : 4,
+            maima: maima,
+            qidui: allpairs
         };
-
-		var id = self._idx;
-		var w = cc.find('body/wanfa', self.node);
-		var node = w.children[id];
-
-		if (0 == id) {
-			var t = node.getChildByName('btnGangFen').getComponent("CheckBox");
-			conf.gangfen = t.checked;
-
-            var t = node.getChildByName('btnCaishen').getComponent("CheckBox");
-			conf.caishenfen = t.checked;
-
-			var t = node.getChildByName('btnGangKai').getComponent("CheckBox");
-			conf.gangkai = t.checked;
-		} else if (1 == id) {
-			var hu = 0;
-			var t = node.getChildByName('grpHu');
-			for (var i = 0; i < t.childrenCount; i++) {
-				var n = t.children[i].getComponent("RadioButton");
-				if (n.checked) {
-					hu = i;
-					break;
-				}
-			}
-
-			conf.hu = hu;
-
-			var birdNum = 0;
-			var t = node.getChildByName('grpBirds');
-			var birds = [ 2, 4, 6 ];
-			for (var i = 0; i < t.childrenCount; i++) {
-				var n = t.children[i].getComponent("RadioButton");
-				if (n.checked) {
-					birdNum = birds[i];
-					break;
-				}
-			}
-
-			conf.birds = birdNum;
-		}
-*/
-		var conf = {
-			type: 'shmj',
-			gamenum: 4,
-			playernum: 2,
-			pay: 0,
-			hu: 0,
-			birds: 0
-		};
 
 		var pc = cc.vv.pclient;
 

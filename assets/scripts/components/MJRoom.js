@@ -198,10 +198,13 @@ cc.Class({
         cc.vv.anysdkMgr.share(title, "房号:" + cc.vv.gameNetMgr.roomId + " 玩法:" + cc.vv.gameNetMgr.getWanfa());
     },
 
-    onBtnDissolveClicked:function(){
+    onBtnDissolveClicked:function() {
+		cc.vv.net.send("dispress");
+/*  TODO
         cc.vv.alert.show("解散房间不扣房卡，是否确定解散？",function(){
             cc.vv.net.send("dispress");
         },true);
+*/
     },
 
     onBtnExit:function(){

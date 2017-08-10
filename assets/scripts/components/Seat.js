@@ -27,7 +27,8 @@ cc.Class({
         _piao: 0,
         _userId:null,
 
-        _lblFlower: null
+        _lblFlower: null,
+        _flowers: 0,
     },
 
     // use this for initialization
@@ -168,6 +169,14 @@ cc.Class({
                 this._sprBG.setIndex(1);
             }
         }
+
+		if (this._lblFlower != null) {
+			if (this._userName != '') {
+	            this._lblFlower.string = '花X' + this._flowers;
+			} else {
+				this._lblFlower.string = '';
+			}
+		}
         
         //this.node.active = this._userName != null && this._userName != ""; 
     },
@@ -217,8 +226,10 @@ cc.Class({
     },
 
     setFlowers: function(flowers) {
-        if (this._lblFlower && flowers != null) {
-            this._lblFlower.string = '花x' + flowers.length;
+		this._flowers = flowers;
+	
+        if (this._lblFlower != null) {
+            this._lblFlower.node.active = this._flowers != null;
         }
     },
     
