@@ -370,20 +370,27 @@ cc.Class({
         pgroot = this.getPengGangItem(pengangroot, side, index);
         pgroot.active = true;
 
+		var seatindex = parseInt(mjid / 100);
+
+		mjid = mjid % 100;
+
         for (var i = 0; i < pgroot.childrenCount; i++) {
             var child = pgroot.children[i];
-
             var board = child.getComponent(cc.Sprite);
-            var tile = child.children[0];
+            var tile = child.getChildByName('tile');
 			var tileSprite = tile.getComponent(cc.Sprite);
+			var chi = child.getChildByName('chi');
+			var arrow = child.getChildByName('arrow');
+			var isGang = flag != "peng";
+
+			if (chi)
+				chi.active = false;
 
             if (child.name == "gang") {
-                var isGang = flag != "peng";
                 child.active = isGang;
                 
-                if (!isGang) {
+                if (!isGang)
                     continue;
-                }
 
 				board.spriteFrame = mgr.getBoardSpriteFrame(side, "meld");
 
@@ -408,9 +415,23 @@ cc.Class({
 
 					tile.active = true;
 					tileSprite.spriteFrame = sprite;
+
+					if (arrow) {
+						arrow.active = !isGang;
+						if (!isGang)
+							this.setArrow(arrow, seatindex);
+					}
                 }
             }
         }
+    },
+
+	setArrow: function(arrow, seatindex) {
+		var net = cc.vv.gameNetMgr;
+		var local = net.getLocalIndex(seatindex);
+		var angels = [ 90, 0, -90, 180 ];
+
+		arrow.rotation = angels[local];
     },
 
 	initChis:function(pengangroot, side, index, mjid) {
@@ -428,14 +449,20 @@ cc.Class({
             var child = pgroot.children[i];
 
             var board = child.getComponent(cc.Sprite);
-            var tile = child.children[0];
+            var tile = child.getChildByName('tile');
 			var tileSprite = tile.getComponent(cc.Sprite);
+			var chi = child.getChildByName('chi');
+			var arrow = child.getChildByName('arrow');
 
 			board.spriteFrame = mgr.getBoardSpriteFrame(side, "meld");
-			var sprite = mgr.getTileSpriteFrame(side, "meld", mjs[i]);
-
 			tile.active = true;
-			tileSprite.spriteFrame = sprite;
+			tileSprite.spriteFrame = mgr.getTileSpriteFrame(side, "meld", mjs[i]);
+
+			if (chi)
+				chi.active = mjs[i] == (mjid % 100);
+
+			if (arrow)
+				arrow.active = false;
         }
     },
 });

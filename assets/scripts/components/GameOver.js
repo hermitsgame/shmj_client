@@ -318,7 +318,9 @@ cc.Class({
             pgroot = seatView._pengandgang[index];
             pgroot.active = true;
         }
-        
+
+		mjid = mjid % 100;
+		
         var side = 'south';
         for (var i = 0; i < pgroot.childrenCount; i++) {
             var child = pgroot.children[i];

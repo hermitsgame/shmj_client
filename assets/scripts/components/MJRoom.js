@@ -170,6 +170,11 @@ cc.Class({
 		var ready = (net.gamestate == '') ? seat.ready : false;
         var flowers = seat.flowers;
 
+		console.log('seat=');
+		console.log(seat);
+		console.log(flowers);
+		console.log(seat.flowers)
+
         this._seats[index].setInfo(seat.name, seat.score);
         this._seats[index].setOffline(isOffline);
         this._seats[index].setID(seat.userid);

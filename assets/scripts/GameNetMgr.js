@@ -527,6 +527,7 @@ cc.Class({
                 self.dispatchEvent('user_state_changed', seat);
             }
 
+			self.dispatchEvent('user_hf_updated');
 			self.doSync();
         });
 
@@ -609,6 +610,9 @@ cc.Class({
 
                 sd.flowers = sd.flowers.concat(flowers);
                 self.dispatchEvent('user_state_changed', sd);
+
+				console.log('send user_hf_updated');
+				self.dispatchEvent('user_hf_updated', self.seats[si]);
             }
         });
 
@@ -672,9 +676,13 @@ cc.Class({
             for (var i = 0; i < self.seats.length; i++) {
                 var seat = self.seats[i];
 
-                seat.flowers = hf[i];
-                self.dispatchEvent('user_state_changed', seat);
+				if (hf[i] != null) {
+	                seat.flowers = hf[i];
+	                self.dispatchEvent('user_state_changed', seat);
+				}
             }
+
+			self.dispatchEvent('user_hf_updated');
         });
 
         net.addHandler("ting_notify_push",function(data) {
@@ -741,7 +749,7 @@ cc.Class({
 			return;
 		}
 
-        this.dispatchEvent('game_mopai',{seatIndex:seatIndex, pai:pai});
+        this.dispatchEvent('game_mopai', {seatIndex:seatIndex, pai:pai});
     },
 
     doChupai: function(seatIndex, pai, skip) {
@@ -823,9 +831,11 @@ cc.Class({
         var seatData = this.seats[seatIndex];
 		var holds = seatData.holds;
 
+		var c = pai % 100;
+
         if (holds != null && holds.length > 0) {
-            for (var i = 0; i < 2; ++i) {
-                var idx = holds.indexOf(pai);
+            for (var i = 0; i < 2; i++) {
+                var idx = holds.indexOf(c);
 				if (idx == -1) {
 					break;
 				}

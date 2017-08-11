@@ -42,12 +42,12 @@ cc.Class({
 
 	onScoreChanged: function(event) {
 		var slide = event.detail;
-
 		var flower = cc.find('base/flower', this.node).getComponent(cc.Label);
-		var flowers = 1 + Math.round(slide.progress * 19);
+		var range = [1, 5, 10, 20, 30, 50, 100, 200, 300];
+		var id = Math.round(slide.progress * (range.length - 1));
 
-		flower.string = flowers;
-		this._flowers = flowers;
+		flower.string = range[id];
+		this._flowers = range[id];
 	},
 
     onBtnClose:function() {

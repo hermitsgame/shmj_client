@@ -117,7 +117,14 @@ cc.Class({
 			focus.opacity = 255;
 		}
     },
-	
+
+	setFlag: function(name, status) {
+		var flag = this.node.getChildByName(name);
+		if (flag) {
+			flag.active = status;
+		}
+    },
+
     setInteractable: function(status) {
         var mask = this.node.getChildByName("mask");
         if (mask) {
