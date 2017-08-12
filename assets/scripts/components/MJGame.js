@@ -522,7 +522,7 @@ cc.Class({
 			ting.active = true;
             if(seatData.seatindex == cc.vv.gameNetMgr.seatIndex) {
                 //self.initMahjongs();
-                self.showTingpai(localIndex, seatData.tings);
+                self.updateTingpai(localIndex, seatData.tings);
                 self.checkChuPai(true);
             }
             else{
@@ -546,6 +546,24 @@ cc.Class({
             }
             else {
                 self.initOtherMahjongs(seatData, false, true);
+
+				var net = cc.vv.gameNetMgr;
+				var sd = net.getSelfData();
+
+				if (sd.hastingpai) {
+					var mjs = net.getChiArr(pai);
+					var found = false;
+
+					for (var i = 0; i < mjs.length; i++) {
+						if (sd.tings.indexOf(mjs[i]) >= 0) {
+							found = true;
+							break;
+						}
+					}
+
+					if (found)
+						self.updateTingpai(0, sd.tings);
+				}
             }
 
             self._chipeng = false;
@@ -569,6 +587,13 @@ cc.Class({
 				self.showTings(false);
             } else {
                 self.initOtherMahjongs(seatData);
+
+				var pai = data.pai;
+				var sd = net.getSelfData();
+
+				if (sd.hastingpai && sd.tings.indexOf(pai) >= 0) {
+					self.updateTingpai(0, sd.tings);
+				}
             }
 
             var localIndex = self.getLocalIndex(seatData.seatindex);
@@ -959,7 +984,7 @@ cc.Class({
         wanfa.string = cc.vv.gameNetMgr.getWanfa();
     },
 
-    showTingpai: function(localIndex, tings) {
+    updateTingpai: function(localIndex, tings) {
         var huPrompt = this._huPrompts[localIndex];
         var huTemplate = this._huTemplates[localIndex];
 		var wc = cc.vv.wildcard;
@@ -1079,7 +1104,7 @@ cc.Class({
             }
 
             if (seatData.hastingpai && seatData.tings) {
-                this.showTingpai(localIndex, seatData.tings);
+                this.updateTingpai(localIndex, seatData.tings);
             }
         }
 
