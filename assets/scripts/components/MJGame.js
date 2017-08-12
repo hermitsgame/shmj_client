@@ -75,6 +75,7 @@ cc.Class({
         this.addComponent("PopupMgr");
         //this.addComponent("Voice");
         //this.addComponent('Dice');
+        this.addComponent('wildcard');
 
         this.initView();
         this.initEventHandlers();
@@ -199,7 +200,7 @@ cc.Class({
 			} else {
 				prompt = cc.instantiate(temp);
 				prompts.addChild(prompt);
-			}
+			} 
 
 			var ting = tings[i];
 
@@ -209,7 +210,7 @@ cc.Class({
 
 			mj.setMJID(ting.pai);
 
-			info.string = '剩' + ting.left + '张 ' + ting.fan + '番';
+			info.string = '剩' + ting.left + '张';
 			hu.string = ting.pattern;
 		}
     },
@@ -961,6 +962,7 @@ cc.Class({
     showTingpai: function(localIndex, tings) {
         var huPrompt = this._huPrompts[localIndex];
         var huTemplate = this._huTemplates[localIndex];
+		var wc = cc.vv.wildcard;
 
 		var hupais = huPrompt.getChildByName('hupais');
         var hulist = hupais.getChildByName('hulist');
@@ -972,6 +974,7 @@ cc.Class({
             var mj = hu.getComponent("Majiang");
 
             mj.setMJID(tings[i]);
+			mj.setContent('num', wc.getLeft(tings[i]));
             hulist.addChild(hu);
         }
 
@@ -1177,26 +1180,20 @@ cc.Class({
         var mjid = mj.mjid;
         var options = this._optionsData;
         var net = cc.vv.gameNetMgr;
-        var mgr = cc.vv.mahjongmgr;
+        var wc = cc.vv.wildcard;
         var seats = net.seats;
         var seatData = seats[net.seatIndex];
         var holds = seatData.holds;
 
         if (this._tingState == 0) {
-/*
-            // TODO
-            var tings = mgr.getTings(seatData, mjid);
+            var tings = wc.getTings(seatData, mjid);
             this.showTingPrompts(tings);
-*/
         } else if (this._gangState == 0) {
             this.enterGangState(1, mjid);
         } else {
             if (options) {
-/*
-                // TODO
-                var tings = mgr.getTings(seatData, mjid);
+                var tings = wc.getTings(seatData, mjid);
                 this.showTingPrompts(tings);
-*/
             }
         }
     },
@@ -1414,7 +1411,8 @@ cc.Class({
                     this.showChiOptions(pai, types);
                 } else {
                     net.send('chi', { type: types[0], pai: pai });
-                }
+                }
+
 
                 break;
             }

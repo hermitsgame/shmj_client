@@ -423,44 +423,6 @@ cc.Class({
 
 		return (1 << fan);
     },
-
-	getLeft: function(pai) {
-		var seats = cc.vv.gameNetMgr.seats;
-		var left = 4;
-
-		for (var i in seats) {
-			var seat = seats[i];
-			var holds = seat.holds;
-			var folds = seat.folds;
-
-			if (holds && holds.length > 0) {
-				for (var j in holds) {
-					if (holds[j] == pai) {
-						left -= 1;
-					}
-				}
-			}
-
-			if (folds && folds.length > 0) {
-				for (var j in folds) {
-					if (folds[j] == pai) {
-						left -= 1;
-					}
-				}
-			}
-
-			if (seat.pengs.indexOf(pai) != -1) {
-				left -= 3;
- 			} else if (seat.angangs.indexOf(pai) != -1 ||
- 						seat.diangangs.indexOf(pai) != -1 ||
-						seat.wangangs.indexOf(pai) != -1)
-			{
-				left -= 4;
-			}
-		}
-
-		return left;
-    },
 	
 	getPattern: function(pattern) {
         var patterns = [ 'normal', '7pairs', 'duidui' ];

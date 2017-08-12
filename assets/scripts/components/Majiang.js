@@ -125,6 +125,13 @@ cc.Class({
 		}
     },
 
+	setContent: function(name, content) {
+		var item = this.node.getChildByName(name);
+		if (item) {
+			item.getComponent(cc.Label).string = content;
+		}
+    },
+
     setInteractable: function(status) {
         var mask = this.node.getChildByName("mask");
         if (mask) {
