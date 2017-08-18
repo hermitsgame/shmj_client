@@ -95,6 +95,12 @@ cc.Class({
 
         cc.vv.audioMgr.playBackGround();
 */
+		var self = this;
+
+		this.node.on("rb-updated", function(event) {
+            var id = event.detail.id;
+            self.showTab(id);
+        });
     },
 
     start: function() {
@@ -107,6 +113,17 @@ cc.Class({
             cc.vv.userMgr.oldRoomId = null;
             cc.vv.userMgr.enterRoom(roomId);
         }
+    },
+
+	showTab: function(id) {
+		var body = this.node.getChildByName('body');
+		var tabs = [ 'discover', 'club', 'history', 'mine' ];
+
+		for (var i = 0; i < tabs.length; i++) {
+			var tab = body.getChildByName(tabs[i]);
+
+			tab.active = i == id;
+		}
     },
 
     refreshCoins: function() {

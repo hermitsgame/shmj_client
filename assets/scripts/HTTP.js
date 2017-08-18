@@ -1,5 +1,5 @@
 
-var URL = "http://115.28.80.123:9000";
+var URL = "http://115.28.80.123:9001";
 
 cc.VERSION = 20161227;
 var HTTP = cc.Class({

@@ -3,8 +3,6 @@ cc.Class({
     extends: cc.Component,
 
     properties: {
-        _arrow:null,
-		_sprite:null,
         _pointer:null,
         _timeLabel:null,
         _time:-1,
@@ -13,13 +11,10 @@ cc.Class({
 
     onLoad: function() {
         var gameChild = this.node.getChildByName("game");
-        this._arrow = gameChild.getChildByName("arrow");
-		this._sprite = this._arrow.getComponent("SpriteMgr");
-		
-//        this._pointer = this._arrow.getChildByName("pointer");
+        this._pointer = gameChild.getChildByName("arrow");
         this.initPointer();
         
-        this._timeLabel = this._arrow.getChildByName("lblTime").getComponent(cc.Label);
+        this._timeLabel = gameChild.getChildByName("lblTime").getComponent(cc.Label);
         this._timeLabel.string = "00";
         
         var self = this;
@@ -35,7 +30,7 @@ cc.Class({
             self.initPointer();
         });
 		
-        this.node.on('game_chupai',function(data) {
+        this.node.on('game_chupai', function(data) {
             self.initPointer();
             self._time = 10;
             self._alertTime = 3;
@@ -46,19 +41,19 @@ cc.Class({
         if (cc.vv == null)
             return;
 
-        this._arrow.active = cc.vv.gameNetMgr.gamestate == "playing" || cc.vv.replayMgr.isReplay();
-        if (!this._arrow.active)
+		var pt = this._pointer;
+		var net = cc.vv.gameNetMgr;
+
+        pt.active = net.gamestate == "playing" || cc.vv.replayMgr.isReplay();
+        if (!pt.active)
             return;
 
-        var turn = cc.vv.gameNetMgr.turn;
-        var localIndex = cc.vv.gameNetMgr.getLocalIndex(turn);
-/*
-        for(var i = 0; i < this._pointer.children.length; ++i){
-            this._pointer.children[i].active = i == localIndex;
-        }
-*/
+        var turn = net.turn;
+        var localIndex = net.getLocalIndex(turn);
 
-		this._sprite.setIndex(localIndex);
+        for(var i = 0; i < pt.children.length; i++) {
+            pt.children[i].active = i == localIndex;
+        }
     },
 
     update: function (dt) {
