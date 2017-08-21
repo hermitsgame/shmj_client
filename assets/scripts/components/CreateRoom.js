@@ -9,7 +9,7 @@ cc.Class({
         _maima: null,
         _allpairs: null,
         _bao: null,
-		slider: cc.Slider,		
+		slider: cc.Slider,
     },
 
     onLoad: function() {
@@ -62,6 +62,30 @@ cc.Class({
         this.createRoom();
     },
 
+    createClubRoom: function(conf, club_id) {
+        var pc = cc.vv.pclient;
+        var self = this;
+
+        cc.vv.wc.show(2);
+
+        conf.club_id = club_id;
+
+        pc.request_connector('create_private_room', { conf: conf }, function(ret) {
+            cc.vv.wc.hide();
+            if (!ret)
+                return;
+
+            if (ret.errcode != 0) {
+                cc.vv.alert.show(errmsg);
+                return;
+            }
+
+            cc.vv.alert.show('create success');
+
+            self.node.active = false; 
+        });
+    },
+
     createRoom: function() {
         var self = this;
 
@@ -97,6 +121,12 @@ cc.Class({
             maima: maima,
             qidui: allpairs
         };
+
+        var club_id = cc.vv.userMgr.club_id;
+        if (club_id) {
+            this.createClubRoom(conf, club_id);
+            return;
+        }
 
 		var pc = cc.vv.pclient;
 

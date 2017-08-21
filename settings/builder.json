@@ -3,15 +3,12 @@
   "appSecret": "",
   "excludeScenes": [],
   "includeAnySDK": false,
-  "includeSDKBox": false,
   "includeSdk": [
     "anysdk"
   ],
   "inlineSpriteFrames": true,
-  "inlineSpriteFrames_native": false,
   "mergeStartScene": false,
   "oauthLoginServer": "",
-  "optimizeHotUpdate": false,
   "orientation": {
     "landscapeLeft": false,
     "landscapeRight": false,
