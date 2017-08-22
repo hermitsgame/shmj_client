@@ -55,18 +55,23 @@ cc.Class({
 
 		var item = event.target.parent;
 		var room = item.room;
+        var pc = cc.vv.pclient;
 
-		var data = {
-			roomid : room.id,
-			room_tag : room.room_tag
-		};
+        if (room.status == 'idle') {
+            var data = {
+    			roomid : room.id,
+    			room_tag : room.room_tag
+    		};
 
-		cc.vv.pclient.request_apis('start_club_room', data, function(ret) {
-			if (!ret || ret.errcode != 0)
-				return;
+    		pc.request_apis('start_club_room', data, function(ret) {
+    			if (!ret || ret.errcode != 0)
+    				return;
 
-			self.refresh();
-		});
+    			self.refresh();
+    	    });
+        } else {
+
+        }
     },
     
 	onDisable: function() {
