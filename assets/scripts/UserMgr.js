@@ -183,6 +183,8 @@ cc.Class({
             roomid: roomId
         };
 
+		console.log('usermgr enterRoom: ' + roomId);
+
         cc.vv.wc.show(2);
 		pc.request_connector('enter_private_room', data, function(ret) {
             console.log("return from enter_private_room=" + ret.errcode);
@@ -195,6 +197,7 @@ cc.Class({
             } else {
                 if(callback != null)
                     callback(ret);
+
                 console.log(ret);
                 cc.vv.gameNetMgr.connectGameServer({roomid : roomId});
             }

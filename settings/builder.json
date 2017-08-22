@@ -20,5 +20,8 @@
   "renderMode": "0",
   "startScene": "ebb7014e-8b54-4b5d-b304-c02685b8e05c",
   "title": "SHMJ",
-  "webOrientation": "portrait"
+  "webOrientation": "portrait",
+  "includeSDKBox": false,
+  "inlineSpriteFrames_native": true,
+  "optimizeHotUpdate": false
 }

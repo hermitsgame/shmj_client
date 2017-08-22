@@ -52,6 +52,21 @@ cc.Class({
 
     onBtnPlayClicked: function(event) {
         console.log('onBtnPlayClicked');
+
+		var item = event.target.parent;
+		var room = item.room;
+
+		var data = {
+			roomid : room.id,
+			room_tag : room.room_tag
+		};
+
+		cc.vv.pclient.request_apis('start_club_room', data, function(ret) {
+			if (!ret || ret.errcode != 0)
+				return;
+
+			self.refresh();
+		});
     },
     
 	onDisable: function() {
@@ -102,6 +117,9 @@ cc.Class({
     		var btn_destroy = item.getChildByName('btn_destroy');
             var btn_play = item.getChildByName('btn_play');
 			var seats = item.getChildByName('seats');
+			var progress = item.getChildByName('progress').getComponent(cc.Label);
+			var roomid = item.getChildByName('roomid').getComponent(cc.Label);
+			
 			var np = 0;
 
 			for (var j = 0; j < players.length; j++) {
@@ -131,10 +149,17 @@ cc.Class({
 				head.getComponent('ImageLoader').setUserID(p.id);
 			}
 
+			progress.string = room.num_of_turns + ' / ' + room.base_info.maxGames;
+
+			roomid.string = 'ID:' + room.id;
+
+			
+
             room.np = np;
 			item.room = room;
 
-            btn_play.getComponent(cc.Button).interactable = np == 4;
+            // btn_play.getComponent(cc.Button).interactable = np == 4;
+			btn_play.getComponent('SpriteMgr').setIndex(room.status == 'idle' ? 0 : 1);
 		}
 
 		this.shrinkContent(content, rooms.length);

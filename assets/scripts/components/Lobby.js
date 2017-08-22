@@ -40,11 +40,12 @@ cc.Class({
 		this._timer = -1;
     },
 
-	join_room: function(roomid, seatindex) {
+	join_room: function(room, seatindex) {
 		var self = this;
 
 		var data = {
-			roomid : roomid,
+			roomid : room.id,
+			room_tag : room.room_tag,
 			name : cc.vv.userMgr.userName,
 			seatindex : seatindex
 		};
@@ -62,10 +63,15 @@ cc.Class({
 		});
     },
 
-	leave_room: function(roomid) {
+	leave_room: function(room) {
 		var self = this;
 
-		cc.vv.pclient.request_apis('leave_club_room', { roomid : roomid }, function(ret) {
+		var data = {
+			roomid : room.id,
+			room_tag : room.room_tag
+		};
+
+		cc.vv.pclient.request_apis('leave_club_room', data, function(ret) {
 			if (!ret)
 				return;
 
@@ -78,10 +84,15 @@ cc.Class({
 		});
     },
 
-	prepare: function(roomid) {
+	prepare: function(room) {
 		var self = this;
-	
-		cc.vv.pclient.request_apis('prepare_club_room', { roomid: roomid }, function(ret) {
+
+		var data = {
+			roomid : room.id,
+			room_tag : room.room_tag
+		};
+
+		cc.vv.pclient.request_apis('prepare_club_room', data, function(ret) {
 			if (!ret)
 				return;
 
@@ -102,21 +113,21 @@ cc.Class({
 		if (this.roomid != null)
 			return;
 
-		this.join_room(room.id, player.seatindex);
+		this.join_room(room, player.seatindex);
     },
 
 	onBtnPrepareClicked: function(event) {
 		var item = event.target.parent;
 		var room = item.room;
 
-		this.prepare(room.id);
+		this.prepare(room);
     },
 
 	onBtnLeaveClicked: function(event) {
 		var item = event.target.parent;
 		var room = item.room;
 
-		this.leave_room(room.id);
+		this.leave_room(room);
     },
 
 	refresh: function() {
@@ -165,6 +176,7 @@ cc.Class({
 			var seats = item.getChildByName('table');
 			var btn_prepare = item.getChildByName('btn_prepare');
 			var btn_leave = item.getChildByName('btn_leave');
+			var progress = item.getChildByName('progress').getComponent(cc.Label);
 			var found = false;
 
 			for (var j = 0; j < players.length; j++) {
@@ -200,6 +212,8 @@ cc.Class({
 				btn_prepare.active = false;
 				btn_leave.active = false;
 			}
+
+			progress.string = room.num_of_turns + ' / ' + room.base_info.maxGames;
 
 			item.room = room;
 		}

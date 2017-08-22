@@ -724,6 +724,14 @@ cc.Class({
         net.addHandler("voice_msg_push",function(data){
             self.dispatchEvent("voice_msg",data);
         });
+
+		net.addHandler('start_club_room', function(data) {
+			console.log('start_club_room');
+			console.log(data);
+
+			console.log('enter ' + data.room_tag);
+			cc.vv.userMgr.enterRoom(data.room_tag);
+		});
     },
 
     doGuo:function(seatIndex, pai, skip) {
