@@ -101,6 +101,8 @@ cc.Class({
             var id = event.detail.id;
             self.showTab(id);
         });
+
+		cc.vv.gameNetMgr.dataEventHandler = this.node;
     },
 
     start: function() {

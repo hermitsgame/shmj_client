@@ -19,9 +19,9 @@ cc.Class({
 
 		for (var i = 0; i < seats.childrenCount; i++) {
 			var seat = seats.children[i];
-            var btnKick = seat.getChildByName('btnKick');
+            var btn_kick = seat.getChildByName('btn_kick');
 
-			addClickEvent(btnKick, this.node, 'Admin', 'onBtnKickClicked');
+			addClickEvent(btn_kick, this.node, 'Admin', 'onBtnKickClicked');
 		}
 
 		addClickEvent(btn_edit, this.node, 'Admin', 'onBtnEditClicked');
@@ -30,16 +30,168 @@ cc.Class({
 
 		this._tempRoom = item;
 		content.removeChild(item, false);
+
+		this.initEventHandler();
+    },
+
+	initEventHandler: function() {
+		var node = cc.find('Canvas');
+		var lobby = this.node;
+		var self = this;
+
+		node.on('club_room_updated', function(data) {
+			var room = data.detail;
+
+			if (!lobby.active)
+				return;
+
+			self.room_updated(room);
+		});
+
+		node.on('club_room_removed', function(data) {
+			var room = data.detail;
+
+			if (!lobby.active)
+				return;
+
+			self.room_removed(room);
+		});
+    },
+
+	room_updated: function(data) {
+		var content = cc.find('rooms/view/content', this.node);
+		var item = null;
+		var room = null;
+		var found = false;
+
+		for (var i = 0; i < content.childrenCount; i++) {
+			item = content.children[i];
+			room = item.room;
+
+			if (room.id != data.id)
+				continue;
+
+			found = true;
+			break;
+		}
+
+		if (!found)
+			item = this.getRoomItem(content.childrenCount);
+
+		this.updateRoom(item, data);
+    },
+
+	room_removed: function(data) {
+		var content = cc.find('rooms/view/content', this.node);
+		var item = null;
+		var room = null;
+		var found = false;
+
+		for (var i = 0; i < content.childrenCount; i++) {
+			item = content.children[i];
+			room = item.room;
+
+			if (room.id != data.id)
+				continue;
+
+			found = true;
+			break;
+		}
+
+		if (found)
+			content.removeChild(item);
     },
 
 	onEnable: function() {
 		this.refresh();
 
-		this._timer = 0;
+		var self = this;
+		var data = {
+			club_id : cc.vv.userMgr.club_id
+		};
+		
+		cc.vv.pclient.request_apis('join_club_channel', data, function(ret) {
+			if (!ret)
+				return;
+
+			if (ret.errcode != 0) {
+				cc.vv.alert.show(errmsg);
+				return;
+			}
+		});
+    },
+
+	onDisable: function() {
+		this._timer = -1;
+
+		var data = {
+			club_id : cc.vv.userMgr.club_id
+		};
+
+		cc.vv.pclient.request_apis('leave_club_channel', data, function(ret) {
+			if (!ret)
+				return;
+
+			if (ret.errcode != 0) {
+				cc.vv.alert.show(errmsg);
+				return;
+			}
+		});
+    },
+
+	onBtnCloseClicked: function(event) {
+		this.node.active = false;
+
+		var userMgr = cc.vv.userMgr;
+
+		userMgr.club_id = null;
+		userMgr.is_admin = null;
+    },
+
+	onBtnHistoryClicked: function(event) {
+		var history = cc.find('Canvas/club_history');
+
+		cc.vv.historyParam = {
+			club_id : cc.vv.userMgr.club_id
+		};
+
+		history.active = true;
+    },
+
+	onBtnMemberClicked: function(event) {
+		var member = cc.find('Canvas/set_member');
+
+		console.log('onBtnMemberClicked');
+
+		member.active = true;
+    },
+
+	onBtnMessangeClicked: function(event) {
+		var message = cc.find('Canvas/club_message');
+
+		message.active = true;
     },
 
     onBtnKickClicked: function(event) {
         console.log('onBtnKickClicked');
+
+		var self = this;
+		var seat = event.target.parent;
+
+		var data = {
+			uid : seat.player.id,
+			room_tag : seat.room.room_tag,
+			roomid : seat.room.id
+		};
+
+		cc.vv.pclient.request_apis('kick_from_club_room', data, function(ret) {
+			if (!ret || ret.errcode != 0) {
+				console.log('kick fail');
+    			return;
+    		}
+
+			self.refresh();
+		});
     },
 
     onBtnEditClicked: function(event) {
@@ -48,6 +200,25 @@ cc.Class({
 
     onBtnDestroyClicked: function(event) {
         console.log('onBtnDestroyClicked');
+
+		var self = this;
+		var item = event.target.parent;
+		var room = item.room;
+
+		var data = {
+			roomid : room.id,
+			room_tag : room.room_tag,
+			club_id : cc.vv.userMgr.club_id
+		};
+
+		cc.vv.pclient.request_apis('destroy_club_room', data, function(ret) {
+			if (!ret || ret.errcode != 0) {
+				console.log('destroy fail');
+    			return;
+    		}
+
+			self.refresh();
+		});
     },
 
     onBtnPlayClicked: function(event) {
@@ -56,21 +227,48 @@ cc.Class({
 		var item = event.target.parent;
 		var room = item.room;
         var pc = cc.vv.pclient;
+		var self = this;
 
         if (room.status == 'idle') {
+
+			if (room.readys != 4) {
+				cc.vv.alert.show('');
+				return;
+        	}
+
+			
             var data = {
     			roomid : room.id,
     			room_tag : room.room_tag
     		};
 
+			console.log('start room');
+
     		pc.request_apis('start_club_room', data, function(ret) {
-    			if (!ret || ret.errcode != 0)
+    			if (!ret || ret.errcode != 0) {
+					console.log('start room fail');
     				return;
+    			}
 
     			self.refresh();
     	    });
         } else {
+        	var data = {
+				roomid : room.room_tag
+        	};
 
+			console.log('stop room');
+
+			pc.request_connector('stop_room', data, function(ret) {
+				if (!ret || ret.errcode != 0) {
+					console.log('stop room fail');
+    				return;
+				}
+
+				console.log('stop ok');
+
+				self.refresh();
+			});
         }
     },
     
@@ -110,64 +308,76 @@ cc.Class({
         }
     },
 
-	showRooms: function(rooms) {
-		var content = cc.find('rooms/view/content', this.node);
+	updateRoom: function(room, data) {
+		var players = data.players;
+		var desc = room.getChildByName('desc').getComponent(cc.Label);
+        var btn_edit = room.getChildByName('btn_edit');
+    	var btn_destroy = room.getChildByName('btn_destroy');
+        var btn_play = room.getChildByName('btn_play');
+		var status = room.getChildByName('status').getComponent(cc.Label);
+		var seats = room.getChildByName('seats');
+		var progress = room.getChildByName('progress').getComponent(cc.Label);
+		var roomid = room.getChildByName('roomid').getComponent(cc.Label);
 
-		for (var i = 0; i < rooms.length; i++) {
-			var room = rooms[i];
-			var players = room.players;
-			var item = this.getRoomItem(i);
-			var desc = item.getChildByName('desc').getComponent(cc.Label);
-            var btn_edit = item.getChildByName('btn_edit');
-    		var btn_destroy = item.getChildByName('btn_destroy');
-            var btn_play = item.getChildByName('btn_play');
-			var seats = item.getChildByName('seats');
-			var progress = item.getChildByName('progress').getComponent(cc.Label);
-			var roomid = item.getChildByName('roomid').getComponent(cc.Label);
-			
-			var np = 0;
+		var readys = 0;
+		var nplayer = 0;
+		var idle = data.status == 'idle';
 
-			for (var j = 0; j < players.length; j++) {
-				var seat = seats.children[j];
-				var p = players[j];
-				var name = seat.getChildByName('name');
-                var id = seat.getChildByName('id');
-				var head = seat.getChildByName('head');
-                var btnKick = seat.getChildByName('btnKick');
-				var empty = p.id == 0;
+		for (var j = 0; j < players.length; j++) {
+			var seat = seats.children[j];
+			var p = players[j];
+			var name = seat.getChildByName('name');
+            var id = seat.getChildByName('id');
+			var head = seat.getChildByName('head');
+            var btnKick = seat.getChildByName('btn_kick');
+			var ready = seat.getChildByName('ready');
+			var empty = p.id == 0;
 
-				name.active = !empty;
-                id.active = !empty;
-				//ready.active = !empty && p.ready;
-				head.active = !empty;
-                btnKick.active = !empty;
+			name.active = !empty;
+            id.active = !empty;
+			ready.active = !empty && p.ready;
+			head.active = !empty;
+            btnKick.active = !empty && idle;
 
-				if (empty)
-					continue;
+			if (empty)
+				continue;
 
-                np += 1;
+			if (p.ready)
+    	        readys += 1;
 
-                seat.player = p;
-				seat.room = room;
+			nplayer += 1;
 
-				name.getComponent(cc.Label).string = p.name;
-				head.getComponent('ImageLoader').setUserID(p.id);
-			}
+            seat.player = p;
+			seat.room = data;
 
-			progress.string = room.num_of_turns + ' / ' + room.base_info.maxGames;
-
-			roomid.string = 'ID:' + room.id;
-
-			
-
-            room.np = np;
-			item.room = room;
-
-            // btn_play.getComponent(cc.Button).interactable = np == 4;
-			btn_play.getComponent('SpriteMgr').setIndex(room.status == 'idle' ? 0 : 1);
+			name.getComponent(cc.Label).string = p.name;
+			id.getComponent(cc.Label).string = p.id;
+			head.getComponent('ImageLoader').setUserID(p.id);
 		}
 
-		this.shrinkContent(content, rooms.length);
+		progress.string = data.num_of_turns + ' / ' + data.base_info.maxGames;
+		roomid.string = 'ID:' + data.id;
+
+        data.readys = readys;
+		room.room = data;
+
+		btn_play.getComponent('SpriteMgr').setIndex(idle ? 0 : 1);
+		status.string = idle ? '开始' : '游戏中';
+		btn_edit.active = idle;
+		btn_destroy.active = idle && nplayer == 0;
+    },
+
+	showRooms: function(data) {
+		var content = cc.find('rooms/view/content', this.node);
+
+		for (var i = 0; i < data.length; i++) {
+			var room = data[i];
+			var item = this.getRoomItem(i);
+
+			this.updateRoom(item, room);
+		}
+
+		this.shrinkContent(content, data.length);
     },
 
 	update: function(dt) {

@@ -28,6 +28,9 @@ cc.Class({
     },
 
 	showDialog: function(dialog, path, enable, parent) {
+		dialog.active = enable;
+		return; // TODO
+
 		var body = cc.find(path, dialog);
 
 		if (enable) {
@@ -62,6 +65,9 @@ cc.Class({
     },
 
     showFrame: function(frame, headPath, bodyPath, enable, parent) {
+		frame.active = enable;
+		return; // TODO
+
 		var head = cc.find(headPath, frame);
 		var body = cc.find(bodyPath, frame);
 
@@ -142,6 +148,24 @@ cc.Class({
 		}
 
 		return desc;
+    },
+
+	dateFormat: function(time) {
+        var date = new Date(time);
+        var datetime = "{0}-{1}-{2} {3}:{4}:{5}";
+        var year = date.getFullYear();
+        var month = date.getMonth() + 1;
+        month = month >= 10? month : ("0"+month);
+        var day = date.getDate();
+        day = day >= 10? day : ("0"+day);
+        var h = date.getHours();
+        h = h >= 10? h : ("0"+h);
+        var m = date.getMinutes();
+        m = m >= 10? m : ("0"+m);
+        var s = date.getSeconds();
+        s = s >= 10? s : ("0"+s);
+        datetime = datetime.format(year,month,day,h,m,s);
+        return datetime;
     },
 });
 

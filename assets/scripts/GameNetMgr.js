@@ -135,14 +135,20 @@ cc.Class({
 		return ids;
     },
 
-    prepareReplay: function(roomInfo,detailOfGame) {
-        this.roomId = roomInfo.id;
-        this.seats = roomInfo.seats;
-        this.numOfSeats = roomInfo.seats.length;
+    prepareReplay: function(roomInfo, detailOfGame) {
+		console.log('prepareReplay');
+		console.log(roomInfo);
+		console.log(detailOfGame);
+	
+        this.roomId = roomInfo.room_tag;
+        this.seats = roomInfo.info.seats;
+        this.numOfSeats = roomInfo.info.seats.length;
         this.turn = detailOfGame.base_info.button;
         var baseInfo = detailOfGame.base_info;
 
 		this.gamestate = 'playing';
+
+		this.seatIndex = -1;
         for(var i = 0; i < this.seats.length; ++i){
             var s = this.seats[i];
             s.seatindex = i;
@@ -162,6 +168,9 @@ cc.Class({
                 this.seatIndex = i;
             }
         }
+
+		if (this.seatIndex < 0)
+			this.seatIndex = 0;
 
 		var conf = baseInfo.conf;
         this.conf = conf;
@@ -731,6 +740,18 @@ cc.Class({
 
 			console.log('enter ' + data.room_tag);
 			cc.vv.userMgr.enterRoom(data.room_tag);
+		});
+
+		net.addHandler('club_room_updated', function(data) {
+			console.log('club_room_updated');
+
+			self.dispatchEvent('club_room_updated', data);
+		});
+
+		net.addHandler('club_room_removed', function(data) {
+			console.log('club_room_removed');
+
+			self.dispatchEvent('club_room_removed', data);
 		});
     },
 

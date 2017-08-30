@@ -69,7 +69,7 @@ cc.Class({
 		var content = cc.find('clubs/view/content', this.node);
 
 		for (var i = 0; i < clubs.length; i++) {
-			var club = clubs[0];
+			var club = clubs[i];
 			var item = this.getClubItem(i);
 			var name = item.getChildByName('name').getComponent(cc.Label);
 			var desc = item.getChildByName('desc').getComponent(cc.Label);

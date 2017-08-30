@@ -69,11 +69,11 @@ cc.Class({
         this.addComponent("MJRoom");
         this.addComponent("TimePointer");
         this.addComponent("GameResult");
-        //this.addComponent("Chat");
+        this.addComponent("Chat");
         this.addComponent("Folds");
-        //this.addComponent("ReplayCtrl");
+        this.addComponent("ReplayCtrl");
         this.addComponent("PopupMgr");
-        //this.addComponent("Voice");
+        this.addComponent("Voice");
         //this.addComponent('Dice');
         this.addComponent('wildcard');
 
@@ -355,8 +355,9 @@ cc.Class({
     initEventHandlers: function() {
 	    var node = this.node;
 		var self = this;
+		var net = cc.vv.gameNetMgr;
 
-        cc.vv.gameNetMgr.dataEventHandler = node;		
+        net.dataEventHandler = node;		
 
         node.on('game_holds', function(data) {
            self.initMahjongs();
@@ -581,7 +582,7 @@ cc.Class({
             var data = info.detail;
             var seatData = data.seatData;
             var gangtype = data.gangtype;
-            if (seatData.seatindex == cc.vv.gameNetMgr.seatIndex) {
+            if (seatData.seatindex == net.seatIndex) {
                 self.initMahjongs();
 				self.checkChuPai(false);
 				self.showTings(false);
@@ -1257,6 +1258,9 @@ cc.Class({
         var holds = cc.find("game/south/layout/holds", this.node);
         var mjcnt = holds.childrenCount;
 
+		if (cc.vv.replayMgr.isReplay())
+			return;
+
 		console.log('checkChuPai');
 
         if (check) {
@@ -1888,6 +1892,8 @@ cc.Class({
                 child.setSiblingIndex(i == holds.length - 1 ? 0 : i + 1);
             }
         }
+
+		console.log('end showMopai');
     },
 
     updateHolds: function() {

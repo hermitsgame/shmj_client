@@ -6,7 +6,7 @@ var ACTION_GANG = 4;
 var ACTION_CHI = 5;
 var ACTION_HU = 6;
 var ACTION_ZIMO = 7;
-var ACTION_MING = 8;
+var ACTION_TING = 8;
 
 cc.Class({
     extends: cc.Component,
@@ -127,8 +127,11 @@ cc.Class({
 
         this._lastAction = action;
         if (action == null) {
+			console.log('action null');
             return -1;
         }
+
+		console.log('action: ' + action.type);
 
         var nextActionDelay = 1.0;
         if (action.type == ACTION_CHUPAI) {
@@ -137,7 +140,7 @@ cc.Class({
         } else if (action.type == ACTION_MOPAI) {
             net.doMopai(action.si, action.pai, skip);
             net.doTurnChange(action.si, skip);
-            return 0.5;
+            return 1.0;
         } else if (action.type == ACTION_PENG) {
             net.doPeng(action.si, action.pai, skip);
             net.doTurnChange(action.si, skip);
@@ -160,10 +163,12 @@ cc.Class({
         } else if (action.type == ACTION_ZIMO) {
             net.doHu({ seatindex: action.si, hupai: action.pai, iszimo: true }, skip);
             return 1.5;
-        } else if (action.type == ACTION_MING) {
-            net.doMing(action.si, null, null, null, skip);
+        } else if (action.type == ACTION_TING) {
+            net.doTing(action.si, null, skip);
             return 1.0;
         }
+
+		console.log('unknown action: ' + action.type);
     }
 });
 

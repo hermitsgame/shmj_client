@@ -14,7 +14,9 @@ cc.Class({
 
     onLoad: function() {
         this._gamenum = [];
-		var t = this.node.getChildByName('game_num');
+
+		var body = this.node.getChildByName('body');
+		var t = body.getChildByName('game_num');
         for (var i = 0; i < t.childrenCount; i++) {
             var n = t.children[i].getComponent("RadioButton");
             if (n != null) {
@@ -23,7 +25,7 @@ cc.Class({
         }
 
         this._maxfan = [];
-		var t = this.node.getChildByName('maxfan');
+		var t = body.getChildByName('maxfan');
         for (var i = 0; i < t.childrenCount; i++) {
             var n = t.children[i].getComponent("RadioButton");
             if (n != null) {
@@ -31,9 +33,9 @@ cc.Class({
             }
         }
 
-		this._maima = cc.find('wanfa/horse', this.node);
-		this._allpairs = cc.find('wanfa/allpairs', this.node);
-		this._bao = cc.find('wanfa/bao', this.node);
+		this._maima = cc.find('wanfa/horse', body);
+		this._allpairs = cc.find('wanfa/allpairs', body);
+		this._bao = cc.find('wanfa/bao', body);
 		
 		var score = this.slider;
 
@@ -42,12 +44,16 @@ cc.Class({
 
 	onScoreChanged: function(event) {
 		var slide = event.detail;
-		var flower = cc.find('base/flower', this.node).getComponent(cc.Label);
+		var body = this.node.getChildByName('body');
+		var fill = cc.find('base/score/body', body).getComponent(cc.Sprite);
+		var flower = cc.find('base/flower', body).getComponent(cc.Label);
 		var range = [1, 5, 10, 20, 30, 50, 100, 200, 300];
 		var id = Math.round(slide.progress * (range.length - 1));
 
 		flower.string = range[id];
 		this._flowers = range[id];
+
+		fill.fillRange = slide.progress;
 	},
 
     onBtnClose:function() {
