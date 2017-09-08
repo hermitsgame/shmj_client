@@ -19,6 +19,9 @@ cc.Class({
 
 			this._inputs.push(tile);
 		}
+
+		var btnClose = cc.find('top/btn_back', this.node);
+		cc.vv.utils.addClickEvent(btnClose, this.node, 'QuickJoin', 'onBtnClose');
     },
 
 	onEnable:function() {
@@ -54,12 +57,11 @@ cc.Class({
         this._inputs[id].string = num;
         this._inputIndex = id + 1;
         this._roomid.push(num);
-/*
+
         if (this._inputIndex == this._inputs.length) {
             var roomId = this.parseRoomID();
             this.onInputFinished(roomId);
         }
-*/
     },
 
 	onN0Clicked: function() {
@@ -124,27 +126,6 @@ cc.Class({
             str += this._roomid[i];
         }
         return str;
-    },
-
-    onBtnQuickJoinClicked: function() {
-		if (this._inputIndex != this._inputs.length)
-			return;
-		
-        var roomId = this.parseRoomID();
-        var self = this;
-
-        cc.vv.userMgr.enterRoom(roomId, function(ret) {
-            if (ret.errcode == 0) {
-                self.node.active = false;
-            }
-            else {
-                var content = "房间["+ roomId +"]不存在，请重新输入!";
-                if(ret.errcode == 4){
-                    content = "房间["+ roomId + "]已满!";
-                }
-                cc.vv.alert.show(content);
-            }
-        });
-    },
+    }
 });
 

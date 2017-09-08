@@ -1,6 +1,6 @@
 {
   "__type__": "cc.AnimationClip",
-  "_name": "new_hu",
+  "_name": "hu",
   "_objFlags": 0,
   "_rawFiles": null,
   "_duration": 1,
@@ -14,7 +14,7 @@
           {
             "frame": 0,
             "value": {
-              "__uuid__": "e1f6e670-3eb7-491a-92cc-ce0f537db933"
+              "__uuid__": "9a764871-a9fc-4ec9-add0-05909c42d8bc"
             }
           }
         ]

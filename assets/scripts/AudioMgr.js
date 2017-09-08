@@ -15,7 +15,6 @@ cc.Class({
     },
 
     init: function () {
-/*
         var t = cc.sys.localStorage.getItem("bgmVolume");
         if(t != null){
             this.bgmVolume = parseFloat(t);
@@ -45,7 +44,6 @@ cc.Class({
             console.log("cc.audioEngine.resumeAll");
             cc.audioEngine.resumeAll();
         });
-*/
     },
 
     getUrl:function(url){
@@ -53,7 +51,6 @@ cc.Class({
     },
     
     playBGM: function(url) {
-/*
         var audioUrl = this.getUrl(url);
         var bgmVolume = this.bgmVolume;
 
@@ -67,18 +64,15 @@ cc.Class({
         } else {
             this._bgmUrl = url;
         }
-*/
     },
     
     playSFX: function(url, cb) {
-/*
         var audioUrl = this.getUrl(url);
 		var audioId = cc.audioEngine.play(audioUrl, false, this.sfxVolume);
 
 		if (cb != null) {
 			cc.audioEngine.setFinishCallback(audioId, cb);
 		}
-*/
     },
 
     getRandom: function(n, m) {
@@ -91,72 +85,110 @@ cc.Class({
         return Math.round(Math.random() * w + n);
     },
 
-    playDialect: function(content, cb) {
-/*
+	getSex: function(uid) {
+		var infos = cc.vv.baseInfoMap;
+
+		if (!infos || !infos[uid])
+			return 0;
+
+		return infos[uid].sex;
+	},
+
+    playDialect: function(content, uid, cb) {
         var dialect = [ 'PuTong', 'WenZhou' ];
         var speaker = [ 'man', 'woman' ];
-		var path = 'Sound_{0}/{1}/{2}.mp3';
+		var path = 'Sound_{0}/{1}/{2}_1.mp3';
+		var files = [];
 
-		path = path.format(dialect[this.dialectID], speaker[this.speakerID], content);
-		this.playSFX(path, cb);
-*/
+		var sex = this.getSex(uid);
+
+		if (!cc.sys.isNative) {
+			path = path.format(dialect[this.dialectID], speaker[sex], content);
+			this.playSFX(path, cb);
+			return;
+		}
+
+        path = 'Sound_{0}/{1}/{2}';
+        path = path.format(dialect[this.dialectID], speaker[sex], content);
+
+        var idx = 1;
+
+        do {
+            var file = path + '_{0}.mp3';
+            file = file.format(idx);
+    
+            if (jsb.fileUtils.isFileExist(this.getUrl(file))) {
+	            files.push(file);
+				idx++;
+            } else {
+				break;
+            }
+        } while (1);
+
+        if (files.length == 0) {
+            console.log('Dialect not found: ' + type + ' ' + content);
+            cb();
+            return;
+        }
+
+		var file = files[this.getRandom(0, files.length - 1)];
+		console.log('play ' + file);
+
+        this.playSFX(file, cb);
     },
 
-    playHu: function(name, cb) {
-/*
+	playQuickChat: function(id, uid) {
+		var speaker = [ 'man', 'woman' ];
+		var dialect = [ 'putong', 'wenzhou' ];
+		var path = 'Sound_QC/{0}/{1}/{2}.mp3';
+		var sex = this.getSex(uid);
+
+		path = path.format(dialect[this.dialectID], speaker[sex], id);
+		this.playSFX(path);
+    },
+
+    playHu: function(name, uid, cb) {
         var speaker = [ 'man', 'woman' ];
 		var path = 'Sound_Hu/{0}/{1}.mp3';
+		var sex = this.getSex(uid);
 
-		path = path.format(speaker[this.speakerID], name);
+		path = path.format(speaker[sex], name);
 		this.playSFX(path, cb);
-*/
-        cb();
     },
 
     playBackGround : function() {
-/*
         var id = this.getRandom(1, 3);
         var path = 'Sound_BG/backmusic' + id + '.mp3';
 
         this.playBGM(path);
-*/
     },
 
 	playButtonClicked: function() {
-/*
 		this.playSFX('Sound/Button_Click.mp3');
-*/
     },
 
     setDialect: function(id) {
-/*
         if (this.dialectID != id) {
             cc.sys.localStorage.setItem("dialectID", id);
             this.dialectID = id;
         }
-*/
     },
     
     setSpeaker: function(id) {
-/*
         if (this.speakerID != id) {
             cc.sys.localStorage.setItem("speakerID", id);
             this.speakerID = id;
         }
-*/
     },
-    
+
     setSFXVolume: function(v) {
-/*
         if (this.sfxVolume != v) {
             cc.sys.localStorage.setItem("sfxVolume", v);
             this.sfxVolume = v;
         }
-*/
     },
 
     setBGMVolume: function(v, force) {
-/*
         if (this.bgmAudioID >= 0) {
             if (v > 0) {
                 cc.audioEngine.resume(this.bgmAudioID);
@@ -180,19 +212,14 @@ cc.Class({
                 }
             }
         }
-*/
     },
 
     pauseAll: function() {
-/*
         cc.audioEngine.pauseAll();
-*/
     },
 
     resumeAll: function() {
-/*
         cc.audioEngine.resumeAll();
-*/
     }
 });
 

@@ -28,13 +28,16 @@ cc.Class({
 		cc.vv.utils.addClickEvent(btn_climit, this.node, 'SetMember', 'onBtnEditWinClicked');
 		cc.vv.utils.addClickEvent(btn_close, this.node, 'SetMember', 'onBtnEditWinClicked');
 		cc.vv.utils.addClickEvent(btn_ok, this.node, 'SetMember', 'onBtnEditWinClicked');
+
+		var btnClose = cc.find('top/btn_back', this.node);
+		cc.vv.utils.addClickEvent(btnClose, this.node, 'SetMember', 'onBtnClose');
     },
 
 	onEnable: function() {
 		this.refresh();
     },
 
-	onBtnBackClicked: function() {
+	onBtnClose: function() {
 		this.node.active = false;
 	},
 
@@ -42,14 +45,10 @@ cc.Class({
 		var member = event.target.parent.member;
 		var edit = this.node.getChildByName('edit');
 
-		var name = edit.getChildByName('name').getComponent(cc.Label);
-		var id = edit.getChildByName('id').getComponent(cc.Label);
 		var edt_score = edit.getChildByName('edt_score').getComponent(cc.EditBox);
 		var edt_limit = edit.getChildByName('edt_limit').getComponent(cc.EditBox);
 
 		edit.member = member;
-		name.string = member.name;
-		id.string = member.id;
 		edt_score.string = member.score;
 		edt_limit.string = member.limit;
 
@@ -73,7 +72,7 @@ cc.Class({
 
 			var data = {
 				user_id : member.id,
-				club_id : cc.vv.userMgr.club_id,
+				club_id : this.node.club_id,
 				score : parseInt(edt_score.string) || 0,
 				limit : parseInt(edt_limit.string) || 0
 			};
@@ -96,7 +95,7 @@ cc.Class({
 
 		var data = {
 			user_id : member.id,
-			club_id : cc.vv.userMgr.club_id
+			club_id : this.node.club_id
 		};
 
 		cc.vv.historyParam = data;
@@ -107,7 +106,7 @@ cc.Class({
 		var self = this;
 
 		var data = {
-			club_id : cc.vv.userMgr.club_id
+			club_id : this.node.club_id
 		};
 
 		cc.vv.pclient.request_apis('list_club_members', data, function(ret) {
@@ -148,11 +147,13 @@ cc.Class({
 			var id = item.getChildByName('id').getComponent(cc.Label);
 			var score = item.getChildByName('score').getComponent(cc.Label);
 			var limit = item.getChildByName('limit').getComponent(cc.Label);
+			var head = cc.find('icon/head', item).getComponent('ImageLoader');
 
 			name.string = member.name;
 			id.string = member.id;
 			score.string = member.score;
 			limit.string = member.limit;
+			head.setLogo(member.id, member.logo);
 
 			item.member = member;
 		}

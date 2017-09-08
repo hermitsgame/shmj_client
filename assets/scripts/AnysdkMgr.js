@@ -181,7 +181,7 @@ cc.Class({
         let height = view.getFrameSize().height < view.getFrameSize().width ? view.getFrameSize().width : view.getFrameSize().height;
 
 		view.setFrameSize(width, height);
-        view.setDesignResolutionSize(720, 1280, cc.ResolutionPolicy.FIXED_HEIGHT);
+        view.setDesignResolutionSize(720, 1280, cc.ResolutionPolicy.FIXED_WIDTH);
     },
 
     setLandscape: function() {

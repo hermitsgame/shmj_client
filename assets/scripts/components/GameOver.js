@@ -140,7 +140,7 @@ cc.Class({
 				huSeats.push(i);
 			}
 
-            seatView.username.string = cc.vv.gameNetMgr.seats[i].name;
+            seatView.username.string = userData.name;
             seatView.zhuang.active = userData.button;
 
             if (detail) {

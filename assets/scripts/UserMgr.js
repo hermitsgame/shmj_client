@@ -48,13 +48,13 @@ cc.Class({
         } else {
             self.sign = ret.token;
             self.account = ret.account;
-            cc.vv.http.url = "http://1.2.3.4";
+            //cc.vv.http.url = "http://1.2.3.4";
 			cc.vv.wc.show(0);
 
 			var login_cb = function(ret) {
 				if (ret == cc.vv.global.const_code.OK) {
 					cc.director.loadScene('hall');
-				} else if (ret.code == cc.vv.global.const_code.ENTRY.FA_USER_NOT_EXIST) {
+				} else if (ret == cc.vv.global.const_code.ENTRY.FA_USER_NOT_EXIST) {
 					cc.sys.localStorage.removeItem("wx_account");
 					cc.sys.localStorage.removeItem("wx_sign");
 					cc.vv.wc.hide();
@@ -110,6 +110,9 @@ cc.Class({
 
                 pc.request_connector('entry', { token: token }, function(data) {
                     console.log("log ret");
+
+					if (data.code != 0)
+						pc.disconnect();
 
                     onLogin(data);
                 });
@@ -178,6 +181,7 @@ cc.Class({
     enterRoom: function(roomId, callback) {
         var self = this;
 		var pc = cc.vv.pclient;
+		var net = cc.vv.gameNetMgr;
 
         var data = {
             roomid: roomId
@@ -188,10 +192,10 @@ cc.Class({
         cc.vv.wc.show(2);
 		pc.request_connector('enter_private_room', data, function(ret) {
             console.log("return from enter_private_room=" + ret.errcode);
-			cc.vv.wc.hide();
             if (ret.errcode != cc.vv.global.const_code.OK) {
                 console.log("enter room failed,code=" + ret.errcode);
 
+				cc.vv.wc.hide();
                 if(callback != null)
                     callback(ret);
             } else {
@@ -199,7 +203,7 @@ cc.Class({
                     callback(ret);
 
                 console.log(ret);
-                cc.vv.gameNetMgr.connectGameServer({roomid : roomId});
+                net.connectGameServer({roomid : roomId});
             }
         });
     },

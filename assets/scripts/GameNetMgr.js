@@ -74,8 +74,12 @@ cc.Class({
         return -1;
     },
 
+    isClubRoom : function() {
+        return this.roomId.indexOf('c') == 0;
+    },
+
     isOwner: function() {
-        return this.seatIndex == 0;
+        return !this.isClubRoom() && this.seatIndex == 0;
     },
 
 	isButton: function() {
@@ -236,10 +240,24 @@ cc.Class({
             cc.director.loadScene("mjgame");
         });
 
-        net.addHandler("exit_result",function(data){
+        net.addHandler("exit_result",function(data) {
             self.roomId = null;
             self.turn = -1;
             //self.seats = null;
+
+			var reason = data.reason;
+
+			var fnBack = function() {
+				cc.director.loadScene("hall");
+			};
+
+			if (reason == 'kick') {
+				cc.vv.alert.show('you are kicked by admin!', ()=>{
+					fnBack();
+				});
+			} else if (reason == 'request') {
+				fnBack();
+			}
         });
 
         net.addHandler("exit_notify_push",function(data){
@@ -261,19 +279,19 @@ cc.Class({
         });
 
         net.addHandler("need_reconnect",function(data) {
-			var userMgr = cc.vv.userMgr;
+            var userMgr = cc.vv.userMgr;
 
-			console.log('get need_reconnect');
+            console.log('get need_reconnect');
 
-			if (userMgr.userId == null) {
-				console.log('userid == null, return');
-				return;
-			}
+            if (userMgr.userId == null) {
+                console.log('userid == null, return');
+                return;
+            }
 
-			if (self.connecting) {
-				console.log('is connecting, return');
-				return;
-			}
+            if (self.connecting) {
+                console.log('is connecting, return');
+                return;
+            }
 /*
             if(self.roomId == null){
                 cc.director.loadScene("hall");
@@ -289,46 +307,46 @@ cc.Class({
             }
 */
 
-			userMgr.userId = null;
-			self.connecting = true;
+            userMgr.userId = null;
+            self.connecting = true;
 
-			var retry = 0;
-			var max_retry = 10;
+            var retry = 0;
+            var max_retry = 10;
 
-			var fnLogin = function() {
-				console.log('try login, retry=' + retry);
+            var fnLogin = function() {
+                console.log('try login, retry=' + retry);
 
-				userMgr.login(function(ret) {
-					if (ret) {
-						console.log('reconnect success');
-						cc.vv.wc.hide();
+                userMgr.login(ret=>{
+                    console.log('login ret=' + ret);
+                    if (ret == 0) {
+                        cc.vv.wc.hide();
 
-						self.connecting = false;
+                        self.connecting = false;
 
-						if (userMgr.roomData != null) {
-							userMgr.enterRoom(userMgr.roomData);
-							userMgr.roomData = null;
-						}
+                        if (userMgr.roomData != null) {
+                            userMgr.enterRoom(userMgr.roomData);
+                            userMgr.roomData = null;
+                        }
 
-						return;
-					}
+                        return;
+                    }
 
-					retry++;
+                    retry++;
 
-					console.log('reconnect fail: retry=' + retry);
+                    console.log('reconnect fail: retry=' + retry);
 
-					if (retry >= max_retry) {
-						self.connecting = false;
-						cc.director.loadScene("login");
-						return;
-					}
+                    if (retry >= max_retry) {
+                        self.connecting = false;
+                        cc.director.loadScene("login");
+                        return;
+                    }
 
-					setTimeout(fnLogin, 3000);
-				});
-			}
+                    setTimeout(fnLogin, 3000);
+                });
+            }
 
-			cc.vv.wc.show(1);
-			fnLogin();
+            //cc.vv.wc.show(1);
+            fnLogin();
         });
 
         net.addHandler("new_user_comes_push", function(data) {
@@ -1051,3 +1069,4 @@ cc.Class({
         this.dispatchEvent("refresh_bg", data);
     },
 });
+

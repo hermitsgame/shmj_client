@@ -12,8 +12,8 @@ cc.Class({
         _info: null,
         _sprBG: null,
 
-		_lblWin: null,
-		_lblLose: null,
+        _lblWin: null,
+        _lblLose: null,
 
         _chat:null,
         _emoji:null,
@@ -89,12 +89,12 @@ cc.Class({
 		if (this._lblLose) {
 			this._lblLose.active = false;
 		}
-/*
+
         this._emoji = this.node.getChildByName("emoji");
         if(this._emoji != null){
             this._emoji.active = false;
         }
-*/        
+        
         this.refresh();
         
         if(this._sprIcon && this._userId){
@@ -217,12 +217,12 @@ cc.Class({
     },
 
     setFlowers: function(flowers) {
-    	console.log('setFlowers');
-		console.log(flowers);
+        console.log('setFlowers');
+        console.log(flowers);
 	
         if (this._lblFlower != null) {
             this._lblFlower.node.active = flowers != null;
-			this._lblFlower.string = '花x' + (flowers != null ? flowers.length : 0);
+            this._lblFlower.string = '花x' + (flowers != null ? flowers.length : 0);
         }
     },
     
@@ -263,13 +263,10 @@ cc.Class({
         this._lastChatTime = 3;
     },
     
-    emoji:function(emoji){
-        //emoji = JSON.parse(emoji);
-        if(this._emoji == null || this._emoji == null){
+    emoji: function(emoji) {
+        if (this._emoji == null)
             return;
-        }
-        console.log(emoji);
-        this._chatBubble.active = false;
+
         this._emoji.active = true;
         this._emoji.getComponent(cc.Animation).play(emoji);
         this._lastChatTime = 3;
@@ -316,12 +313,13 @@ cc.Class({
 		node.runAction(action);
     },
 
-    // called every frame, uncomment this function to activate update callback
     update: function (dt) {
         if (this._lastChatTime > 0) {
             this._lastChatTime -= dt;
             if (this._lastChatTime < 0) {
                 this._chat.active = false;
+		if (this._emoji != null)
+                    this._emoji.active = false;
             }
         }
     },

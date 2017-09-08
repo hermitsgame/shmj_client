@@ -14,10 +14,45 @@ cc.Class({
 
 		this._tempClub = item;
 		content.removeChild(item, false);
+
+		var top = this.node.getChildByName('top');
+		var btn_add = top.getChildByName('btn_add');
+
+		cc.vv.utils.addClickEvent(btn_add, this.node, 'Clubs', 'onBtnAdd');
+
+        var popup = this.node.getChildByName('popup');
+        var btn_join = popup.getChildByName('btn_join');
+        var btn_create = popup.getChildByName('btn_create');
+
+        cc.vv.utils.addClickEvent(btn_join, this.node, 'Clubs', 'onBtnJoin');
+        cc.vv.utils.addClickEvent(btn_create, this.node, 'Clubs', 'onBtnCreate');
     },
 
-	start: function() {
+	onEnable: function() {
 		this.refresh();
+    },
+
+	onBtnAdd : function() {
+        var popup = this.node.getChildByName('popup');
+
+        popup.active = !popup.active;
+    },
+
+    onBtnJoin : function() {
+        var join_club = cc.find('Canvas/join_club');
+        var popup = this.node.getChildByName('popup');
+
+		join_club.active = true;
+        popup.active = false;
+    },
+
+    onBtnCreate : function() {
+        var create_club = cc.find('Canvas/create_club');
+        var popup = this.node.getChildByName('popup');
+
+        create_club.parent_page = this;
+		create_club.active = true;
+        popup.active = false;
     },
 
 	onBtnClubClicked: function(event) {
@@ -31,11 +66,14 @@ cc.Class({
 		var lobby = is_admin ? 'admin' : 'lobby';
 		var next = cc.find('Canvas/' + lobby);
 
+		next.club_id = item.club_id;
 		next.active = true;
     },
 
 	refresh: function() {
 		var self = this;
+
+        console.log('Clubs refresh');
 
 		cc.vv.pclient.request_apis('list_clubs', {}, function(ret) {
 			if (!ret || ret.errcode != 0)
@@ -72,12 +110,17 @@ cc.Class({
 			var club = clubs[i];
 			var item = this.getClubItem(i);
 			var name = item.getChildByName('name').getComponent(cc.Label);
+            var id = item.getChildByName('id').getComponent(cc.Label);
+			var head = cc.find('icon/head', item);
 			var desc = item.getChildByName('desc').getComponent(cc.Label);
 			var headcount = item.getChildByName('headcount').getComponent(cc.Label);
 
 			name.string = club.name;
+            id.string = 'ID:' + club.id;
 			desc.string = club.desc;
 			headcount.string = club.member_num + ' / ' + club.max_member_num;
+
+			cc.vv.utils.loadImage(club.logo, head);
 
 			item.club_id = club.id;
 			item.is_admin = club.is_admin;

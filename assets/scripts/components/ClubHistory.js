@@ -15,13 +15,16 @@ cc.Class({
 
 		this._temp = item;
 		content.removeChild(item, false);
+
+		var btnClose = cc.find('top/btn_back', this.node);
+		cc.vv.utils.addClickEvent(btnClose, this.node, 'ClubHistory', 'onBtnClose');
     },
 
 	onEnable: function() {
 		this.refresh();
     },
 
-	onBtnBackClicked: function() {
+	onBtnClose: function() {
 		this.node.active = false;
 	},
 
@@ -91,7 +94,7 @@ cc.Class({
 			var info = history.info;
 			var index = 0;
 
-			time.string = cc.vv.utils.dateFormat(history.creat_time * 1000);
+			time.string = cc.vv.utils.dateFormat(history.create_time * 1000);
 			roomid.string = '房间号：' + history.room_id;
 			gamenum.string = '局数：' + info.game_num;
 			desc.string = info.huafen + '/' + info.huafen + (info.maima ? '带苍蝇' : '不带苍蝇') + info.maxGames + '局';
@@ -100,11 +103,13 @@ cc.Class({
 				var seat = seats.children[j];
 				var name = seat.getChildByName('name').getComponent(cc.Label);
 				var score = seat.getChildByName('score').getComponent(cc.Label);
+				var head = cc.find('icon/head', seat).getComponent('ImageLoader');
 				var sd = info.seats[j];
 
 				seat.active = true;
 				name.string = sd.name;
 				score.string = sd.score >= 0 ? '+' + sd.score : sd.score;
+				head.setUserID(sd.uid);
 
 				index += 1;
 			}

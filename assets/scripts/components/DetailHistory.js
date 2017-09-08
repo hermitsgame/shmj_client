@@ -17,13 +17,16 @@ cc.Class({
 
 		this._temp = item;
 		content.removeChild(item, false);
+
+		var btnClose = cc.find('top/btn_back', this.node);
+		cc.vv.utils.addClickEvent(btnClose, this.node, 'DetailHistory', 'onBtnClose');
     },
 
 	onEnable: function() {
 		this.refresh();
     },
 
-	onBtnBackClicked: function() {
+	onBtnClose: function() {
 		this.node.active = false;
 	},
 
@@ -106,16 +109,19 @@ cc.Class({
 			var item = this.getItem(i);
 			var time = item.getChildByName('time').getComponent(cc.Label);
 			var seats = item.getChildByName('seats');
+			var idx = item.getChildByName('idx').getComponent('SpriteMgr');
 
 			var index = 0;
 			var result = JSON.parse(game.result);
 
 			time.string = cc.vv.utils.dateFormat(game.create_time * 1000);
+			idx.setIndex(game.game_index);
 
 			for (var j = 0; j < seats.childrenCount && j < info.seats.length; j++) {
 				var seat = seats.children[j];
 				var name = seat.getChildByName('name').getComponent(cc.Label);
 				var score = seat.getChildByName('score').getComponent(cc.Label);
+				var head = cc.find('icon/head', seat).getComponent('ImageLoader');
 				var sd = info.seats[j];
 				var _score = result[j];
 
@@ -123,6 +129,8 @@ cc.Class({
 
 				name.string = sd.name;
 				score.string = _score >= 0 ? '+' + _score : _score;
+				head.setUserID(sd.uid);
+				
 
 				index += 1;
 			}

@@ -17,11 +17,11 @@ cc.Class({
             cvs.fitWidth = true;
         }
         
-		this.initMgr();
-/*
+        this.initMgr();
+        
         this._splash = cc.find("Canvas/splash");
         this._splash.active = true;
-        
+/*
         this._mianze = cc.find('Canvas/mianze');
         this._mianze.active = false;
 */
@@ -31,7 +31,7 @@ cc.Class({
         var self = this;
         var SHOW_TIME = 1000;
         var FADE_TIME = 300;
-        if (false && (cc.sys.os != cc.sys.OS_IOS || !cc.sys.isNative)) {
+        if(cc.sys.os != cc.sys.OS_IOS || !cc.sys.isNative){
             self._splash.active = true;
             var t = Date.now();
             var fn = function(){
@@ -52,8 +52,9 @@ cc.Class({
                 }
             };
             setTimeout(fn,33);
-        } else {
-            //this._splash.active = false;
+        }
+        else{
+            this._splash.active = false;
             this.checkVersion();
         }
     },

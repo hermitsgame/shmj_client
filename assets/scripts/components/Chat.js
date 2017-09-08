@@ -1,3 +1,4 @@
+
 cc.Class({
     extends: cc.Component,
 
@@ -8,73 +9,133 @@ cc.Class({
         _btnChat:null,
     },
 
-    onLoad: function () {
-        if(cc.vv == null){
+    onLoad: function() {
+        if (cc.vv == null)
             return;
-        }
-        
+
         cc.vv.chat = this;
-        
+
         this._btnChat = this.node.getChildByName("btn_chat");
         this._btnChat.active = !cc.vv.replayMgr.isReplay();
-        
-        this._chatRoot = this.node.getChildByName("chat");
-        this._chatRoot.active = false;
-        
-        var content = cc.find("Canvas/chat/scroll/view/content");
-        var itemTemp = content.getChildByName("item");
-        var barrier = content.getChildByName("barrier");
-        
-        content.removeChild(itemTemp);
-        content.removeChild(barrier);
-        
-        this._quickChatInfo = {};
-        this._quickChatInfo["item0"] = {index:0, content:"咋弄的呀，你还打不打？", sound:"fix_msg_1.mp3"};
-        this._quickChatInfo["item1"] = {index:1, content:"快点啊，我等的花都谢了", sound:"fix_msg_2.mp3"};
-        this._quickChatInfo["item2"] = {index:2, content:"打球个牌，怎么这么慢啊", sound:"fix_msg_3.mp3"};
-        this._quickChatInfo["item3"] = {index:3, content:"太爽了，这牌能给你们打满", sound:"fix_msg_4.mp3"};
-        this._quickChatInfo["item4"] = {index:4, content:"莫慌这牌胡的宽的很", sound:"fix_msg_5.mp3"};
-        this._quickChatInfo["item5"] = {index:5, content:"亮倒！搞满你们", sound:"fix_msg_6.mp3"};
-        this._quickChatInfo["item6"] = {index:6, content:"我这牌胡劲大的很", sound:"fix_msg_7.mp3"};
-        this._quickChatInfo["item7"] = {index:7, content:"13不靠呀", sound:"fix_msg_8.mp3"};
-        this._quickChatInfo["item8"] = {index:8, content:"都懒得打了", sound:"fix_msg_9.mp3"};
-        this._quickChatInfo["item9"] = {index:9, content:"让我闯一下行吗", sound:"fix_msg_9.mp3"};
-        
-        for (var i = 0; i < 10; i++) {
-            var name = "item" + i;
-            var info = this._quickChatInfo[name];
-            
-            var item = cc.instantiate(itemTemp);
-            item.name = name;
+        cc.vv.utils.addClickEvent(this._btnChat, this.node, 'Chat', 'onBtnChatClicked');
+
+        var root = this.node.getChildByName("chat");
+
+        root.active = false;
+        this._chatRoot = root;
+
+        var bg = root.getChildByName("bg");
+
+        cc.vv.utils.addClickEvent(bg, this.node, 'Chat', 'onBgClicked');
+
+        var content = cc.find("quick/view/content", root);
+        var temp = content.getChildByName("item");
+
+        cc.vv.utils.addClickEvent(temp, this.node, 'Chat', 'onQuickChatItemClicked');
+
+        content.removeChild(temp, false);
+
+        var qc = [
+            { content: '打快一点呀！', sound: '1.mp3' },
+            { content: '快点撒，我等到花儿都谢了！', sound: '2.mp3' },
+            { content: '牌太好了，打哪张呢？', sound: '3.mp3' },
+            { content: '不要乱催', sound: '4.mp3' },
+            { content: '别吵啦！', sound: '5.mp3' },
+            { content: '三缺一，我来的正好', sound: '6.mp3' },
+            { content: '被你这个老麻将盯上', sound: '7.mp3' },
+            { content: '见鬼了，这烂牌', sound: '8.mp3' },
+            { content: '喔天，打错牌了', sound: '9.mp3' },
+            { content: '风头不好，明天再约', sound: '10.mp3' },
+            { content: '输完回家睡觉', sound: '11.mp3' },
+        ];
+
+        for (var i = 0; i < qc.length; i++) {
+            var info = qc[i];
+            var item = cc.instantiate(temp);
+
+            item.idx = i;
 
             var lblInfo = item.getChildByName("msg").getComponent(cc.Label);
-            lblInfo.string = (info.index + 1) + "." + info.content;
-            
+            lblInfo.string = info.content;
+
             content.addChild(item);
-            
-            if (i != 9) {
-                content.addChild(cc.instantiate(barrier));
-            }
+        }
+
+        this._quickChatInfo = qc;
+
+        var emoji = cc.find('emoji/view/content', root);
+
+        for (var i = 0; i < emoji.childrenCount; i++) {
+            var item = emoji.children[i];
+
+            item.idx = i;
+
+            cc.vv.utils.addClickEvent(item, this.node, 'Chat', 'onEmojiItemClicked');
+        }
+
+        var btnSend = root.getChildByName('btn_send');
+
+        cc.vv.utils.addClickEvent(btnSend, this.node, 'Chat', 'onBtnChatSend');
+
+        var self = this;
+        root.on('rb-updated', function(event) {
+            var id = event.detail.id;
+            self.chooseTag(id);
+        });
+    },
+
+    chooseTag: function(id) {
+        var root = this._chatRoot;
+        var tags = [ 'quick', 'emoji' ];
+
+        for (var i = 0; i < tags.length; i++) {
+            var item = root.getChildByName(tags[i]);
+
+            item.active = id == i;
         }
     },
-    
-    getQuickChatInfo(index){
-        var key = "item" + index;
-        return this._quickChatInfo[key];   
+	
+    getQuickChatInfo: function(index) {
+        return this._quickChatInfo[index];
     },
     
-    onBtnChatClicked:function(){
+    onBtnChatClicked: function() {
         this._chatRoot.active = true;
     },
     
     onBgClicked:function(){
         this._chatRoot.active = false;
     },
-    
-    onQuickChatItemClicked:function(event){
+
+    onQuickChatItemClicked: function(event) {
+        var idx = event.target.idx;
+
         this._chatRoot.active = false;
-        var info = this._quickChatInfo[event.target.name];
-        cc.vv.net.send("quick_chat", info.index);
+
+        console.log('quick_chat: ' + idx);
+        cc.vv.net.send("quick_chat", { id : idx });
     },
+
+    onEmojiItemClicked : function(event) {
+        var idx = event.target.idx;
+
+        this._chatRoot.active = false;
+
+        console.log('emoji: ' + idx);
+        cc.vv.net.send("emoji", { id : idx });
+    },
+
+    onBtnChatSend: function() {
+        var root = this._chatRoot;
+        var btnSend = root.getChildByName('btn_send');
+        var edt_chat = root.getChildByName('edt_chat').getComponent(cc.EditBox);
+        var msg = edt_chat.string;
+
+        if (msg == '')
+            return;
+
+        edt_chat.string = '';
+        cc.vv.net.send('chat', { msg : msg });
+    }
 });
 

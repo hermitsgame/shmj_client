@@ -33,8 +33,9 @@ cc.Class({
 		dissolveNotice.active = false;
 
         this._menu = root.getChildByName('menu');
-/*
+
         this._audioSet = root.getChildByName('audioSet');
+/*
         this._skinSet = root.getChildByName('skinSet');
 */
         this.closeAll();
@@ -48,6 +49,7 @@ cc.Class({
         this.addBtnHandler('menu/btnAudio');
         this.addBtnHandler('menu/btnSkin');
         this.addBtnHandler('menu/btnDissolve');
+        this.addBtnHandler('menu/mask');
 
         var self = this;
         this.node.on("dissolve_notice", function(event) {
@@ -55,10 +57,10 @@ cc.Class({
             self.showDissolveNotice(data);
         });
 
-		this.node.on('dissolve_done', function(event) {
-			self._endTime = -1;
-			cc.vv.utils.showDialog(self._dissolveNotice, 'body', false, self._popuproot);
-		});
+        this.node.on('dissolve_done', function(event) {
+            self._endTime = -1;
+            cc.vv.utils.showDialog(self._dissolveNotice, 'body', false, self._popuproot);
+        });
 
         this.node.on("dissolve_cancel", function(event) {
             self._endTime = -1;
@@ -98,47 +100,54 @@ cc.Class({
     },
     
     onBtnClicked:function(event) {
+        var game = cc.vv.gameNetMgr;
+        var net = cc.vv.net;
+
         this.closeAll();
+
         var btnName = event.target.name;
         if(btnName == "btn_agree"){
-            cc.vv.net.send("dissolve_agree");
+            net.send("dissolve_agree");
         }
         else if(btnName == "btn_reject"){
-            cc.vv.net.send("dissolve_reject");
+            net.send("dissolve_reject");
         }
         else if(btnName == "btn_sqjsfj"){
-            cc.vv.net.send("dissolve_request"); 
+            net.send("dissolve_request"); 
         } else if (btnName == "btnAudio") {
             this.showAudioSet();
         } else if (btnName == "btnSkin") {
-            this.showSkinSet();
+            //this.showSkinSet();
         } else if (btnName == "btnDissolve") {
-            var isIdle = cc.vv.gameNetMgr.numOfGames == 0;
-            var isOwner = cc.vv.gameNetMgr.isOwner();
-            
+            var isIdle = game.numOfGames == 0;
+            var isOwner = game.isOwner();
+
             if (isIdle) {
                 if (isOwner) {
                     cc.vv.alert.show('牌局还未开始，房主解散房间，房卡退还', function() {
-                        cc.vv.net.send("dispress");
+                        net.send("dispress");
                     }, true);
                 } else {
-                    cc.vv.net.send("exit");
+                    net.send("exit");
                 }
             } else {
-                cc.vv.net.send("dissolve_request");
+                net.send("dissolve_request");
             }
         } else if (btnName == "btn_dissolve") {
-            cc.vv.net.send("dissolve_request");
+            net.send("dissolve_request");
+        } else if (btnName == 'mask') {
+            this.closeAll();
         }
     },
     
     closeAll: function() {
-		//this._popuproot.active = false;
-/*
+        //this._popuproot.active = false;
+
         this._audioSet.active = false;
+/*
         this._skinSet.active = false;
 */
-		this._menu.active = false;
+        this._menu.active = false;
     },
     
     showMenu: function() {
@@ -160,25 +169,25 @@ cc.Class({
         this.closeAll();
         this._popuproot.active = true;
 
-		cc.vv.utils.showDialog(this._audioSet, 'body', true);
+        cc.vv.utils.showDialog(this._audioSet, 'body', true);
     },
     
     showSkinSet: function() {
         this.closeAll();
         this._popuproot.active = true;
 
-		cc.vv.utils.showDialog(this._skinSet, 'body', true);
+        cc.vv.utils.showDialog(this._skinSet, 'body', true);
     },
     
     showDissolveRequest: function() {
         this.closeAll();
         this._popuproot.active = true;
     },
-	
+
     showDissolveNotice: function(data) {
         this._endTime = Date.now()/1000 + data.time;
         var dissolveNotice = this._dissolveNotice;
-		var body = dissolveNotice.getChildByName('body');
+        var body = dissolveNotice.getChildByName('body');
 
         var seats = body.getChildByName('seats');
 
@@ -186,27 +195,27 @@ cc.Class({
             this.closeAll();
             this._popuproot.active = true;
 
-			cc.vv.utils.showDialog(dissolveNotice, 'body', true);
+            cc.vv.utils.showDialog(dissolveNotice, 'body', true);
 
-			var index = 0;
+            var index = 0;
             for (var i = 0; i < seats.childrenCount && i < cc.vv.gameNetMgr.seats.length; i++) {
                 var seat = seats.children[i];
                 var icon = seat.getChildByName('icon');
                 var imageLoader = icon.getComponent('ImageLoader');
                 var name = seat.getChildByName('name').getComponent(cc.Label);
 
-				seat.active = true;
+                seat.active = true;
                 imageLoader.setUserID(cc.vv.gameNetMgr.seats[i].userid);
                 name.string = cc.vv.gameNetMgr.seats[i].name;
 
-				index++;
+                index++;
             }
 
-			for (var i = index; i < seats.childrenCount; i++) {
-				var seat = seats.children[i];
+            for (var i = index; i < seats.childrenCount; i++) {
+                var seat = seats.children[i];
 
-				seat.active = false;
-			}
+                seat.active = false;
+            }
         }
 
         var notice = ['(等待中)', '(拒绝)', '(同意)', '(离线)'];
@@ -261,8 +270,7 @@ cc.Class({
         btnDissolve.active = check[2];
         wait.active = check[3];
     },
-    
-    // called every frame, uncomment this function to activate update callback
+
     update: function (dt) {
         if (this._endTime > 0) {
             var now = Date.now() / 1000;
@@ -278,14 +286,16 @@ cc.Class({
                 this._endTime = -1;
                 return;
             }
-            
-            var m = Math.floor(lastTime / 60);
-            var s = Math.ceil(lastTime - m*60);
-            
+
+            var h = Math.floor(lastTime / 3600)
+            var m = Math.floor((lastTime % 3600) / 60);
+            var s = Math.ceil(lastTime % 60);
+
+            h = h < 10 ? '0' + h : '' + h;
             m = m < 10 ? '0' + m : '' + m;
             s = s < 10 ? '0' + s : '' + s;
             
-            this._noticeLabel.string = m + ':' + s + ' 后将解散房间';
+            this._noticeLabel.string = h + ':' + m + ':' + s + ' 后将解散房间';
         }
     },
 });

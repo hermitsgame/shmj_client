@@ -31,6 +31,13 @@ cc.Class({
 		this._tempRoom = item;
 		content.removeChild(item, false);
 
+		var btnClose = cc.find('top/btn_back', this.node);
+		cc.vv.utils.addClickEvent(btnClose, this.node, 'Admin', 'onBtnClose');
+
+        var btn_create = cc.find('bottom/btn_create', this.node);
+
+        cc.vv.utils.addClickEvent(btn_create, this.node, 'Admin', 'onBtnCreate');
+
 		this.initEventHandler();
     },
 
@@ -107,7 +114,7 @@ cc.Class({
 
 		var self = this;
 		var data = {
-			club_id : cc.vv.userMgr.club_id
+			club_id : this.node.club_id
 		};
 		
 		cc.vv.pclient.request_apis('join_club_channel', data, function(ret) {
@@ -125,7 +132,7 @@ cc.Class({
 		this._timer = -1;
 
 		var data = {
-			club_id : cc.vv.userMgr.club_id
+			club_id : this.node.club_id
 		};
 
 		cc.vv.pclient.request_apis('leave_club_channel', data, function(ret) {
@@ -139,7 +146,7 @@ cc.Class({
 		});
     },
 
-	onBtnCloseClicked: function(event) {
+	onBtnClose: function(event) {
 		this.node.active = false;
 
 		var userMgr = cc.vv.userMgr;
@@ -152,7 +159,7 @@ cc.Class({
 		var history = cc.find('Canvas/club_history');
 
 		cc.vv.historyParam = {
-			club_id : cc.vv.userMgr.club_id
+			club_id : this.node.club_id
 		};
 
 		history.active = true;
@@ -163,13 +170,24 @@ cc.Class({
 
 		console.log('onBtnMemberClicked');
 
+		member.club_id = this.node.club_id;
 		member.active = true;
     },
 
 	onBtnMessangeClicked: function(event) {
 		var message = cc.find('Canvas/club_message');
 
+		message.club_id = this.node.club_id;
 		message.active = true;
+    },
+
+    onBtnCreate: function() {
+        cc.vv.audioMgr.playButtonClicked();
+
+        var create_room = cc.find('Canvas/create_room');
+
+        create_room.club_id = this.node.club_id;
+        create_room.active = true;
     },
 
     onBtnKickClicked: function(event) {
@@ -184,7 +202,7 @@ cc.Class({
 			roomid : seat.room.id
 		};
 
-		cc.vv.pclient.request_apis('kick_from_club_room', data, function(ret) {
+		cc.vv.pclient.request_connector('kick', data, function(ret) {
 			if (!ret || ret.errcode != 0) {
 				console.log('kick fail');
     			return;
@@ -208,7 +226,7 @@ cc.Class({
 		var data = {
 			roomid : room.id,
 			room_tag : room.room_tag,
-			club_id : cc.vv.userMgr.club_id
+			club_id : this.node.club_id
 		};
 
 		cc.vv.pclient.request_apis('destroy_club_room', data, function(ret) {
@@ -236,15 +254,13 @@ cc.Class({
 				return;
         	}
 
-			
             var data = {
-    			roomid : room.id,
     			room_tag : room.room_tag
     		};
 
 			console.log('start room');
 
-    		pc.request_apis('start_club_room', data, function(ret) {
+    		pc.request_connector('start_room', data, function(ret) {
     			if (!ret || ret.errcode != 0) {
 					console.log('start room fail');
     				return;
@@ -254,7 +270,7 @@ cc.Class({
     	    });
         } else {
         	var data = {
-				roomid : room.room_tag
+				room_tag : room.room_tag
         	};
 
 			console.log('stop room');
@@ -278,7 +294,7 @@ cc.Class({
 
 	refresh: function() {
 		var self = this;
-		var club_id = cc.vv.userMgr.club_id;
+		var club_id = this.node.club_id;
 
 		cc.vv.pclient.request_apis('list_club_rooms', { club_id : club_id }, function(ret) {
 			if (!ret || ret.errcode != 0)
@@ -355,7 +371,10 @@ cc.Class({
 			head.getComponent('ImageLoader').setUserID(p.id);
 		}
 
-		progress.string = data.num_of_turns + ' / ' + data.base_info.maxGames;
+        var info = data.base_info;
+
+        desc.string = info.huafen + '/' + info.huafen + (info.maima ? '带苍蝇' : '不带苍蝇') + info.maxGames + '局';
+		progress.string = data.num_of_turns + ' / ' + info.maxGames;
 		roomid.string = 'ID:' + data.id;
 
         data.readys = readys;

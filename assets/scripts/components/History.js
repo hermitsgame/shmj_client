@@ -24,7 +24,20 @@ cc.Class({
     },
 
 	onEnable: function() {
-		this.refresh(0);
+		var stats = this.node.getChildByName('stats');
+		var radios = [ 'btn_today', 'btn_week', 'btn_month' ];
+		var id = 0;
+
+		for (var i = 0; i < radios.length; i++) {
+			var btn = stats.getChildByName(radios[i]).getComponent('RadioButton');
+
+			if (btn.checked) {
+				id = i;
+				break;
+			}
+		}
+
+		this.refresh(id);
     },
 
 	onBtnItemClicked: function(event) {
@@ -98,9 +111,6 @@ cc.Class({
 		dp.string = history.dp;
 		gk.string = history.gk;
 
-		console.log('history:');
-		console.log(history);
-
 		for (var i = 0; i < data.length; i++) {
 			var room = data[i];
 			var info = room.info;
@@ -111,17 +121,59 @@ cc.Class({
 			var roomid = item.getChildByName('roomid').getComponent(cc.Label);
 			var club = item.getChildByName('club').getComponent(cc.Label);
 			var score = item.getChildByName('score').getComponent(cc.Label);
+			var head = cc.find('icon/head', item);
 
 			roomid.string = '房间号：' + room.room_tag;
 			desc.string = info.huafen + '/' + info.huafen + (info.maima ? '带苍蝇' : '不带苍蝇') + info.maxGames + '局';
 			club.string = room.club_name + '';
 			score.string = room.score;
-			
+			cc.vv.utils.loadImage(room.club_logo, head);
+
+			var ctime = room.create_time * 1000;
+
+			date.string = this.getDate(ctime);
+			time.string = this.getTime(ctime);
 
 			item.roomInfo = room;
 		}
 
 		this.shrinkContent(content, data.length);
+    },
+
+	getDate: function(time) {
+		var today = new Date();
+
+		today.setHours(0);
+	    today.setMinutes(0);
+	    today.setSeconds(0);
+	    today.setMilliseconds(0);
+
+		var utoday = today.getTime();
+		var uyday = utoday - 24 * 3600 * 1000;
+
+		if (time >= utoday)
+			return '今天';
+		else if (time >= uyday)
+			return '昨天';
+
+		var date = new Date(time);
+		var datetime = '{0}月{1}日';
+		var month = date.getMonth() + 1;
+		var day = date.getDate();
+
+		return datetime.format(month, day);
+    },
+
+	getTime: function(time) {
+		var date = new Date(time);
+		var datetime = '{0}:{1}';
+		var h = date.getHours();
+		var m = date.getMinutes();
+
+        h = h >= 10 ? h : ('0' + h);
+        m = m >= 10 ? m : ('0' + m);
+
+		return datetime.format(h, m);
     },
 });
 

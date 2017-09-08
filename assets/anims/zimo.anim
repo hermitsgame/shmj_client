@@ -1,6 +1,6 @@
 {
   "__type__": "cc.AnimationClip",
-  "_name": "new_zimo",
+  "_name": "zimo",
   "_objFlags": 0,
   "_rawFiles": null,
   "_duration": 1,
@@ -14,7 +14,7 @@
           {
             "frame": 0,
             "value": {
-              "__uuid__": "6055f000-abc3-4ee8-8b1d-28e9a4ffca7c"
+              "__uuid__": "5b884348-f9b8-43e6-8e1d-4086d5462d80"
             }
           }
         ]

@@ -1,6 +1,6 @@
 {
   "__type__": "cc.AnimationClip",
-  "_name": "new_gang",
+  "_name": "gang",
   "_objFlags": 0,
   "_rawFiles": null,
   "_duration": 1,
@@ -14,7 +14,7 @@
           {
             "frame": 0,
             "value": {
-              "__uuid__": "caae394b-2294-4377-bd7a-806cd52288ce"
+              "__uuid__": "3a2cd098-ceee-40b4-8eaf-fabe23705c88"
             }
           }
         ]

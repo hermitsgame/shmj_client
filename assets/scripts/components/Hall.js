@@ -212,6 +212,7 @@ cc.Class({
 
 		//cc.vv.utils.showDialog(this.createRoomWin, 'body', true);
 
+        this.createRoomWin.club_id = null;
 		this.createRoomWin.active = true;
     },
 

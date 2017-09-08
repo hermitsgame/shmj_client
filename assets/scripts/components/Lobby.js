@@ -29,6 +29,18 @@ cc.Class({
 		this._tempRoom = item;
 		content.removeChild(item, false);
 
+		var btnClose = cc.find('top/btn_back', this.node);
+		cc.vv.utils.addClickEvent(btnClose, this.node, 'Lobby', 'onBtnClose');
+
+		var btnRank = cc.find('entrys/btn_rank', this.node);
+		cc.vv.utils.addClickEvent(btnRank, this.node, 'Lobby', 'onBtnRankClicked');
+
+		var btnCard = cc.find('entrys/btn_card', this.node);
+		cc.vv.utils.addClickEvent(btnCard, this.node, 'Lobby', 'onBtnCardClicked');
+
+		var btnInvite = cc.find('entrys/btn_invite', this.node);
+		cc.vv.utils.addClickEvent(btnInvite, this.node, 'Lobby', 'onBtnInviteClicked');
+
 		this.initEventHandler();
     },
 
@@ -113,7 +125,7 @@ cc.Class({
 
 		var self = this;
 		var data = {
-			club_id : cc.vv.userMgr.club_id
+			club_id : this.node.club_id
 		};
 		
 		cc.vv.pclient.request_apis('join_club_channel', data, function(ret) {
@@ -131,7 +143,7 @@ cc.Class({
 		this._timer = -1;
 
 		var data = {
-			club_id : cc.vv.userMgr.club_id
+			club_id : this.node.club_id
 		};
 
 		cc.vv.pclient.request_apis('leave_club_channel', data, function(ret) {
@@ -155,6 +167,9 @@ cc.Class({
 			seatindex : seatindex
 		};
 
+		cc.vv.userMgr.enterRoom(room.room_tag);
+
+/*
 		cc.vv.pclient.request_apis('join_club_room', data, function(ret) {
 			if (!ret)
 				return;
@@ -166,6 +181,7 @@ cc.Class({
 
 			self.refresh();
 		});
+*/
     },
 
 	leave_room: function(room) {
@@ -210,13 +226,28 @@ cc.Class({
 		});
     },
 
-	onBtnCloseClicked: function(event) {
+	onBtnClose: function() {
 		this.node.active = false;
 
 		var userMgr = cc.vv.userMgr;
 
 		userMgr.club_id = null;
 		userMgr.is_admin = null;
+    },
+
+	onBtnRankClicked: function() {
+		var rank = cc.find('Canvas/rank');
+
+		rank.club_id = this.node.club_id;
+		rank.active = true;
+    },
+
+	onBtnCardClicked: function() {
+
+    },
+
+	onBtnInviteClicked: function() {
+
     },
 
 	onBtnSeatClicked: function(event) {
@@ -246,7 +277,7 @@ cc.Class({
 
 	refresh: function() {
 		var self = this;
-		var club_id = cc.vv.userMgr.club_id;
+		var club_id = this.node.club_id;
 
 		cc.vv.pclient.request_apis('list_club_rooms', { club_id : club_id }, function(ret) {
 			if (!ret || ret.errcode != 0)
@@ -321,8 +352,12 @@ cc.Class({
 			btn_prepare.active = false;
 			btn_leave.active = false;
 		}
+		
+		var info = room.base_info;
 
-		progress.string = room.num_of_turns + ' / ' + room.base_info.maxGames;
+		desc.string = info.huafen + '/' + info.huafen + (info.maima ? '带苍蝇' : '不带苍蝇') + info.maxGames + '局';
+
+		progress.string = room.num_of_turns + ' / ' + info.maxGames;
 		item.room = room;
     },
 

@@ -15,8 +15,9 @@ cc.Class({
     onLoad: function() {
         this._gamenum = [];
 
-		var body = this.node.getChildByName('body');
-		var t = body.getChildByName('game_num');
+		var content = cc.find('body/items/view/content', this.node);
+
+		var t = content.getChildByName('game_num');
         for (var i = 0; i < t.childrenCount; i++) {
             var n = t.children[i].getComponent("RadioButton");
             if (n != null) {
@@ -25,7 +26,7 @@ cc.Class({
         }
 
         this._maxfan = [];
-		var t = body.getChildByName('maxfan');
+		var t = content.getChildByName('maxfan');
         for (var i = 0; i < t.childrenCount; i++) {
             var n = t.children[i].getComponent("RadioButton");
             if (n != null) {
@@ -33,20 +34,22 @@ cc.Class({
             }
         }
 
-		this._maima = cc.find('wanfa/horse', body);
-		this._allpairs = cc.find('wanfa/allpairs', body);
-		this._bao = cc.find('wanfa/bao', body);
+		this._maima = cc.find('wanfa/horse', content);
+		this._allpairs = cc.find('wanfa/allpairs', content);
+		this._bao = cc.find('wanfa/bao', content);
 		
 		var score = this.slider;
-
 		score.node.on('slide', this.onScoreChanged, this);
+
+		var btnClose = cc.find('top/btn_back', this.node);
+		cc.vv.utils.addClickEvent(btnClose, this.node, 'CreateRoom', 'onBtnClose');
 	},
 
 	onScoreChanged: function(event) {
 		var slide = event.detail;
-		var body = this.node.getChildByName('body');
-		var fill = cc.find('base/score/body', body).getComponent(cc.Sprite);
-		var flower = cc.find('base/flower', body).getComponent(cc.Label);
+		var content = cc.find('body/items/view/content', this.node);
+		var fill = cc.find('base/score/body', content).getComponent(cc.Sprite);
+		var flower = cc.find('base/flower', content).getComponent(cc.Label);
 		var range = [1, 5, 10, 20, 30, 50, 100, 200, 300];
 		var id = Math.round(slide.progress * (range.length - 1));
 
@@ -88,7 +91,7 @@ cc.Class({
 
             cc.vv.alert.show('create success');
 
-            self.node.active = false; 
+            self.node.active = false;
         });
     },
 
@@ -128,8 +131,8 @@ cc.Class({
             qidui: allpairs
         };
 
-        var club_id = cc.vv.userMgr.club_id;
-        if (club_id) {
+        var club_id = this.node.club_id;
+        if (club_id != null) {
             this.createClubRoom(conf, club_id);
             return;
         }

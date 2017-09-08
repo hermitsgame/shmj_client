@@ -167,5 +167,23 @@ cc.Class({
         datetime = datetime.format(year,month,day,h,m,s);
         return datetime;
     },
+
+	loadImage : function(url, node) {
+		if (!url)
+			return;
+	
+		console.log('loadImage: ' + url);
+		cc.loader.load(url, function(err, tex) {
+			if (err) {
+				console.log(err);
+				return;
+			}
+
+	        var spriteFrame = new cc.SpriteFrame(tex, cc.Rect(0, 0, tex.width, tex.height), false, 0);
+			var sprite = node.getComponent(cc.Sprite);
+
+			sprite.spriteFrame = spriteFrame;
+	    });
+	}
 });
 

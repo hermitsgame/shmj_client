@@ -15,7 +15,7 @@ var Global = cc.Class({
 		
         addHandler: function(event, fn) {
             if (this.handlers[event]) {
-                console.log("event:" + event + "' handler has been registered.");
+                //console.log("event:" + event + "' handler has been registered.");
                 return;
             }
 
@@ -28,7 +28,7 @@ var Global = cc.Class({
             };
 
             this.handlers[event] = handler;
-            console.log("register: function " + event);
+            //console.log("register: function " + event);
             cc.vv.pclient.on(event, handler);
         },
 

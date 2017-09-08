@@ -14,13 +14,16 @@ cc.Class({
 
 		this._temp = item;
 		content.removeChild(item, false);
+
+		var btnClose = cc.find('top/btn_back', this.node);
+		cc.vv.utils.addClickEvent(btnClose, this.node, 'ClubMessage', 'onBtnClose');
     },
 
 	onEnable: function() {
 		this.refresh();
     },
 
-	onBtnBackClicked: function() {
+	onBtnClose: function() {
 		this.node.active = false;
 	},
 
@@ -47,7 +50,7 @@ cc.Class({
 		var self = this;
 
 		var data = {
-			club_id : cc.vv.userMgr.club_id
+			club_id : this.node.club_id
 		};
 
 		cc.vv.pclient.request_apis('list_club_message', data, function(ret) {
@@ -88,6 +91,7 @@ cc.Class({
 			var id = item.getChildByName('id').getComponent(cc.Label);
 			var time = item.getChildByName('time').getComponent(cc.Label);
 			var message = item.getChildByName('message').getComponent(cc.Label);
+			var head = cc.find('icon/head', item).getComponent('ImageLoader');
 			var btn_approve = item.getChildByName('btn_approve');
 			var approved = item.getChildByName('approved');
 
@@ -115,6 +119,7 @@ cc.Class({
 				status = '已拒绝';
 
 			approved.getComponent(cc.Label).string = status;
+			head.setLogo(msg.user_id, msg.logo);
 
 			item.msg_id = msg.id;
 		}

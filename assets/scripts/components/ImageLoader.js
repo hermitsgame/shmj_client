@@ -31,9 +31,22 @@ function loadImage(url,code,callback){
     else{
         imageInfo.queue.push({code:code,callback:callback});
     }*/
-    cc.loader.load(url,function (err,tex) {
+
+	console.log('load ' + code + ': ' + url);
+
+	var addr = {
+		url : url,
+		type : 'jpg'
+	};
+
+    cc.loader.load(addr, function(err,tex) {
+		if (err) {
+			console.log(err);
+			return;
+    	}
+
         var spriteFrame = new cc.SpriteFrame(tex, cc.Rect(0, 0, tex.width, tex.height));
-        callback(code,spriteFrame);
+        callback(code, spriteFrame);
     });
 };
 
@@ -59,7 +72,7 @@ function getBaseInfo(userid,callback){
 
             var url = null;
             if (ret.headimgurl) {
-               url = ret.headimgurl + ".jpg";
+               url = ret.headimgurl;// + ".jpg";
             }
             console.log("url=" + url);
             var info = {
@@ -76,35 +89,50 @@ function getBaseInfo(userid,callback){
 cc.Class({
     extends: cc.Component,
     properties: {
-        // foo: {
-        //    default: null,      // The default value will be used only when the component attaching
-        //                           to a node for the first time
-        //    url: cc.Texture2D,  // optional, default is typeof default
-        //    serializable: true, // optional, default is true
-        //    visible: true,      // optional, default is true
-        //    displayName: 'Foo', // optional
-        //    readonly: false,    // optional, default is false
-        // },
-        // ...
+
     },
 
-    // use this for initialization
     onLoad: function () {
         this.setupSpriteFrame();
     },
 
-    setUserID:function(userid) {
-		if (!cc.sys.isNative) {
+	setLogo: function(uid, logo) {
+		if (!cc.sys.isNative)
 			return;
+
+		if (!uid || !logo)
+			return;
+
+		if (cc.vv.baseInfoMap == null)
+			cc.vv.baseInfoMap = {};
+
+		var self = this;
+
+		var info = cc.vv.baseInfoMap[uid];
+
+		if (!info) {
+			info = {
+                name: '',
+                sex: 0
+            };
+
+			cc.vv.baseInfoMap[uid] = info;
 		}
 
-		if (!userid) {
-			return;
-		}
+		info.url = logo;
 
-        if (cc.vv.images == null) {
-            cc.vv.images = {};
-        }
+		loadImage(logo, uid, function(err, spriteFrame) {
+        	self._spriteFrame = spriteFrame;
+            self.setupSpriteFrame();
+        });
+    },
+
+    setUserID: function(userid) {
+		if (!cc.sys.isNative)
+			return;
+
+		if (!userid)
+			return;
 
         var self = this;
         getBaseInfo(userid, function(code,info) {
@@ -117,16 +145,13 @@ cc.Class({
         });
     },
 
-    setupSpriteFrame:function(){
-        if(this._spriteFrame){
+    setupSpriteFrame: function() {
+        if (this._spriteFrame) {
             var spr = this.getComponent(cc.Sprite);
-            if(spr){
+            if (spr) {
                 spr.spriteFrame = this._spriteFrame;
             }
         }
     }
-    // called every frame, uncomment this function to activate update callback
-    // update: function (dt) {
-
-    // },
 });
+

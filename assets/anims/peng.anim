@@ -1,6 +1,6 @@
 {
   "__type__": "cc.AnimationClip",
-  "_name": "play_peng",
+  "_name": "peng",
   "_objFlags": 0,
   "_rawFiles": null,
   "_duration": 1,
@@ -14,7 +14,7 @@
           {
             "frame": 0,
             "value": {
-              "__uuid__": "73a7a48e-4dd4-4b9e-9b2b-12ff2d07d721"
+              "__uuid__": "72c2ab7f-c60f-4da2-8bc3-f8dc2a80b400"
             }
           }
         ]

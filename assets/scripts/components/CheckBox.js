@@ -42,6 +42,13 @@ cc.Class({
                 label.color = new cc.Color(5, 116, 102, 255);
             }
         }
-    }
+    },
+
+    setChecked: function(status) {
+        if (this.checked != status) {
+            this.checked = status;
+            this.refresh();
+        }
+    },
 });
 
