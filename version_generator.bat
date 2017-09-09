@@ -1,0 +1,1 @@
+node version_generator.js -v 1.1.5 -u http://ip.rt155.com:9000/hotupdate/ -s build/jsb-binary/ -d assets/
