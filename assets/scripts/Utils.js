@@ -150,7 +150,7 @@ cc.Class({
 		return desc;
     },
 
-	dateFormat: function(time) {
+    dateFormat: function(time) {
         var date = new Date(time);
         var datetime = "{0}-{1}-{2} {3}:{4}:{5}";
         var year = date.getFullYear();

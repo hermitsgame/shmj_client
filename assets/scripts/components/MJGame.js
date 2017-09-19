@@ -42,12 +42,12 @@ cc.Class({
         _acting: 0,
         _gameover: null,
 
-		_tempHolds: [],
-		_tempPrompt: null,
+        _tempHolds: [],
+        _tempPrompt: null,
 
-		_tempFlowers: [],
+        _tempFlowers: [],
 
-		_chipeng: false,
+        _chipeng: false,
     },
 
     onLoad: function() {
@@ -57,7 +57,7 @@ cc.Class({
             cvs.fitWidth = true;
         }
 
-		cc.vv.anysdkMgr.setLandscape();
+        cc.vv.anysdkMgr.setLandscape();
 
         if (!cc.vv) {
             cc.director.loadScene("loading");
@@ -106,7 +106,7 @@ cc.Class({
         layout.scaleX *= realwidth/1280;
         layout.scaleY *= realwidth/1280;
 
-		var valid = net.getValidLocalIDs();
+        var valid = net.getValidLocalIDs();
         var sides = [ 'south', 'east', 'north', 'west' ];
         for (var i = 0; i < sides.length; ++i) {
             var side = sides[i];
@@ -353,9 +353,9 @@ cc.Class({
     },
 
     initEventHandlers: function() {
-	    var node = this.node;
-		var self = this;
-		var net = cc.vv.gameNetMgr;
+        var node = this.node;
+        var self = this;
+        var net = cc.vv.gameNetMgr;
 
         net.dataEventHandler = node;		
 
@@ -363,15 +363,15 @@ cc.Class({
            self.initMahjongs();
         });
 
-		node.on('game_holds_update', function(data) {
+        node.on('game_holds_update', function(data) {
 			self.updateHolds();
         });
 
-		node.on('game_holds_len', function(data) {
+        node.on('game_holds_len', function(data) {
 			self.updateOtherHolds(data.detail);
         });
 
-		node.on('game_holds_updated', function(data) {
+        node.on('game_holds_updated', function(data) {
 			self.holdsUpdated();
         });
 
@@ -393,13 +393,13 @@ cc.Class({
 
         node.on('game_mopai',function(data) {
             var detail = data.detail;
-			self.hideChupai();
-			self.showMopai(detail.seatIndex, detail.pai);
+            self.hideChupai();
+            self.showMopai(detail.seatIndex, detail.pai);
 
-			var localIndex = cc.vv.gameNetMgr.getLocalIndex(detail.seatIndex);
-			if (0 == localIndex) {
-				self.checkChuPai(true);
-			}
+            var localIndex = cc.vv.gameNetMgr.getLocalIndex(detail.seatIndex);
+            if (0 == localIndex) {
+                self.checkChuPai(true);
+            }
         });
 
         node.on('game_action', function(data) {
@@ -433,6 +433,7 @@ cc.Class({
 
             if (data.holds) {
                 seatData.holds = data.holds;
+                seatData.holds.push(data.hupai);
             }
 
             if (seatData.seatindex == net.seatIndex) {
@@ -441,15 +442,12 @@ cc.Class({
                 self.initOtherMahjongs(seatData);
             }
 
-            if (!iszimo)
-                self.showMopai(seatIndex, data.hupai);
+            if (cc.vv.replayMgr.isReplay()) {
+                var action = data.iszimo ? 'zimo' : 'hu';
 
-			if (cc.vv.replayMgr.isReplay()) {
-				var action = data.iszimo ? 'zimo' : 'hu';
-
-				self.playEfx(localIndex, action);
-				cc.vv.audioMgr.playDialect('hu', seatData.userid);
-			}
+                self.playEfx(localIndex, action);
+                cc.vv.audioMgr.playDialect('hu', seatData.userid);
+            }
         });
 
         node.on('mj_count',function(data) {
@@ -473,14 +471,13 @@ cc.Class({
         node.on('game_chupai_notify', function(data) {
             self.hideChupai();
             var seatData = data.detail.seatData;
-			var pai = data.detail.pai;
+            var pai = data.detail.pai;
 
             if (seatData.seatindex == cc.vv.gameNetMgr.seatIndex) {
-				self.doChupai(seatData, pai);
-				self.checkChuPai(false);
-            }
-            else {
-				self.doChupai(seatData, pai);
+                self.doChupai(seatData, pai);
+                self.checkChuPai(false);
+            } else {
+                self.doChupai(seatData, pai);
             }
 
             self.showChupai();
@@ -505,8 +502,8 @@ cc.Class({
             self._chipeng = true;
             if (seatData.seatindex == cc.vv.gameNetMgr.seatIndex) {
                 self.initMahjongs();
-				self.checkChuPai(true);
-				self.showTings(false);
+                self.checkChuPai(true);
+                self.showTings(false);
             } else {
                 self.initOtherMahjongs(seatData, false, true);
             }
@@ -588,8 +585,8 @@ cc.Class({
             var gangtype = data.gangtype;
             if (seatData.seatindex == net.seatIndex) {
                 self.initMahjongs();
-				self.checkChuPai(false);
-				self.showTings(false);
+                self.checkChuPai(false);
+                self.showTings(false);
             } else {
                 self.initOtherMahjongs(seatData);
 
@@ -704,32 +701,32 @@ cc.Class({
 		}
     },
 
-	hideAllHolds: function() {
-		var sides = [ 'south', 'east', 'north', 'west' ];
+    hideAllHolds: function() {
+        var sides = [ 'south', 'east', 'north', 'west' ];
 
-		for (var i = 0; i < sides.length; i++) {
-			var sideHolds = cc.find('game/' + sides[i] + '/layout/holds', this.node);
+        for (var i = 0; i < sides.length; i++) {
+            var sideHolds = cc.find('game/' + sides[i] + '/layout/holds', this.node);
 
-			while (sideHolds.childrenCount > 0) {
-				var mjnode = sideHolds.children[0];
+            while (sideHolds.childrenCount > 0) {
+                var mjnode = sideHolds.children[0];
 
-				this.putMJItem(sideHolds, i, mjnode);
-			}
+                this.putMJItem(sideHolds, i, mjnode);
+            }
 
-			var flowers = cc.find('game/' + sides[i] + '/flowers', this.node);
+            var flowers = cc.find('game/' + sides[i] + '/flowers', this.node);
 
-			flowers.active = false;
-		}
+            flowers.active = false;
+        }
     },
 
-	doGameOver: function(data) {
-		this.gameRoot.active = false;
-		this.prepareRoot.active = true;
+    doGameOver: function(data) {
+        this.gameRoot.active = false;
+        this.prepareRoot.active = true;
 
-		this.hideAllHolds();
+        this.hideAllHolds();
 
-		var gameover = this.node.getComponent('GameOver');
-		gameover.onGameOver(data);
+        var gameover = this.node.getComponent('GameOver');
+        gameover.onGameOver(data);
     },
 
     playHuAction: function(data, cb) {
@@ -1265,10 +1262,10 @@ cc.Class({
         var holds = cc.find("game/south/layout/holds", this.node);
         var mjcnt = holds.childrenCount;
 
-		if (cc.vv.replayMgr.isReplay())
-			return;
+        if (cc.vv.replayMgr.isReplay())
+            return;
 
-		console.log('checkChuPai');
+        console.log('checkChuPai');
 
         if (check) {
             if (hastingpai) {
@@ -1284,32 +1281,32 @@ cc.Class({
                 for (var i = 0; i < mjcnt; ++i) {
                     var mjnode = holds.children[i];
                     var mj = mjnode.getComponent('SmartMJ');
-					var mjid = mj.mjid;
+                    var mjid = mj.mjid;
 
-					var can = !(seatData.lastChiPai && seatData.lastChiPai == mjid);
+                    var can = !(seatData.lastChiPai && seatData.lastChiPai == mjid);
                     console.log('1290: setInteractable: ' + can);
                     mj.setInteractable(can);
                 }
-	        }
-		} else {
-			for (var i = 0; i < mjcnt; ++i) {
-	                var mjnode = holds.children[i];
-	                var mj = mjnode.getComponent('SmartMJ');
+	    }
+        } else {
+            for (var i = 0; i < mjcnt; ++i) {
+                var mjnode = holds.children[i];
+                var mj = mjnode.getComponent('SmartMJ');
 
-	                mj.setInteractable(false);
-	            }
-		}
+                mj.setInteractable(false);
+            }
+        }
     },
 
     checkGangPai: function() {
         var holds = cc.find("game/south/layout/holds", this.node);
-		var mjcnt = holds.childrenCount;
+        var mjcnt = holds.childrenCount;
         var options = this._optionsData;
         var gp = options.gangpai;
 
         for (var i = 0; i < mjcnt; i++) {
             var mjnode = holds.children[i];
-			var mj = mjnode.getComponent('SmartMJ');
+            var mj = mjnode.getComponent('SmartMJ');
 
             if (!mjnode.active) {
                 continue;

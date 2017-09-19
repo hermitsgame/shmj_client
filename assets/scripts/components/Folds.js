@@ -43,8 +43,8 @@ cc.Class({
 
                 folds.push(mj);
 
-				mj.oldx = n.x;
-				mj.oldy = n.y;
+                mj.oldx = n.x;
+                mj.oldy = n.y;
             }
 
             this._folds[sideName] = folds; 
@@ -69,9 +69,9 @@ cc.Class({
         });  
         
         this.node.on('game_sync',function(data) {
-			if (cc.vv.gameNetMgr.isPlaying()) {
-	            self.initAllFolds();
-			}
+            if (cc.vv.gameNetMgr.isPlaying()) {
+                self.initAllFolds();
+            }
         });
 /*
         this.node.on('game_chupai_notify', function(data) {

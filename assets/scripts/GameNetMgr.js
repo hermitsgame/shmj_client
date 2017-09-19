@@ -245,19 +245,19 @@ cc.Class({
             self.turn = -1;
             //self.seats = null;
 
-			var reason = data.reason;
+            var reason = data.reason;
 
-			var fnBack = function() {
-				cc.director.loadScene("hall");
-			};
+            var fnBack = function() {
+                cc.director.loadScene("hall");
+            };
 
-			if (reason == 'kick') {
-				cc.vv.alert.show('you are kicked by admin!', ()=>{
-					fnBack();
-				});
-			} else if (reason == 'request') {
-				fnBack();
-			}
+            if (reason == 'kick') {
+                cc.vv.alert.show('you are kicked by admin!', ()=>{
+                    fnBack();
+                });
+            } else if (reason == 'request') {
+                fnBack();
+            }
         });
 
         net.addHandler("exit_notify_push",function(data){
