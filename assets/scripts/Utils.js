@@ -168,22 +168,32 @@ cc.Class({
         return datetime;
     },
 
-	loadImage : function(url, node) {
-		if (!url)
-			return;
-	
-		console.log('loadImage: ' + url);
-		cc.loader.load(url, function(err, tex) {
-			if (err) {
-				console.log(err);
-				return;
-			}
+    loadImage : function(url, node, force) {
+        if (!url || url.length == 0)
+            return;
 
-	        var spriteFrame = new cc.SpriteFrame(tex, cc.Rect(0, 0, tex.width, tex.height), false, 0);
-			var sprite = node.getComponent(cc.Sprite);
+        var sprite = node.getComponent(cc.Sprite);
+        var type = url.slice(-3);
+        if (type != 'jpg' && type != 'png')
+            type = 'jpg';
 
-			sprite.spriteFrame = spriteFrame;
-	    });
-	}
+        console.log('loadImage: ' + url + ' type:' + type);
+
+        if (force) {
+            cc.loader.release(url);
+            sprite.spriteFrame = null;
+            console.log('release spriteFrame');
+        }
+
+        //cc.textureCache.addImageAsync(url, tex=>{
+        cc.loader.load({ url : url, type : type }, (err, tex)=>{
+            if (err) {
+                console.log(err);
+                return;
+            }
+
+            sprite.spriteFrame = new cc.SpriteFrame(tex, cc.Rect(0, 0, tex.width, tex.height), false, 0);
+        });
+    }
 });
 

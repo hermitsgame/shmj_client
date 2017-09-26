@@ -9,18 +9,21 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.tencent.mm.sdk.openapi.BaseReq;
-import com.tencent.mm.sdk.openapi.BaseResp;
-import com.tencent.mm.sdk.openapi.IWXAPI;
-import com.tencent.mm.sdk.openapi.IWXAPIEventHandler;
-import com.tencent.mm.sdk.openapi.SendAuth;
-import com.tencent.mm.sdk.openapi.WXAPIFactory;
+import com.tencent.mm.opensdk.modelbase.BaseReq;
+import com.tencent.mm.opensdk.modelbase.BaseResp;
+import com.tencent.mm.opensdk.modelmsg.SendAuth;
+import com.tencent.mm.opensdk.modelmsg.ShowMessageFromWX;
+import com.tencent.mm.opensdk.modelmsg.WXAppExtendObject;
+import com.tencent.mm.opensdk.modelmsg.WXMediaMessage;
+import com.tencent.mm.opensdk.openapi.IWXAPI;
+import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler;
+import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 import com.rentai.island.Constants;
 import com.rentai.island.WXAPI;
 
 public class WXEntryActivity extends Activity implements IWXAPIEventHandler{
 	
-	// IWXAPI ÊÇµÚÈý·½appºÍÎ¢ÐÅÍ¨ÐÅµÄopenapi½Ó¿Ú
+	// IWXAPI ï¿½Çµï¿½ï¿½ï¿½ï¿½ï¿½appï¿½ï¿½Î¢ï¿½ï¿½Í¨ï¿½Åµï¿½openapiï¿½Ó¿ï¿½
     private IWXAPI _api;
 	
     @Override
@@ -40,7 +43,7 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler{
         _api.handleIntent(intent, this);
 	}
 
-	// Î¢ÐÅ·¢ËÍÇëÇóµ½µÚÈý·½Ó¦ÓÃÊ±£¬»á»Øµ÷µ½¸Ã·½·¨
+	// Î¢ï¿½Å·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½óµ½µï¿½ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½Øµï¿½ï¿½ï¿½ï¿½Ã·ï¿½ï¿½ï¿½
 	@Override
 	public void onReq(BaseReq req) {
 		/*
@@ -57,7 +60,7 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler{
 		*/
 	}
 
-	// µÚÈý·½Ó¦ÓÃ·¢ËÍµ½Î¢ÐÅµÄÇëÇó´¦ÀíºóµÄÏìÓ¦½á¹û£¬»á»Øµ÷µ½¸Ã·½·¨
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½Ã·ï¿½ï¿½Íµï¿½Î¢ï¿½Åµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Øµï¿½ï¿½ï¿½ï¿½Ã·ï¿½ï¿½ï¿½
 	@Override
 	public void onResp(BaseResp resp) {
 		int result = 0;
@@ -66,11 +69,11 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler{
 		case BaseResp.ErrCode.ERR_OK:
 			if(WXAPI.isLogin){
 				final SendAuth.Resp authResp = (SendAuth.Resp)resp;
-				if(authResp != null && authResp.token != null){
+				if(authResp != null && authResp.code != null){
 					Cocos2dxHelper.runOnGLThread(new Runnable() {
 						@Override
 						public void run() {
-							Cocos2dxJavascriptJavaBridge.evalString("cc.vv.anysdkMgr.onLoginResp('"+ authResp.token +"')");
+							Cocos2dxJavascriptJavaBridge.evalString("cc.vv.anysdkMgr.onLoginResp('"+ authResp.code +"')");
 						}
 					});
 				} else {
@@ -85,7 +88,7 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler{
 				Cocos2dxHelper.runOnGLThread(new Runnable() {
 					@Override
 					public void run() {
-						Cocos2dxJavascriptJavaBridge.evalString("cc.vv.anysdkMgr.onShareResp()");
+						Cocos2dxJavascriptJavaBridge.evalString("cc.vv.anysdkMgr.onShareResp(0)");
 					}
 				});
 			}
@@ -111,7 +114,7 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler{
 				Cocos2dxHelper.runOnGLThread(new Runnable() {
 					@Override
 					public void run() {
-						Cocos2dxJavascriptJavaBridge.evalString("cc.vv.anysdkMgr.onShareResp()");
+						Cocos2dxJavascriptJavaBridge.evalString("cc.vv.anysdkMgr.onShareResp(" + result + ")");
 					}
 				});
 			}

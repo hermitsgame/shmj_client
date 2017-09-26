@@ -61,7 +61,8 @@ cc.Class({
     },
 
     start: function() {
-        var isIdle = cc.vv.gameNetMgr.numOfGames == 0;
+        var net = cc.vv.gameNetMgr;
+        var isIdle = net.numOfGames == 0;
 
         if ( cc.vv.replayMgr.isReplay() )
             return;
@@ -109,7 +110,7 @@ cc.Class({
             self.initSeats();
         });
 
-		this.node.on('game_sync', function(data) {
+        this.node.on('game_sync', function(data) {
             self.refreshBtns();
             self.initSeats();
         });
@@ -161,7 +162,12 @@ cc.Class({
             index += 1;
             console.log(index);
 
-            cc.vv.audioMgr.playQuickChat(index, data.sender);
+            var btn_chat = self.node.getChildByName("btn_chat").getComponent(cc.Button);
+
+            btn_chat.interactable = false;
+            cc.vv.audioMgr.playQuickChat(index, data.sender, ()=>{
+                btn_chat.interactable = true;
+            });
         });
 
         this.node.on('emoji_push',function(data) {
@@ -178,7 +184,7 @@ cc.Class({
     emoji: function(seatindex, emoji_id) {
         var seat = cc.vv.gameNetMgr.seats[seatindex];
         var emoji = cc.instantiate(this._emoji);
-        var y = Math.floor(Math.random() * 600 - 300);
+        var y = Math.floor(Math.random() * 400 - 200);
 
         console.log('play emoji: ' + emoji_id);
 
@@ -215,6 +221,10 @@ cc.Class({
         var isZhuang = (seat.seatindex == net.button);
         var ready = (net.gamestate == '') ? seat.ready : false;
         var flowers = seat.flowers;
+        if (!seat.userid) {
+            this._seats[index].reset();
+            return;
+        }
 
         this._seats[index].setInfo(seat.name, seat.score);
         this._seats[index].setOffline(isOffline);

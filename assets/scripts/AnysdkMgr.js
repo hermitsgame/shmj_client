@@ -13,6 +13,10 @@ cc.Class({
         // },
         // ...
         _isCapturing:false,
+
+        _isTimeline : false,
+
+        _pickNotify: null
     },
 
     // use this for initialization
@@ -26,6 +30,7 @@ cc.Class({
 
     init:function() {
 		this.ANDROID_API = 'com/' + cc.vv.company + '/' + cc.vv.appname + '/WXAPI';
+        this.ANDROID_IMG_API = 'com/' + cc.vv.company + '/' + cc.vv.appname + '/Image';
         this.IOS_API = "AppController";
     },
 	
@@ -43,6 +48,9 @@ cc.Class({
     },
 
     share: function(title, desc, timeline) {
+        var tl = timeline != null;
+
+        this._isTimeline = tl;
 
         if (cc.sys.os == cc.sys.OS_ANDROID) {
 
@@ -52,10 +60,15 @@ cc.Class({
                                             cc.vv.SI.appweb,
                                             title,
                                             desc,
-                                            timeline ? true : false);
+                                            tl);
         }
         else if(cc.sys.os == cc.sys.OS_IOS){
-            jsb.reflection.callStaticMethod(this.IOS_API, "share:shareTitle:shareDesc:",cc.vv.SI.appweb,title,desc);
+            jsb.reflection.callStaticMethod(this.IOS_API,
+                                            "share:shareTitle:shareDesc:timeLine:",
+                                            cc.vv.SI.appweb,
+                                            title,
+                                            desc,
+                                            tl);
         }
         else{
             console.log("platform:" + cc.sys.os + " dosn't implement share.");
@@ -66,6 +79,10 @@ cc.Class({
         if(this._isCapturing){
             return;
         }
+
+        var tl = timeline != null;
+
+        this._isTimeline = tl;
 
         this._isCapturing = true;
         var size = cc.director.getWinSize();
@@ -93,10 +110,15 @@ cc.Class({
                 if(cc.sys.os == cc.sys.OS_ANDROID){
 					//cc.eventManager.removeCustomListeners(cc.game.EVENT_HIDE);
 
-                    jsb.reflection.callStaticMethod(self.ANDROID_API, "ShareIMG", "(Ljava/lang/String;IIZ)V",fullPath,width,height, timeline ? true : false);
+                    jsb.reflection.callStaticMethod(self.ANDROID_API, "ShareIMG", "(Ljava/lang/String;IIZ)V",fullPath,width,height, tl);
                 }
                 else if(cc.sys.os == cc.sys.OS_IOS){
-                    jsb.reflection.callStaticMethod(self.IOS_API, "shareIMG:width:height:",fullPath,width,height);
+                    jsb.reflection.callStaticMethod(self.IOS_API,
+                                                    "shareIMG:width:height:timeLine:",
+                                                    fullPath,
+                                                    width,
+                                                    height,
+                                                    tl);
                 }
                 else{
                     console.log("platform:" + cc.sys.os + " dosn't implement share.");
@@ -113,6 +135,43 @@ cc.Class({
             }
         }
         setTimeout(fn,50);
+    },
+
+	pay: function(token, id) {
+		if (cc.sys.os == cc.sys.OS_ANDROID) {
+			jsb.reflection.callStaticMethod(this.ANDROID_API, "Pay", "(Ljava/lang/String;I)V", token, id);
+		}
+    },
+
+	onPayResp: function(errcode, out_trade_no) {
+		var data = {
+			out_trade_no : out_trade_no,
+			token : cc.vv.userMgr.sign
+		};
+
+		if (errcode != 0) {
+			console.log('pay errcode=' + errcode);
+			return;
+		}
+	
+		cc.vv.http.sendRequest("/pay_wechat/query_order", data, function(ret) {
+			if (!ret)
+				return;
+
+			console.log('query_order:');
+			console.log(ret);
+
+			var errcode = ret.errcode;
+			if (errcode == cc.vv.global.const_code.ORDER.ORDER_SUCCESS) {
+				var data = {
+					currency : ret.currency,
+					amount : ret.quantity
+				};
+
+				cc.vv.gg.show(data);
+			}
+			// TODO
+		});
     },
 
 	initIAP: function(identifiers) {
@@ -160,10 +219,21 @@ cc.Class({
 
     },
 
-	onShareResp: function() {
-		console.log('onShareResp');
+    onShareResp: function(code) {
+        console.log('onShareResp, ret=' + code);
 
-		
+        if (0 == code && this._isTimeline) {
+            cc.vv.pclient.request_apis('user_exec_wechatshare', {}, ret=>{
+                if (ret.errcode != 0)
+                    return;
+
+                cc.vv.gg.show(ret.data);
+
+                var hall = cc.find('Canvas').getComponent('Hall');
+                if (hall != null)
+                    hall.refreshShare();
+            });
+        }
     },
 
     setPortrait: function() {
@@ -180,7 +250,7 @@ cc.Class({
         let width = view.getFrameSize().height > view.getFrameSize().width ? view.getFrameSize().width : view.getFrameSize().height;
         let height = view.getFrameSize().height < view.getFrameSize().width ? view.getFrameSize().width : view.getFrameSize().height;
 
-		view.setFrameSize(width, height);
+        view.setFrameSize(width, height);
         view.setDesignResolutionSize(720, 1280, cc.ResolutionPolicy.FIXED_WIDTH);
     },
 
@@ -198,8 +268,40 @@ cc.Class({
         let width = view.getFrameSize().height < view.getFrameSize().width ? view.getFrameSize().width : view.getFrameSize().height;
         let height = view.getFrameSize().height > view.getFrameSize().width ? view.getFrameSize().width : view.getFrameSize().height;
 
-		cc.view.setFrameSize(width, height);
+        cc.view.setFrameSize(width, height);
         cc.view.setDesignResolutionSize(1280, 720, cc.ResolutionPolicy.FIXED_WIDTH);
+    },
+
+    pick: function(notify) {
+        var path = jsb.fileUtils.getWritablePath();
+        this._pickNotify = notify;
+
+        if (!cc.sys.isNative)
+            return;
+
+        console.log('pick path: ' + path);
+
+        var file = path + 'icon.jpg';
+
+        if(jsb.fileUtils.isFileExist(file)){
+            jsb.fileUtils.removeFile(file);
+        }
+
+        if (cc.sys.os === cc.sys.OS_ANDROID) {
+            jsb.reflection.callStaticMethod(this.ANDROID_IMG_API, "pickImage", "(Ljava/lang/String;)V", path);
+        } else if (cc.sys.os === cc.sys.OS_IOS) {
+
+        }
+    },
+
+    onPickResp: function(code) {
+        var notify = this._pickNotify;
+        var path = jsb.fileUtils.getWritablePath() + 'icon.jpg';
+
+        console.log('onPickResp code:' + code + ' notify:' + notify);
+        console.log('path: ' + path);
+        if (notify != null)
+            notify.emit('pick_result', { result: code, path: path });
     },
 });
 

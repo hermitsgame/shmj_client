@@ -3,7 +3,7 @@ cc.Class({
     extends: cc.Component,
 
     properties: {
-
+        _pickPath: null,
     },
 
     onLoad: function() {
@@ -13,9 +13,32 @@ cc.Class({
 
         cc.vv.utils.addClickEvent(btn_save, this.node, 'SetClub', 'onBtnSave');
         cc.vv.utils.addClickEvent(btn_back, this.node, 'SetClub', 'onBtnClose');
+
+        var content = cc.find('body/items/view/content', this.node);
+        var icon = cc.find('logo/icon', content);
+        var head = icon.getChildByName('head');
+
+        cc.vv.utils.addClickEvent(icon, this.node, 'SetClub', 'onBtnIcon');
+
+        var self = this;
+        icon.on('pick_result', data=>{
+            var data = data.detail;
+            var ret = data.result;
+            var path = data.path;
+
+            console.log('pick_result: ' + data.path);
+
+            if (ret != 0)
+                return;
+
+            self._pickPath = path;
+            cc.vv.utils.loadImage(path, head, true);
+        });
 	},
 
     onEnable : function() {
+        console.log('setClub onEnable');
+        this._pickPath = null;
         this.refresh();
     },
 
@@ -32,6 +55,10 @@ cc.Class({
         edt_name.string = data.name;
         edt_desc.string = data.desc;
         auto_start.setChecked(data.auto_start);
+    },
+
+    onBtnIcon: function(event) {
+        cc.vv.anysdkMgr.pick(event.target);
     },
 
     onBtnClose: function() {
@@ -68,12 +95,22 @@ cc.Class({
             id : clubInfo.id,
             name : edt_name.string,
             desc : edt_desc.string,
-            logo : '', // TODO
             auto_start : auto_start.checked
         };
 
         var self = this;
         var pp = this.node.parent_page;
+
+        console.log('pickPath: ' + this._pickPath);
+
+        if (cc.sys.isNative && this._pickPath) {
+            var fileData = jsb.fileUtils.getDataFromFile(this._pickPath);
+            if (fileData) {
+                var content = cc.vv.crypto.encode(fileData);
+
+                data.logo = content;
+            }
+        }
 
         cc.vv.pclient.request_apis('set_club', data, ret=>{
             if (ret.errcode != 0) {

@@ -68,11 +68,17 @@ cc.Class({
     
     playSFX: function(url, cb) {
         var audioUrl = this.getUrl(url);
-		var audioId = cc.audioEngine.play(audioUrl, false, this.sfxVolume);
+        var audioId = cc.audioEngine.play(audioUrl, false, this.sfxVolume);
 
-		if (cb != null) {
-			cc.audioEngine.setFinishCallback(audioId, cb);
-		}
+        if (cb != null)
+            cc.audioEngine.setFinishCallback(audioId, cb);
+
+        return audioId;
+    },
+
+    stopSFX : function(id) {
+        if (id >= 0)
+            cc.audioEngine.stop(id);
     },
 
     getRandom: function(n, m) {
@@ -137,14 +143,14 @@ cc.Class({
         this.playSFX(file, cb);
     },
 
-	playQuickChat: function(id, uid) {
-		var speaker = [ 'man', 'woman' ];
-		var dialect = [ 'putong', 'wenzhou' ];
-		var path = 'Sound_QC/{0}/{1}/{2}.mp3';
-		var sex = this.getSex(uid);
+    playQuickChat: function(id, uid, cb) {
+        var speaker = [ 'man', 'woman' ];
+        var dialect = [ 'putong', 'wenzhou' ];
+        var path = 'Sound_QC/{0}/{1}/{2}.mp3';
+        var sex = this.getSex(uid);
 
-		path = path.format(dialect[this.dialectID], speaker[sex], id);
-		this.playSFX(path);
+        path = path.format(dialect[this.dialectID], speaker[sex], id);
+        this.playSFX(path, cb);
     },
 
     playHu: function(name, uid, cb) {

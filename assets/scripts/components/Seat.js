@@ -2,7 +2,7 @@ cc.Class({
     extends: cc.Component,
 
     properties: {
-        _sprIcon:null,
+        _icon: null,
         _zhuang:null,
         _ready:null,
         _offline:null,
@@ -30,13 +30,13 @@ cc.Class({
         _lblFlower: null,
     },
 
-    // use this for initialization
-    onLoad: function () {
-        if(cc.vv == null){
+    onLoad: function() {
+        if (cc.vv == null)
             return;
-        }
-        
-        this._sprIcon = this.node.getChildByName("icon").getComponent("ImageLoader");
+
+        this._icon = this.node.getChildByName("icon");
+
+        var sptIcon = this._icon.getComponent('ImageLoader');
         this._lblName = this.node.getChildByName("name").getComponent(cc.Label);
         this._lblScore = this.node.getChildByName("score").getComponent(cc.Label);
         this._voicemsg = this.node.getChildByName("voicemsg");
@@ -51,15 +51,15 @@ cc.Class({
         if (bg) {
             this._sprBG = bg.getComponent("SpriteMgr");
         }
-        
+
         if (this._voicemsg) {
             this._voicemsg.active = false;
         }
-        
-        if(this._sprIcon && this._sprIcon.getComponent(cc.Button)){
-            cc.vv.utils.addClickEvent(this._sprIcon,this.node,"Seat","onIconClicked");    
+
+        if (this._icon && this._icon.getComponent(cc.Button)) {
+            cc.vv.utils.addClickEvent(this._icon, this.node, "Seat", "onIconClicked");
         }
-        
+
         if (this._info) {
             this._info.active = false;
             
@@ -68,11 +68,11 @@ cc.Class({
                 cc.vv.utils.addClickEvent(this._info, this.node, "Seat", "onInfoClicked");
             }
         }
-        
+
         this._offline = this.node.getChildByName("offline");
-        
+
         this._ready = this.node.getChildByName("ready");
-        
+
         this._zhuang = this.node.getChildByName("zhuang");
 
         this._chat = this.node.getChildByName("chat");
@@ -80,15 +80,15 @@ cc.Class({
             this._chat.active = false;
         }
 
-		this._lblWin = this.node.getChildByName('lblWin');
-		if (this._lblWin) {
-			this._lblWin.active = false;
-		}
+        this._lblWin = this.node.getChildByName('lblWin');
+        if (this._lblWin) {
+            this._lblWin.active = false;
+        }
 
-		this._lblLose = this.node.getChildByName('lblLose');
-		if (this._lblLose) {
-			this._lblLose.active = false;
-		}
+        this._lblLose = this.node.getChildByName('lblLose');
+        if (this._lblLose) {
+            this._lblLose.active = false;
+        }
 
         this._emoji = this.node.getChildByName("emoji");
         if(this._emoji != null){
@@ -97,13 +97,13 @@ cc.Class({
         
         this.refresh();
         
-        if(this._sprIcon && this._userId){
-            this._sprIcon.setUserID(this._userId);
+        if (sptIcon && this._userId) {
+            sptIcon.setUserID(this._userId);
         }
     },
     
     onIconClicked:function(){
-        var iconSprite = this._sprIcon.node.getComponent(cc.Sprite);
+        var iconSprite = this._icon.getComponent(cc.Sprite);
         if (this._userId != null && this._userId > 0) {
            var seat = cc.vv.gameNetMgr.getSeatByID(this._userId);
 /*
@@ -136,7 +136,7 @@ cc.Class({
         this._info.active = false;
     },
     
-    refresh:function(){
+    refresh: function() {
         if(this._lblName != null){
             this._lblName.string = this._userName;    
         }
@@ -211,8 +211,10 @@ cc.Class({
     
     setReady:function(isReady){
         this._isReady = isReady;
-        if(this._ready){
-            this._ready.active = this._isReady && (cc.vv.gameNetMgr.numOfGames > 0); 
+        if (this._ready) {
+            var prepare = cc.find('Canvas/prepare');
+
+            this._ready.active = this._isReady && prepare && prepare.active;
         }
     },
 
@@ -236,8 +238,10 @@ cc.Class({
             label.string = 'ID:' + userid;
         }
 
-        if (this._sprIcon) {
-            this._sprIcon.setUserID(userid); 
+        if (this._icon) {
+            var sptIcon = this._icon.getComponent('ImageLoader');
+            if (sptIcon)
+                sptIcon.setUserID(userid);
         }
     },
     
@@ -311,6 +315,29 @@ cc.Class({
 		var action = cc.sequence(cc.delayTime(0.3), cc.fadeTo(0.3, 0), fnUpdate);
 
 		node.runAction(action);
+    },
+
+    reset : function() {
+        this._userName = '';
+        this._score = 0;
+        this._isOffline = false;
+        this._isReady = false;
+        this._isZhuang = false;
+        this._isMaidi = false;
+        this._isDingdi = false;
+        this._isIdle = false;
+        this._userId = 0;
+
+        this.refresh();
+
+        console.log('seat reset');
+
+        if (this._icon) {
+            var sptIcon = this._icon.getComponent('ImageLoader');
+            console.log(sptIcon);
+            if (sptIcon)
+                sptIcon.setUserID(this._userId);
+        }
     },
 
     update: function (dt) {

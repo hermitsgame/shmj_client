@@ -100,29 +100,52 @@ cc.Class({
     },
     
     onBtnChatClicked: function() {
-        this._chatRoot.active = true;
+        var root = this._chatRoot;
+
+        root.active = true
+
+        var act = cc.moveBy(0.3, -400, 0);
+
+        root.runAction(act);
+
+        var menu = this.node.getChildByName('btn_menu');
+
+        menu.runAction(cc.fadeOut(0.3));
     },
-    
-    onBgClicked:function(){
-        this._chatRoot.active = false;
+
+    hide : function() {
+        var root = this._chatRoot;
+
+        var act = cc.sequence(cc.moveBy(0.3, 400, 0), cc.callFunc(()=>{
+            root.active = false;
+        }));
+
+        root.runAction(act);
+
+        var menu = this.node.getChildByName('btn_menu');
+
+        menu.runAction(cc.fadeIn(0.3));
+    },
+
+    onBgClicked : function(){
+        this.hide();
     },
 
     onQuickChatItemClicked: function(event) {
         var idx = event.target.idx;
-
-        this._chatRoot.active = false;
-
         console.log('quick_chat: ' + idx);
         cc.vv.net.send("quick_chat", { id : idx });
+
+        this.hide();
     },
 
     onEmojiItemClicked : function(event) {
         var idx = event.target.idx;
 
-        this._chatRoot.active = false;
-
         console.log('emoji: ' + idx);
         cc.vv.net.send("emoji", { id : idx });
+
+        this.hide();
     },
 
     onBtnChatSend: function() {
@@ -136,6 +159,8 @@ cc.Class({
 
         edt_chat.string = '';
         cc.vv.net.send('chat', { msg : msg });
+
+        this.hide();
     }
 });
 

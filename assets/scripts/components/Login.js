@@ -80,12 +80,12 @@ cc.Class({
             cc.vv.alert.show("您必须先同意用户协议！", null, false);
         }
 */
-		cc.vv.userMgr.guestAuth();
+        cc.vv.userMgr.guestAuth();
     },
     
     onBtnWeichatClicked: function() {
-/*
         cc.vv.audioMgr.playButtonClicked();
+/*
         if (this._agreeCheck.checked) {
 			cc.vv.wc.show();
 			cc.vv.anysdkMgr.login();

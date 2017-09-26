@@ -23,8 +23,6 @@ cc.Class({
 			return;
         }
 
-		console.log('wc show');
-
         var notice = this.node.getChildByName('notice');
         var progress = this.node.getChildByName('progress');
         var spriteMgr = notice.getComponent('SpriteMgr');

@@ -25,7 +25,15 @@ cc.Class({
         this._mianze = cc.find('Canvas/mianze');
         this._mianze.active = false;
 */
-	},
+    },
+
+    setProgress: function(per) {
+        var progress = this.node.getChildByName('progress');
+        var percent = progress.getComponent('Progress')
+
+        progress.active = true;
+        percent.setPercent(per);
+    },
 
     start: function() {
         var self = this;
@@ -43,7 +51,7 @@ cc.Class({
                     var op = (1 - ((dt - SHOW_TIME) / FADE_TIME)) * 255;
                     if(op < 0){
                         self._splash.opacity = 0;
-                        self.checkVersion();    
+                        //self.checkVersion();    
                     }
                     else{
                         self._splash.opacity = op;
@@ -55,15 +63,15 @@ cc.Class({
         }
         else{
             this._splash.active = false;
-            this.checkVersion();
+            //this.checkVersion();
         }
     },
     
     initMgr: function() {
         cc.vv = {};
 
-		cc.vv.company = 'rentai';  // dinosaur
-		cc.vv.appname = 'island';  // shmj
+        cc.vv.company = 'rentai';  // dinosaur
+        cc.vv.appname = 'island';  // shmj
 
         var pclient = require("pclient");
         cc.vv.pclient = new pclient();
@@ -96,6 +104,10 @@ cc.Class({
         
         var Utils = require("Utils");
         cc.vv.utils = new Utils();
+
+        var Crypto = require("Crypto");
+        cc.vv.crypto = new Crypto();
+        cc.vv.crypto.init();
         
         cc.args = this.urlParse();
     },
@@ -177,23 +189,22 @@ cc.Class({
     startPreloading: function() {
         var self = this;
 
-		if (0) {
-		    this._stateStr = "正在加载资源，请稍候";
+        if (true) {
+            this._stateStr = "正在加载资源，请稍候";
             this._isLoading = true;
 
-	        cc.loader.onProgress = function ( completedCount, totalCount,  item ){
-	            //console.log("completedCount:" + completedCount + ",totalCount:" + totalCount );
-	            if(self._isLoading){
-	                self._progress = completedCount/totalCount;
-	            }
-	        };
+            console.log('start loading');
+            var onProgress = function (completedCount, totalCount,  item ) {
+                if (self._isLoading)
+                    self._progress = completedCount / totalCount;
+	    };
 
-	        cc.loader.loadResDir("textures", function(err, assets) {
-	            self.onLoadComplete();
-	        });
-		} else {
-			self.onLoadComplete();
-		}
+            cc.loader.loadResDir("textures/hall", onProgress, function(err, assets) {
+                self.onLoadComplete();
+            });
+        } else {
+            self.onLoadComplete();
+        }
     },
     
     onLoadComplete: function() {
@@ -206,7 +217,7 @@ cc.Class({
         loadCount++;
         cc.sys.localStorage.setItem('loadCount', loadCount);
         
-        if (false && 1 == loadCount) {  // TODO
+        if (false && 1 == loadCount) {
             this._mianze.active = true;
         } else {
             this.login();
@@ -233,7 +244,7 @@ cc.Class({
 
         this.tipLabel.string = this._stateStr + ' ';
         if (this._isLoading) {
-            this.tipLabel.string += Math.floor(this._progress * 100) + "%";   
+            this.setProgress(this._progress);
         }
         else {
             var t = Math.floor(Date.now() / 1000) % 4;

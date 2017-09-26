@@ -8,22 +8,23 @@ import android.graphics.BitmapFactory;
 import android.view.WindowManager;
 import android.util.Log;
 
-import com.tencent.mm.sdk.openapi.IWXAPI;
-import com.tencent.mm.sdk.openapi.SendAuth;
-import com.tencent.mm.sdk.openapi.SendMessageToWX;
-import com.tencent.mm.sdk.openapi.WXAPIFactory;
-import com.tencent.mm.sdk.openapi.WXImageObject;
-import com.tencent.mm.sdk.openapi.WXMediaMessage;
-import com.tencent.mm.sdk.openapi.WXWebpageObject;
+import com.tencent.mm.opensdk.modelmsg.WXImageObject;
+import com.tencent.mm.opensdk.modelmsg.WXMediaMessage;
+import com.tencent.mm.opensdk.modelmsg.WXWebpageObject;
+import com.tencent.mm.opensdk.openapi.IWXAPI;
+import com.tencent.mm.opensdk.modelmsg.SendAuth;
+import com.tencent.mm.opensdk.modelmsg.SendMessageToWX;
+import com.tencent.mm.opensdk.modelpay.PayReq;
+import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 
-import android.content.pm.ActivityInfo;
-
+import org.json.JSONObject;
 import com.rentai.island.Constants;
 
 public class WXAPI {
 	public static IWXAPI api;
 	public static Activity instance;
 	public static boolean isLogin = false;
+	public static String out_trade_no = "";
 	public static void Init(Activity context){
 		WXAPI.instance = context;
 		api = WXAPIFactory.createWXAPI(context, Constants.APP_ID, true);
@@ -52,6 +53,66 @@ public class WXAPI {
 		});
 		
 		//instance.finish();
+	}
+
+	public static void Pay(String token, int id) {
+		final IWXAPI _api = api;
+		final int _id = id;
+		final String _token = token;
+		final Activity _instance = instance;
+
+		new Thread() {
+			@Override
+			public void run() {
+				try {
+					String url = "http://ip.rt155.com:9000/pay_wechat/prepay";
+					Log.d("cocos", " before httpGet");
+
+					JSONObject data = new JSONObject();
+					data.put("os", "Android");
+					data.put("goods_id", _id);
+					data.put("token", _token);
+
+					byte[] buf = Util.httpPost(url, data.toString());
+
+					Log.d("cocos buf: ", new String(buf));
+
+					if (buf == null || buf.length == 0) {
+						Log.d("cocos PAY_GET", "buf null");
+						return;
+					}
+
+					String content = new String(buf);
+					Log.e("cocos pay params:", content);
+					JSONObject json = new JSONObject(content); 
+
+					if (json == null || json.has("retcode")) {
+						Log.d("cocos json:", json != null ? json.getString("retmsg") : "");
+						return;
+					}
+
+					final PayReq req = new PayReq();
+					req.appId			= json.getString("appid");
+					req.partnerId		= json.getString("partnerid");
+					req.prepayId		= json.getString("prepayid");
+					req.nonceStr		= json.getString("noncestr");
+					req.timeStamp		= json.getString("timestamp");
+					req.packageValue	= json.getString("package");
+					req.sign			= json.getString("sign");
+
+					out_trade_no = json.getString("out_trade_no");
+
+					_instance.runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							_api.sendReq(req);
+						}
+					});
+		 		} catch(Exception e) {
+					Log.e("cocos exception", "" + e.getMessage());
+		 		}
+			}
+		}.start();
 	}
 	
 	public static void Share(String url,String title,String desc, boolean timeline) {

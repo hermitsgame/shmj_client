@@ -9,6 +9,9 @@ cc.Class({
     onLoad: function() {
 		var content = cc.find('items/view/content', this.node);
 		var item = content.children[0];
+        var btn_transfer = item.getChildByName('btn_transfer');
+
+        cc.vv.utils.addClickEvent(btn_transfer, this.node, 'Rank', 'onBtnTransfer');
 
 		this._temp = item;
 		content.removeChild(item, false);
@@ -24,6 +27,17 @@ cc.Class({
 	onBtnClose: function() {
 		this.node.active = false;
 	},
+
+    onBtnTransfer: function(event) {
+        var member = event.target.parent.member;
+        var transfer = cc.find('Canvas/transfer');
+
+        transfer.parent_page = this;
+
+        transfer.club_id = this.node.club_id;
+        transfer.user_id = member.id;
+        transfer.active = true;
+    },
 
 	refresh: function() {
 		var self = this;
@@ -70,11 +84,13 @@ cc.Class({
 			var id = item.getChildByName('id').getComponent(cc.Label);
 			var score = item.getChildByName('score').getComponent(cc.Label);
 			var head = cc.find('icon/head', item).getComponent('ImageLoader');
+            var transfer = item.getChildByName('btn_transfer');
 
 			name.string = member.name;
 			id.string = member.id;
 			score.string = member.score;
 			head.setLogo(member.id, member.logo);
+            transfer.active = member.id != cc.vv.userMgr.userId;
 
 			item.member = member;
 		}

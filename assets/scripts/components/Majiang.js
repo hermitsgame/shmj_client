@@ -118,18 +118,18 @@ cc.Class({
 		}
     },
 
-	setFlag: function(name, status) {
-		var flag = this.node.getChildByName(name);
-		if (flag) {
-			flag.active = status;
-		}
+    setFlag: function(name, status) {
+        var flag = this.node.getChildByName(name);
+        if (flag) {
+            flag.active = status;
+        }
     },
 
-	setContent: function(name, content) {
-		var item = this.node.getChildByName(name);
-		if (item) {
-			item.getComponent(cc.Label).string = content;
-		}
+    setContent: function(name, content) {
+        var item = this.node.getChildByName(name);
+        if (item) {
+            item.getComponent(cc.Label).string = content;
+        }
     },
 
     setInteractable: function(status) {

@@ -97,8 +97,10 @@ cc.Class({
     },
 
 	setLogo: function(uid, logo) {
+/*
 		if (!cc.sys.isNative)
 			return;
+*/
 
 		if (!uid || !logo)
 			return;
@@ -128,11 +130,18 @@ cc.Class({
     },
 
     setUserID: function(userid) {
-		if (!cc.sys.isNative)
-			return;
+/*
+        if (!cc.sys.isNative)
+            return;
+*/
 
-		if (!userid)
-			return;
+        console.log('setUserID: ' + userid);
+
+        if (!userid) {
+            this._spriteFrame = null;
+            this.setupSpriteFrame();
+            return;
+        }
 
         var self = this;
         getBaseInfo(userid, function(code,info) {
@@ -146,11 +155,11 @@ cc.Class({
     },
 
     setupSpriteFrame: function() {
-        if (this._spriteFrame) {
-            var spr = this.getComponent(cc.Sprite);
-            if (spr) {
-                spr.spriteFrame = this._spriteFrame;
-            }
+        var spr = this.getComponent(cc.Sprite);
+        if (spr) {
+            console.log('setupSpriteFrame');
+            console.log(this._spriteFrame);
+            spr.spriteFrame = this._spriteFrame;
         }
     }
 });

@@ -1,0 +1,30 @@
+{
+  "ver": "1.0.0",
+  "uuid": "92698099-3246-40b3-80b5-6c256c170c2b",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "subMetas": {
+    "banzhuan0005.dds": {
+      "ver": "1.0.3",
+      "uuid": "f1b20490-a3eb-4013-a882-4592506dfd40",
+      "rawTextureUuid": "92698099-3246-40b3-80b5-6c256c170c2b",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": -15.5,
+      "offsetY": -9,
+      "trimX": 66,
+      "trimY": 92,
+      "width": 32,
+      "height": 30,
+      "rawWidth": 195,
+      "rawHeight": 196,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

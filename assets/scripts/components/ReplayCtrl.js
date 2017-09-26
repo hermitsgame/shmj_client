@@ -110,16 +110,13 @@ cc.Class({
         if (cc.vv) {
             if (this._isPlaying && cc.vv.replayMgr.isReplay() && this._nextPlayTime > 0) {
                 this._nextPlayTime -= dt;
-
                 if (this._nextPlayTime < 0) {
-					var next = cc.vv.replayMgr.takeAction();
+                    var next = cc.vv.replayMgr.takeAction();
 
-					if (next < 0) {
-						console.log('replay over');
-						this.replayOver(true);
-					}
+                    if (next < 0) {
+                        this.replayOver(true);
+                    }
 
-					console.log('next=' + next);
                     this._nextPlayTime = next;
                 }
             }

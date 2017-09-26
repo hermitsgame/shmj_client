@@ -10,39 +10,38 @@ cc.Class({
             default: null,
             url: cc.RawAsset
         },
-        percent: {
-            default: null,
-            type: cc.Label
-        },
-        lblErr: {
-            default: null,
-            type: cc.Label
-        }
+
+        _percent : null
+    },
+
+    done : function() {
+        var load = this.node.getComponent('LoadingLogic');
+
+        load.checkVersion();
     },
 
     checkCb: function (event) {
-        console.log('Code: ' + event.getEventCode());
+        cc.log('Code: ' + event.getEventCode());
         switch (event.getEventCode())
         {
             case jsb.EventAssetsManager.ERROR_NO_LOCAL_MANIFEST:
                 console.log("No local manifest file found, hot update skipped.");
-				cc.director.loadScene("loading");
+                this.done();
                 return;
             case jsb.EventAssetsManager.ERROR_DOWNLOAD_MANIFEST:
             case jsb.EventAssetsManager.ERROR_PARSE_MANIFEST:
                 console.log("Fail to download manifest file, hot update skipped.");
-				cc.director.loadScene("loading");
-				return;
+                this.done();
+                return;
             case jsb.EventAssetsManager.ALREADY_UP_TO_DATE:
                 console.log("Already up to date with the latest remote version.");
                 cc.eventManager.removeListener(this._checkListener);
-                this.lblErr.string += "游戏不需要更新\n";
-                cc.director.loadScene("loading");
+                this.done();
                 return;
             case jsb.EventAssetsManager.NEW_VERSION_FOUND:
                 this._needUpdate = true;
                 this.updatePanel.active = true;
-                this.percent.string = '00.00%';
+                this._percent.setPercent(0);
                 break;
             default:
                 return;
@@ -70,8 +69,10 @@ cc.Class({
                 if (msg) {
                     console.log(msg);
                 }
-                console.log(percent.toFixed(2) + '%');
-                this.percent.string = percent + '%';
+
+                cc.log(percent.toFixed(2) + '%');
+
+                this._percent.setPercent(percent);
                 break;
             case jsb.EventAssetsManager.ERROR_DOWNLOAD_MANIFEST:
             case jsb.EventAssetsManager.ERROR_PARSE_MANIFEST:
@@ -131,22 +132,65 @@ cc.Class({
             cc.sys.localStorage.setItem('HotUpdateSearchPaths', JSON.stringify(searchPaths));
 
             jsb.fileUtils.setSearchPaths(searchPaths);
-            this.lblErr.string += "游戏资源更新完毕\n";
             cc.audioEngine.stopAll();
             cc.game.restart();
         }
     },
 
+    loadCustomManifest: function () {
+        if (this._am.getState() === jsb.AssetsManager.State.UNINITED) {
+            var manifest = new jsb.Manifest(customManifestStr, this._storagePath);
+            this._am.loadLocalManifest(manifest, this._storagePath);
+            console.log('Using custom manifest');
+        }
+    },
+    
+    retry: function () {
+        if (!this._updating && this._canRetry) {
+            this.panel.retryBtn.active = false;
+            this._canRetry = false;
+            
+            this.panel.info.string = 'Retry failed Assets...';
+            this._am.downloadFailedAssets();
+        }
+    },
+    
+    checkUpdate: function () {
+        if (this._updating) {
+            cc.log('Checking or updating ...');
+            return;
+        }
+        if (this._am.getState() === jsb.AssetsManager.State.UNINITED) {
+            this._am.loadLocalManifest(this.manifestUrl);
+        }
+        if (!this._am.getLocalManifest() || !this._am.getLocalManifest().isLoaded()) {
+            cc.log('Failed to load local manifest ...');
+            return;
+        }
+        this._checkListener = new jsb.EventListenerAssetsManager(this._am, this.checkCb.bind(this));
+        cc.eventManager.addListener(this._checkListener, 1);
+
+        this._am.checkUpdate();
+        this._updating = true;
+    },
+
     hotUpdate: function () {
         if (this._am && this._needUpdate) {
-            this.lblErr.string += "开始更新游戏资源...\n";
             this._updateListener = new jsb.EventListenerAssetsManager(this._am, this.updateCb.bind(this));
             cc.eventManager.addListener(this._updateListener, 1);
 
-
+            if (this._am.getState() === jsb.AssetsManager.State.UNINITED) {
+                this._am.loadLocalManifest(this.manifestUrl);
+            }
 
             this._failCount = 0;
             this._am.update();
+        }
+    },
+    
+    show: function () {
+        if (this.updateUI.active === false) {
+            this.updateUI.active = true;
         }
     },
 
@@ -154,12 +198,15 @@ cc.Class({
     onLoad: function () {
         // Hot update is only available in Native build
         if (!cc.sys.isNative) {
+            this.done();
             return;
         }
-        this.lblErr.string += "检查游戏资源...\n";
-        var storagePath = ((jsb.fileUtils ? jsb.fileUtils.getWritablePath() : '/') + 'tiantianqipai-asset');
+
+        this._percent = this.node.getChildByName('progress').getComponent('Progress');
+
+        var storagePath = ((jsb.fileUtils ? jsb.fileUtils.getWritablePath() : '/') + 'island-asset');
         console.log('Storage path for remote asset : ' + storagePath);
-        this.lblErr.string += storagePath + "\n";
+
         // Setup your own version compare handler, versionA and B is versions in string
         // if the return value greater than 0, versionA is greater than B,
         // if the return value equals 0, versionA equals to B,
@@ -187,7 +234,7 @@ cc.Class({
         };
         console.log('Local manifest URL : ' + this.manifestUrl);
 
-		this._am = new jsb.AssetsManager('', storagePath, versionCompareHandle);
+        this._am = new jsb.AssetsManager('', storagePath, versionCompareHandle);
         if (!cc.sys.ENABLE_GC_FOR_NATIVE_OBJECTS) {
             this._am.retain();
         }
@@ -221,19 +268,7 @@ cc.Class({
             console.log("Max concurrent tasks count have been limited to 2");
         }
 
-		if (this._am.getState() === jsb.AssetsManager.State.UNINITED) {
-			this._am.loadLocalManifest(this.manifestUrl);
-		}
-
-		if (!this._am.getLocalManifest() || !this._am.getLocalManifest().isLoaded()) {
-			this.panel.info.string = 'Failed to load local manifest ...';
-			return;
-		}
-
-        this._checkListener = new jsb.EventListenerAssetsManager(this._am, this.checkCb.bind(this));
-        cc.eventManager.addListener(this._checkListener, 1);
-
-        this._am.checkUpdate();
+        this.checkUpdate();
     },
 
     onDestroy: function () {
@@ -246,3 +281,4 @@ cc.Class({
         }
     }
 });
+

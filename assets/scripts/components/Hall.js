@@ -6,40 +6,40 @@ cc.Class({
     extends: cc.Component,
 
     properties: {
-		lblName:cc.Label,
-		lblID:cc.Label,
+        lblName:cc.Label,
+        lblID:cc.Label,
         lblGems:cc.Label,
         lblGolds: cc.Label,
         lblLottery: cc.Label,
         lblNotice:cc.Label,
         sprHeadImg: cc.Node,
 
-		joinGameWin: cc.Node,
-		createRoomWin: cc.Node,
+        joinGameWin: cc.Node,
+        createRoomWin: cc.Node,
 
-		helpWin: cc.Node,
+        helpWin: cc.Node,
     },
 
-	onShare: function() {
-		var share = this.node.getChildByName('share');
+    onShare: function() {
+        var share = this.node.getChildByName('share');
 
-		cc.vv.audioMgr.playButtonClicked();
-		cc.vv.utils.showDialog(share, 'body', true);
+        cc.vv.audioMgr.playButtonClicked();
+        cc.vv.utils.showDialog(share, 'body', true);
     },
 
-	onShareClose: function() {
-		var share = this.node.getChildByName('share');
+    onShareClose: function() {
+        var share = this.node.getChildByName('share');
 
-		cc.vv.audioMgr.playButtonClicked();
-		cc.vv.utils.showDialog(share, 'body', false);
+        cc.vv.audioMgr.playButtonClicked();
+        cc.vv.utils.showDialog(share, 'body', false);
     },
 
     share: function(timeLine) {
-		cc.vv.audioMgr.playButtonClicked();
+        cc.vv.audioMgr.playButtonClicked();
 
-		setTimeout(function() {
-			cc.vv.anysdkMgr.share("休闲岛", "温州休闲岛，包含了温州麻将、转转麻将等多种流行麻将玩法。", timeLine);
-		}, 100);
+        setTimeout(()=>{
+            cc.vv.anysdkMgr.share("雀达麻友圈", "雀达麻友圈，包含了上海敲麻等多种流行麻将玩法。", timeLine);
+        }, 100);
     },
 
     onShareWeChat: function() {

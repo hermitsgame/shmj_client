@@ -19,7 +19,7 @@ cc.Class({
         isOver: false,
         dissoveData: null,
 
-		connecting: false,
+        connecting: false,
     },
 
     reset: function() {
@@ -82,15 +82,15 @@ cc.Class({
         return !this.isClubRoom() && this.seatIndex == 0;
     },
 
-	isButton: function() {
-		return this.seatIndex == this.button;
+    isButton: function() {
+        return this.seatIndex == this.button;
     },
 
-	isPlaying: function() {
-		var state = this.gamestate;
-		var states = [ 'begin', 'playing' ];
+    isPlaying: function() {
+        var state = this.gamestate;
+        var states = [ 'begin', 'playing' ];
 
-		return states.indexOf(state) >= 0;
+        return states.indexOf(state) >= 0;
     },
 
     getSeatByID: function(userId) {
@@ -107,42 +107,42 @@ cc.Class({
         var id = 0;
         var nSeats = this.numOfSeats;
 
-		var ids = this.getValidLocalIDs();
+        var ids = this.getValidLocalIDs();
 
-		if (index >= nSeats) {
-			console.log('getLocalIndex: index=' + index + ' nSeats=' + nSeats);
-		}
+        if (index >= nSeats) {
+            console.log('getLocalIndex: index=' + index + ' nSeats=' + nSeats);
+        }
 
         id = (index - this.seatIndex + nSeats) % nSeats;
 
         return ids[id];
     },
 
-	getSide: function(localIndex) {
-		var sides = [ 'south', 'east', 'north', 'west' ];
+    getSide: function(localIndex) {
+        var sides = [ 'south', 'east', 'north', 'west' ];
 
-		return sides[localIndex];
+        return sides[localIndex];
     },
 
-	getValidLocalIDs: function() {
-		var nSeats = this.numOfSeats;
-		var ids = [ 0 ];
+    getValidLocalIDs: function() {
+        var nSeats = this.numOfSeats;
+        var ids = [ 0 ];
 
-		if (nSeats == 4) {
-			ids = [ 0, 1, 2, 3 ];
-		} else if (nSeats == 2) {
-			ids = [ 0, 2 ];
-		} else if (nSeats == 3) {
-			ids = [ 0, 1, 3 ];
-		}
+        if (nSeats == 4) {
+            ids = [ 0, 1, 2, 3 ];
+        } else if (nSeats == 2) {
+            ids = [ 0, 2 ];
+        } else if (nSeats == 3) {
+            ids = [ 0, 1, 3 ];
+        }
 
-		return ids;
+        return ids;
     },
 
     prepareReplay: function(roomInfo, detailOfGame) {
-		console.log('prepareReplay');
-		console.log(roomInfo);
-		console.log(detailOfGame);
+        console.log('prepareReplay');
+        console.log(roomInfo);
+        console.log(detailOfGame);
 	
         this.roomId = roomInfo.room_tag;
         this.seats = roomInfo.info.seats;
@@ -150,9 +150,9 @@ cc.Class({
         this.turn = detailOfGame.base_info.button;
         var baseInfo = detailOfGame.base_info;
 
-		this.gamestate = 'playing';
+        this.gamestate = 'playing';
 
-		this.seatIndex = -1;
+        this.seatIndex = -1;
         for(var i = 0; i < this.seats.length; ++i){
             var s = this.seats[i];
             s.seatindex = i;
@@ -173,10 +173,10 @@ cc.Class({
             }
         }
 
-		if (this.seatIndex < 0)
-			this.seatIndex = 0;
+        if (this.seatIndex < 0)
+            this.seatIndex = 0;
 
-		var conf = baseInfo.conf;
+        var conf = baseInfo.conf;
         this.conf = conf;
 
         this.numOfHolds = 13;
@@ -189,32 +189,32 @@ cc.Class({
         var strArr = [];
 
         if (conf) {
-			if (conf.maxGames != null && conf.maxFan != null) {
-				var type = conf.type;
-				// TODO
-			}
+            if (conf.maxGames != null && conf.maxFan != null) {
+                var type = conf.type;
+                // TODO
+            }
 
             return strArr.join(' ');
         }
 
         return '';
-	},
+    },
 	
 
-	getGameType: function() {
-		var conf = this.conf;
+    getGameType: function() {
+        var conf = this.conf;
 
-		if (conf && conf.type) {
-			return conf.type;
-		}
+        if (conf && conf.type) {
+            return conf.type;
+        }
 
-		return '';
-	},
+        return '';
+    },
 
 
     initHandlers: function() {
         var self = this;
-		var net = cc.vv.net;
+        var net = cc.vv.net;
 
         net.addHandler("login_result", function(data) {
             console.log("get event: login_result");
@@ -351,6 +351,10 @@ cc.Class({
 
         net.addHandler("new_user_comes_push", function(data) {
             var seatIndex = data.seatindex;
+
+            if (!self.seats)
+                return;
+
             if(self.seats[seatIndex].userid > 0){
                 self.seats[seatIndex].online = true;
             }
@@ -361,26 +365,26 @@ cc.Class({
             self.dispatchEvent('new_user',self.seats[seatIndex]);
         });
 
-        net.addHandler("user_state_push",function(data){
+        net.addHandler("user_state_push", function(data) {
             var userId = data.userid;
             var seat = self.getSeatByID(userId);
             seat.online = data.online;
             self.dispatchEvent('user_state_changed',seat);
         });
 
-        net.addHandler("user_ready_push",function(data){
+        net.addHandler("user_ready_push", function(data) {
             var userId = data.userid;
             var seat = self.getSeatByID(userId);
             seat.ready = data.ready;
 
-			if (self.gamestate == '') {
-				self.dispatchEvent('user_state_changed', seat);
-			}
+            if (self.gamestate == '') {
+                self.dispatchEvent('user_state_changed', seat);
+            }
         });
 
-		net.addHandler("game_dice_push",function(data) {
-			self.dices = data;
-			self.dispatchEvent('game_dice', data);
+        net.addHandler("game_dice_push",function(data) {
+            self.dices = data;
+            self.dispatchEvent('game_dice', data);
         });
 
 
@@ -428,41 +432,41 @@ cc.Class({
             self.dispatchEvent('game_holds');
         });
 
-		net.addHandler("game_holds_update_push", function(data) {
-			var seat = self.seats[self.seatIndex];
+        net.addHandler("game_holds_update_push", function(data) {
+            var seat = self.seats[self.seatIndex];
 
-			console.log('game_holds_update_push');
-			console.log(data);
+            console.log('game_holds_update_push');
+            console.log(data);
 
             seat.holds = data;
-			self.dispatchEvent('game_holds_update');
-		});
+            self.dispatchEvent('game_holds_update');
+        });
 
-		net.addHandler("game_holds_len_push", function(data) {
-			var seatIndex = data.seatIndex;
-			var seat = self.seats[seatIndex];
+        net.addHandler("game_holds_len_push", function(data) {
+            var seatIndex = data.seatIndex;
+            var seat = self.seats[seatIndex];
 
-			console.log('game_holds_len_push');
+            console.log('game_holds_len_push');
 
             seat.holdsLen = data.len;
-			self.dispatchEvent('game_holds_len', seat);
-		});
+            self.dispatchEvent('game_holds_len', seat);
+        });
 
-		net.addHandler("game_holds_updated_push", function(data) {
-			console.log('game_holds_updated_push');
+        net.addHandler("game_holds_updated_push", function(data) {
+            console.log('game_holds_updated_push');
 
-			self.dispatchEvent('game_holds_updated');
-		});
+            self.dispatchEvent('game_holds_updated');
+        });
 
-		net.addHandler('game_state_push', function(data) {
-			console.log('game_state_push');
-			console.log(data);
+        net.addHandler('game_state_push', function(data) {
+            console.log('game_state_push');
+            console.log(data);
 
-			self.gamestate = data.state;
-			self.button = data.button;
+            self.gamestate = data.state;
+            self.button = data.button;
 
-			self.dispatchEvent('game_state');
-		});
+            self.dispatchEvent('game_state');
+        });
 
 
         net.addHandler("game_begin_push", function(data) {
@@ -554,8 +558,8 @@ cc.Class({
                 self.dispatchEvent('user_state_changed', seat);
             }
 
-			self.dispatchEvent('user_hf_updated');
-			self.doSync();
+            self.dispatchEvent('user_hf_updated');
+            self.doSync();
         });
 
         net.addHandler("hangang_notify_push",function(data){
@@ -590,7 +594,6 @@ cc.Class({
             for (var i = 0; i <  self.seats.length; ++i) {
                 self.seats[i].score = results.length == 0 ? 0:results[i].totalscore;
             }
-
 
             self.dispatchEvent('game_over', data);
             if (data.endinfo) {
@@ -638,8 +641,8 @@ cc.Class({
                 sd.flowers = sd.flowers.concat(flowers);
                 self.dispatchEvent('user_state_changed', sd);
 
-				console.log('send user_hf_updated');
-				self.dispatchEvent('user_hf_updated', self.seats[si]);
+                console.log('send user_hf_updated');
+                self.dispatchEvent('user_hf_updated', self.seats[si]);
             }
         });
 
@@ -703,13 +706,13 @@ cc.Class({
             for (var i = 0; i < self.seats.length; i++) {
                 var seat = self.seats[i];
 
-				if (hf[i] != null) {
-	                seat.flowers = hf[i];
-	                self.dispatchEvent('user_state_changed', seat);
-				}
+                if (hf[i] != null) {
+                    seat.flowers = hf[i];
+                    self.dispatchEvent('user_state_changed', seat);
+                }
             }
 
-			self.dispatchEvent('user_hf_updated');
+            self.dispatchEvent('user_hf_updated');
         });
 
         net.addHandler("ting_notify_push",function(data) {
@@ -752,25 +755,25 @@ cc.Class({
             self.dispatchEvent("voice_msg",data);
         });
 
-		net.addHandler('start_club_room', function(data) {
-			console.log('start_club_room');
-			console.log(data);
+        net.addHandler('start_club_room', function(data) {
+            console.log('start_club_room');
+            console.log(data);
 
-			console.log('enter ' + data.room_tag);
-			cc.vv.userMgr.enterRoom(data.room_tag);
-		});
+            console.log('enter ' + data.room_tag);
+            cc.vv.userMgr.enterRoom(data.room_tag);
+        });
 
-		net.addHandler('club_room_updated', function(data) {
-			console.log('club_room_updated');
+        net.addHandler('club_room_updated', function(data) {
+            console.log('club_room_updated');
 
-			self.dispatchEvent('club_room_updated', data);
-		});
+            self.dispatchEvent('club_room_updated', data);
+        });
 
-		net.addHandler('club_room_removed', function(data) {
-			console.log('club_room_removed');
+        net.addHandler('club_room_removed', function(data) {
+            console.log('club_room_removed');
 
-			self.dispatchEvent('club_room_removed', data);
-		});
+            self.dispatchEvent('club_room_removed', data);
+        });
     },
 
     doGuo:function(seatIndex, pai, skip) {
@@ -778,125 +781,126 @@ cc.Class({
         var folds = seatData.folds;
         folds.push(pai);
 
-		if (skip) {
-			return;
-		}
+        if (skip) {
+            return;
+        }
 
-	    this.dispatchEvent('guo_notify',seatData);
+        this.dispatchEvent('guo_notify',seatData);
     },
 
     doMopai:function(seatIndex, pai, skip) {
         var seatData = this.seats[seatIndex];
-		var holds = seatData.holds;
+        var holds = seatData.holds;
         if (holds != null && holds.length > 0 && pai >= 0) {
             holds.push(pai);
         }
 
-		if (skip) {
-			return;
-		}
+        if (skip) {
+            return;
+        }
 
-        this.dispatchEvent('game_mopai', {seatIndex:seatIndex, pai:pai});
+        this.dispatchEvent('game_mopai',{seatIndex:seatIndex, pai:pai});
     },
 
     doChupai: function(seatIndex, pai, skip) {
         this.chupai = pai;
         var seatData = this.seats[seatIndex];
-		var holds = seatData.holds;
+        var holds = seatData.holds;
 
         if (holds != null && holds.length > 0) {
             var idx = holds.indexOf(pai);
-			if (idx != -1) {
- 	           holds.splice(idx, 1);
-			}
+            if (idx != -1) {
+                holds.splice(idx, 1);
+            }
         }
 
-		if (skip) {
-			return;
-		}
+        if (skip) {
+            return;
+        }
 
-		if (seatIndex == this.seatIndex) {
-			seatData.lastChiPai = null;
-			console.log('set lastChiPai=null');
-		}
+        if (seatIndex == this.seatIndex) {
+            seatData.lastChiPai = null;
+            console.log('set lastChiPai=null');
+        }
 
         this.dispatchEvent('game_chupai_notify', { seatData: seatData, pai: pai });
     },
 
-	getChiArr: function(pai, ign) {
-		var type = parseInt(pai / 100);
-		var c = pai % 100;
+    getChiArr: function(pai, ign) {
+        var type = parseInt(pai / 100);
+        var c = pai % 100;
 
-		var begin = c - type;
 
-		var arr = [];
-		for (var i = 0; i < 3; i++) {
-			var k = begin + i;
-			if (ign && k == c) {
-				continue;
-			}
+        var begin = c - type;
 
-			arr.push(k);
-		}
+        var arr = [];
+        for (var i = 0; i < 3; i++) {
+            var k = begin + i;
+            if (ign && k == c) {
+                continue;
+            }
 
-		return arr;
+            arr.push(k);
+        }
+
+        return arr;
     },
 
-	doChi: function(seatIndex, pai, skip) {
+    doChi: function(seatIndex, pai, skip) {
         var seatData = this.seats[seatIndex];
-		var holds = seatData.holds;
+        var holds = seatData.holds;
 
         if (holds != null && holds.length > 0) {
-			var mjs = this.getChiArr(pai, true);
+            var mjs = this.getChiArr(pai, true);
             for (var i = 0; i < 2; i++) {
-				var c = mjs[i];
+                var c = mjs[i];
                 var idx = holds.indexOf(c);
-				if (idx == -1) {
-					break;
-				}
+                if (idx == -1) {
+                    break;
+                }
 
-				holds.splice(idx, 1);
+                holds.splice(idx, 1);
             }
         }
 
         var chis = seatData.chis;
         chis.push(pai);
 
-		if (skip) {
-			return;
-		}
+        if (skip) {
+            return;
+        }
 
-		if (seatIndex == this.seatIndex && holds.length > 2) {
-			seatData.lastChiPai = pai % 100;
-			console.log('set lastChiPai=' + pai);
-		}
+        if (seatIndex == this.seatIndex && holds.length > 2) {
+            seatData.lastChiPai = pai % 100;
+            console.log('set lastChiPai=' + pai);
+        }
 
         this.dispatchEvent('chi_notify', { seatData: seatData, pai: pai });
     },
 
     doPeng: function(seatIndex, pai, skip) {
         var seatData = this.seats[seatIndex];
-		var holds = seatData.holds;
+        var holds = seatData.holds;
 
-		var c = pai % 100;
+        var c = pai % 100;
 
         if (holds != null && holds.length > 0) {
             for (var i = 0; i < 2; i++) {
                 var idx = holds.indexOf(c);
-				if (idx == -1) {
-					break;
-				}
+                if (idx == -1) {
+                    break;
+                }
 
-				holds.splice(idx, 1);
+                holds.splice(idx, 1);
             }
         }
 
         var pengs = seatData.pengs;
         pengs.push(pai);
 
-		if (skip) {
-			return;
-		}
+        if (skip) {
+            return;
+        }
 
         this.dispatchEvent('peng_notify', { seatData: seatData, pai: pai });
     },
@@ -909,9 +913,9 @@ cc.Class({
             seatData.tings = tings;
         }
 
-		if (skip) {
-			return;
-		}
+        if (skip) {
+            return;
+        }
 
         this.dispatchEvent('ting_notify', seatData);
     },
@@ -981,17 +985,17 @@ cc.Class({
             seatData.diangangs.push(pai);
         }
 
-		if (skip) {
-			return;
-		}
+        if (skip) {
+            return;
+        }
 
         this.dispatchEvent('gang_notify', { seatData: seatData, gangtype: gangtype, pai: pai });
     },
 
     doHu: function(data, skip) {
-		if (skip) {
-			return;
-		}
+        if (skip) {
+            return;
+        }
 
         this.dispatchEvent('hupai', data);
     },
@@ -1004,9 +1008,9 @@ cc.Class({
 
         this.turn = si;
 
-		if (skip) {
-			return;
-		}
+        if (skip) {
+            return;
+        }
 
         this.dispatchEvent('game_chupai',data);
     },

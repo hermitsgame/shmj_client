@@ -16,8 +16,8 @@ cc.Class({
         _actionRecords: null,
         _currentIndex: 0,
 
-		_data: null,
-		_roominfo: null,
+        _data: null,
+        _roominfo: null,
     },
 
     onLoad: function() {
@@ -37,8 +37,8 @@ cc.Class({
             this._actionRecords = [];
         }
 
-		this._roominfo = roominfo;
-		this._data = data;
+        this._roominfo = roominfo;
+        this._data = data;
 
         this._currentIndex = 0;
         this._lastAction = null;
@@ -48,54 +48,54 @@ cc.Class({
         return this._actionRecords != null;    
     },
 
-	gotoAction: function(index) {
-		this._currentIndex = 0;
+    gotoAction: function(index) {
+        this._currentIndex = 0;
         this._lastAction = null;
 
-		var records = this._actionRecords;
-		var total = records.length / 3;
+        var records = this._actionRecords;
+        var total = records.length / 3;
 
-		if (index >= total) {
-			return false;
-		}
+        if (index >= total) {
+            return false;
+        }
 
-		var id = 0;
-		while (id < index) {
-			this.takeAction(true);
-			id += 1;
-		}
+        var id = 0;
+        while (id < index) {
+            this.takeAction(true);
+            id += 1;
+        }
 
-		return true;
+        return true;
     },
 
-	prev: function(num) {
-		var index = this._currentIndex / 3;
+    prev: function(num) {
+        var index = this._currentIndex / 3;
 
-		if (index >= num) {
-			index -= num;
-		} else {
-			index = 0;
-		}
+        if (index >= num) {
+            index -= num;
+        } else {
+            index = 0;
+        }
 
-		var net = cc.vv.gameNetMgr;
+        var net = cc.vv.gameNetMgr;
 
-		net.reset();
-		net.prepareReplay(this._roominfo, this._data);
+        net.reset();
+        net.prepareReplay(this._roominfo, this._data);
 
-		this.gotoAction(index);
+        this.gotoAction(index);
     },
 
-	forward: function(num) {
-		var id = 0;
+    forward: function(num) {
+        var id = 0;
 
-		while (id < num) {
-			this.takeAction(true);
-			id += 1;
-		}
+        while (id < num) {
+            this.takeAction(true);
+            id += 1;
+        }
     },
 
     getNextAction: function() {
-		var index = this._currentIndex;
+        var index = this._currentIndex;
         if (index >= this._actionRecords.length) {
             return null;
         }
@@ -104,7 +104,7 @@ cc.Class({
         var action = this._actionRecords[index + 1];
         var pai = this._actionRecords[index + 2];
 
-		this._currentIndex += 3;
+        this._currentIndex += 3;
 
         return { si: si, type: action, pai: pai };
     },
@@ -113,25 +113,25 @@ cc.Class({
     	var net = cc.vv.gameNetMgr;
         var action = this.getNextAction();
         if (this._lastAction != null &&
-			this._lastAction.type == ACTION_CHUPAI)
-		{
+            this._lastAction.type == ACTION_CHUPAI)
+        {
             if (action != null &&
-				action.type != ACTION_PENG &&
-				action.type != ACTION_GANG &&
-				action.type != ACTION_CHI &&
-				action.type != ACTION_HU)
-			{
+                action.type != ACTION_PENG &&
+                action.type != ACTION_GANG &&
+                action.type != ACTION_CHI &&
+                action.type != ACTION_HU)
+            {
                 net.doGuo(this._lastAction.si, this._lastAction.pai, skip);
             }
         }
 
         this._lastAction = action;
         if (action == null) {
-			console.log('action null');
+            console.log('action null');
             return -1;
         }
 
-		console.log('action: ' + action.type);
+        console.log('action: ' + action.type);
 
         var nextActionDelay = 1.0;
         if (action.type == ACTION_CHUPAI) {

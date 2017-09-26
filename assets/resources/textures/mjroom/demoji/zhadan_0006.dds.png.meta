@@ -1,0 +1,30 @@
+{
+  "ver": "1.0.0",
+  "uuid": "38c6330c-7fe4-44e2-bc97-22e340df5603",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "subMetas": {
+    "zhadan_0006.dds": {
+      "ver": "1.0.3",
+      "uuid": "34a6918e-ef57-462d-8986-280238bd2c6a",
+      "rawTextureUuid": "38c6330c-7fe4-44e2-bc97-22e340df5603",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 3,
+      "offsetY": 3.5,
+      "trimX": 83,
+      "trimY": 75,
+      "width": 62,
+      "height": 65,
+      "rawWidth": 222,
+      "rawHeight": 222,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "ver": "1.0.0",
+  "uuid": "1af5061b-4312-49ce-b217-8f97f01c0eae",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "subMetas": {
+    "bianbian0009.dds": {
+      "ver": "1.0.3",
+      "uuid": "41e1a0b3-227b-4f37-9525-19438850ae7d",
+      "rawTextureUuid": "1af5061b-4312-49ce-b217-8f97f01c0eae",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": -18,
+      "trimX": 36,
+      "trimY": 62,
+      "width": 128,
+      "height": 162,
+      "rawWidth": 200,
+      "rawHeight": 250,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

@@ -27,15 +27,15 @@ cc.Class({
         this._folds = {};
         var game = this.node.getChildByName("game");
         var sides = [ 'south', 'east','north', 'west'];
-		var net = cc.vv.gameNetMgr;
-		var nSeats = net.numOfSeats;
+        var net = cc.vv.gameNetMgr;
+        var nSeats = net.numOfSeats;
 
         for (var i = 0; i < sides.length; ++i) {
             var sideName = sides[i];
             var sideRoot = game.getChildByName(sideName);
             var folds = [];
             var foldRoot = sideRoot.getChildByName('folds');
-            for (var j = 0; j < foldRoot.children.length; ++j) {
+            for (var j = 0; j < foldRoot.childrenCount; ++j) {
                 var n = foldRoot.children[j];
                 var mj = n.getComponent("Majiang");
 
@@ -95,24 +95,24 @@ cc.Class({
             //self.initFolds(data.detail, false, -1);
         });
 
-		this.node.on('peng_notify', function(data) {
-			self.initAllFolds();
-			self._lastMJ = null;
-		});
+        this.node.on('peng_notify', function(data) {
+            self.initAllFolds();
+            self._lastMJ = null;
+        });
 
-		this.node.on('chi_notify', function(data) {
-			self.initAllFolds();
-			self._lastMJ = null;
-		});
+        this.node.on('chi_notify', function(data) {
+            self.initAllFolds();
+            self._lastMJ = null;
+        });
 
-		this.node.on('gang_notify',function(data) {
-			var info = data.detail;
+        this.node.on('gang_notify',function(data) {
+            var info = data.detail;
 
-			if (info.gangtype == 'diangang') {
-				self.initAllFolds();
-				self._lastMJ = null;
-			}
-		});
+            if (info.gangtype == 'diangang') {
+                self.initAllFolds();
+                self._lastMJ = null;
+            }
+        });
 
         this.node.on('refresh_mj',function() {
             self.initAllFolds(true);
@@ -121,81 +121,76 @@ cc.Class({
     
     initAllFolds: function(refresh) {
         var seats = cc.vv.gameNetMgr.seats;
-		var pai = cc.vv.gameNetMgr.chupai;
+        var pai = cc.vv.gameNetMgr.chupai;
 		
         for (var i in seats) {
-			this.initFolds(seats[i], refresh);
+            this.initFolds(seats[i], refresh);
         }
     },
     
     getRealIndex: function(localIndex, idx) {
-    	var net = cc.vv.gameNetMgr;
-		var row = 3;
-		var column = 10;
+        var row = 3;
+        var column = 10;
 
-		if (0 == localIndex || 3 == localIndex) {
-			return idx;
-		} else if (1 == localIndex || 2 == localIndex) {
-			var rid = row - 1 - parseInt(idx / column);
-			var cid = idx % column;
+        if (0 == localIndex || 3 == localIndex) {
+            return idx;
+        } else if (1 == localIndex) {
+            var rid = parseInt(idx / column);
+            var cid = idx % column;
 
-			var newid = rid * column + cid;
-
-			if (1 == localIndex) {
-				newid = row * column - 1 - newid;
-			}
-
-			return newid;
-		}
+            return rid * column + (column - 1 - cid);
+        } else if (2 == localIndex) {
+            return row * column - 1 - idx;
+        }
     },
 
-	doChupai: function(seatData, pai, pos) {
-		var folds = seatData.folds;
-		var localIndex = cc.vv.gameNetMgr.getLocalIndex(seatData.seatindex);
+    doChupai: function(seatData, pai, pos) {
+        var folds = seatData.folds;
+        var localIndex = cc.vv.gameNetMgr.getLocalIndex(seatData.seatindex);
         var side = cc.vv.gameNetMgr.getSide(localIndex);
         var foldsSprites = this._folds[side];
 
-		var start = folds.length;
+        var start = folds.length;
 
-		var index = this.getRealIndex(localIndex, start);
+        var index = this.getRealIndex(localIndex, start);
 
-		var mj = foldsSprites[index];
-		var mjnode = mj.node;
-		var self = this;
-		var position = mjnode.parent.convertToNodeSpaceAR(pos);
+        var mj = foldsSprites[index];
+        var mjnode = mj.node;
+        var self = this;
+        var position = mjnode.parent.convertToNodeSpaceAR(pos);
 
-		if (self._lastMJ != null) {
-			self._lastMJ.setFocus(false);
-			self._lastMJ = null;
-		}
+        if (self._lastMJ != null) {
+            self._lastMJ.setFocus(false);
+            self._lastMJ = null;
+        }
 
-		mjnode.opacity = 0;
-		mjnode.active = true;
-		mj.setMJID(pai);
-		var oldx = mj.oldx;
-		var oldy = mj.oldy;
+        mjnode.opacity = 0;
+        mjnode.active = true;
+        mj.setMJID(pai);
+        var oldx = mj.oldx;
+        var oldy = mj.oldy;
 
-		var fnSetOpacity = cc.callFunc(function(target, data) {
-			data.opacity = 255;
-		}, this, mjnode);
+        var fnSetOpacity = cc.callFunc(function(target, data) {
+            data.opacity = 255;
+        }, this, mjnode);
 
-		var fnFinished = cc.callFunc(function(target, data) {
-			data.showFocus(true);
-			data.node.x = data.oldx;
-			data.node.y = data.oldy;
-		}, this, mj);
+        var fnFinished = cc.callFunc(function(target, data) {
+            data.showFocus(true);
+            data.node.x = data.oldx;
+            data.node.y = data.oldy;
+        }, this, mj);
 
-		var actions = cc.sequence(cc.hide(),
-									cc.place(position.x, position.y),
-									cc.show(),
-									fnSetOpacity,
-									cc.moveTo(0.3, cc.p(oldx, oldy)),
-									fnFinished);
+        var actions = cc.sequence(cc.hide(),
+                                  cc.place(position.x, position.y),
+                                  cc.show(),
+                                  fnSetOpacity,
+                                  cc.moveTo(0.2, cc.p(oldx, oldy)),
+                                  fnFinished);
 
-		mjnode.runAction(actions);
+        mjnode.runAction(actions);
 
-		mj.setFocus(true);
-		this._lastMJ = mj;
+        mj.setFocus(true);
+        this._lastMJ = mj;
     },
 
     initFolds:function(seatData, refresh, chupai) {
@@ -220,35 +215,35 @@ cc.Class({
 
             mj.setMJID(folds[i]);
 
-			if (i == (folds.length - 1) && chupai == -1) {
-				mj.setFocus(true);
-				mj.showFocus();
-				this._lastMJ = mj;
-			} else {
-				mj.setFocus(false);
-			}
+            if (i == (folds.length - 1) && chupai == -1) {
+                mj.setFocus(true);
+                mj.showFocus();
+                this._lastMJ = mj;
+            } else {
+                mj.setFocus(false);
+            }
         }
 
-		var start = folds.length;
+        var start = folds.length;
 
-		if (chupai != null && chupai >= 0) {
-			var index = this.getRealIndex(localIndex, start);
+        if (chupai != null && chupai >= 0) {
+            var index = this.getRealIndex(localIndex, start);
 
             var mj = foldsSprites[index];
 
-			if (refresh) {
+            if (refresh) {
                 mj.refresh();
             }
 
             mj.node.active = true;
             mj.setMJID(chupai);
-			mj.setFocus(true);
-			mj.showFocus();
+            mj.setFocus(true);
+            mj.showFocus();
 
-			start += 1;
+            start += 1;
 
-			this._lastMJ = mj;
-		}
+            this._lastMJ = mj;
+        }
 
         for (var i = start; i < foldsSprites.length; ++i) {
             var index = this.getRealIndex(localIndex, i);

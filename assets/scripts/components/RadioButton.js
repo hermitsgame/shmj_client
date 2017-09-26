@@ -47,11 +47,11 @@ cc.Class({
     
     refresh: function() {
         var targetSprite = this.target.getComponent(cc.Sprite);
-        var label = this.target.getChildByName("Label");
+        var label = this.target.getChildByName("label");
         if (this.checked) {
             targetSprite.spriteFrame = this.checkedSprite;
             if (label != null) {
-                label.color = new cc.Color(146, 50, 50, 255);
+                label.color = new cc.Color(255, 0, 0, 255);
             }
         } else {
             targetSprite.spriteFrame = this.sprite;

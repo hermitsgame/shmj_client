@@ -14,13 +14,25 @@ cc.Class({
 
         this._temp = item;
 		content.removeChild(item, false);
+
+        var btn_fb = cc.find('top/btn_fb', this.node);
+
+        cc.vv.utils.addClickEvent(btn_fb, this.node, 'Discover', 'onBtnFB');
     },
 
     onBtnItem: function(event) {
         var item = event.target;
         var room_tag = item.room_tag;
-        
+
         cc.vv.userMgr.enterRoom(room_tag);
+    },
+
+    onBtnFB: function() {
+        cc.vv.audioMgr.playButtonClicked();
+
+        var fb = cc.find('Canvas/feedback');
+
+        cc.vv.utils.showDialog(fb, 'body', true);
     },
 
 	onEnable: function() {

@@ -180,22 +180,22 @@ cc.Class({
 
     enterRoom: function(roomId, callback) {
         var self = this;
-		var pc = cc.vv.pclient;
-		var net = cc.vv.gameNetMgr;
+        var pc = cc.vv.pclient;
+        var net = cc.vv.gameNetMgr;
 
         var data = {
             roomid: roomId
         };
 
-		console.log('usermgr enterRoom: ' + roomId);
+        console.log('usermgr enterRoom: ' + roomId);
 
         cc.vv.wc.show(2);
-		pc.request_connector('enter_private_room', data, function(ret) {
+        pc.request_connector('enter_private_room', data, function(ret) {
             console.log("return from enter_private_room=" + ret.errcode);
             if (ret.errcode != cc.vv.global.const_code.OK) {
                 console.log("enter room failed,code=" + ret.errcode);
 
-				cc.vv.wc.hide();
+                cc.vv.wc.hide();
                 if(callback != null)
                     callback(ret);
             } else {
@@ -211,7 +211,7 @@ cc.Class({
     getHistoryList:function(callback){
         var self = this;
         var onGet = function(ret) {
-			cc.vv.wc.hide();
+            cc.vv.wc.hide();
 
             if (ret.errcode !== 0) {
                 console.log(ret.errmsg);
@@ -223,14 +223,14 @@ cc.Class({
             }
         };
 
-		cc.vv.wc.show(0);
+        cc.vv.wc.show(0);
         cc.vv.pclient.request_apis('get_history_list', {}, onGet);
     },
 
     getGamesOfRoom: function(uuid,callback) {
         var self = this;
         var onGet = function(ret) {
-			cc.vv.wc.hide();
+            cc.vv.wc.hide();
             if (ret.errcode !== 0) {
                 console.log(ret.errmsg);
             } else {
@@ -243,14 +243,14 @@ cc.Class({
             uuid:uuid,
         };
 
-		cc.vv.wc.show(0);
+        cc.vv.wc.show(0);
         cc.vv.pclient.request_apis('get_games_of_room', data, onGet);
     },
 
     getDetailOfGame: function(uuid, index, callback) {
         var self = this;
         var onGet = function(ret) {
-			cc.vv.wc.hide();
+            cc.vv.wc.hide();
             if (ret.errcode !== 0) {
                 console.log(ret.errmsg);
             } else {
@@ -264,105 +264,105 @@ cc.Class({
             index: index,
         };
 
-		cc.vv.wc.show(0);
+        cc.vv.wc.show(0);
         cc.vv.pclient.request_apis('get_detail_of_game', data, onGet);
     },
 
-	simpleRequest: function(path, data, cb) {
-		var self = this;
-		var onGet = function(ret) {
-			cc.vv.wc.hide();
+    simpleRequest: function(path, data, cb) {
+        var self = this;
+        var onGet = function(ret) {
+            cc.vv.wc.hide();
 
-			if (ret.errcode !== 0) {
+            if (ret.errcode !== 0) {
                 console.log(ret.errmsg);
-			}
+            }
 
-			cb(ret.errcode == 0);
-		};
+            cb(ret.errcode == 0);
+        };
 
-		cc.vv.wc.show(0);
-		cc.vv.pclient.request_apis(path, data, onGet);
+        cc.vv.wc.show(0);
+        cc.vv.pclient.request_apis(path, data, onGet);
     },
 
-	simpleRequstWithResult: function(path, data, cb) {
-		var self = this;
-		var onGet = function(ret) {
-			cc.vv.wc.hide();
+    simpleRequstWithResult: function(path, data, cb) {
+        var self = this;
+        var onGet = function(ret) {
+            cc.vv.wc.hide();
 
-			cb(ret);
-		};
+            cb(ret);
+        };
 
-		cc.vv.wc.show(0);
-		cc.vv.pclient.request_apis(path, data, onGet);
+        cc.vv.wc.show(0);
+        cc.vv.pclient.request_apis(path, data, onGet);
     },
 
-	invest: function(name, phone, wechat, cb) {
-		var data = {
-			name: name,
-			phone: phone,
-			wechat: wechat
-		};
+    invest: function(name, phone, wechat, cb) {
+        var data = {
+            name: name,
+            phone: phone,
+            wechat: wechat
+        };
 
-		this.simpleRequest('invest', data, cb);
-	},
+        this.simpleRequest('invest', data, cb);
+    },
 
-	feedback: function(content, qq, phone, cb) {
-		var data = {
-			content: content,
-			qq: qq,
-			phone: phone
-		};
+    feedback: function(content, qq, phone, cb) {
+        var data = {
+            content: content,
+            qq: qq,
+            phone: phone
+        };
 
-		this.simpleRequest('feedback', data, cb);
-	},
+        this.simpleRequest('feedback', data, cb);
+    },
 
-	getGameExchange: function(cb) {
+    getGameExchange: function(cb) {
         var self = this;
 
-		// TODO
-		var ret = {
-			errcode: 0,
-			errmsg: 'ok',
-			data: [
-				{
-					id: 0,
-					amount: 10,
-					name: 'recharge',
-					logo: 'http://foo.com/1.png',
-					price: {
-						count: 100,
-						currency: 'lottery',
-					},
-				},
-			],
-		};
+        // TODO
+        var ret = {
+            errcode: 0,
+            errmsg: 'ok',
+            data: [
+                {
+                    id: 0,
+                    amount: 10,
+                    name: 'recharge',
+                    logo: 'http://foo.com/1.png',
+                    price: {
+                        count: 100,
+                        currency: 'lottery',
+                    },
+                },
+            ],
+        };
 
-		cb(ret);
+        cb(ret);
     },
 
-	exchange: function(data, cb) {
-		var self = this;
+    exchange: function(data, cb) {
+        var self = this;
 
-		// TODO
-		var ret = {
-			errcode: 0,
-			errmsg: 'ok',
-			data: {
-				amount: 10,
-				name: 'recharge',
-			},
-		};
+        // TODO
+        var ret = {
+            errcode: 0,
+            errmsg: 'ok',
+            data: {
+                amount: 10,
+                name: 'recharge',
+            },
+        };
 
-		cb(ret);
+        cb(ret);
     },
 
-	getTicketsInfo: function(callback) {
-		var self = this;
+    getTicketsInfo: function(callback) {
+        var self = this;
 
-		// TODO
-		var ret = { ticket: 2000, chip: 500 };
+        // TODO
+        var ret = { ticket: 2000, chip: 500 };
 
-		callback(ret);
+        callback(ret);
     },
 
 	getRewardDesc: function(reward) {

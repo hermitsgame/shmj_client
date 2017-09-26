@@ -97,8 +97,8 @@ cc.Class({
     },
     
     onGameOver: function(odata) {
-		var einfo = odata.info;
-		var data = odata.results;
+        var einfo = odata.info;
+        var data = odata.results;
 	
         if (data.length == 0) {
             this._gameresult.active = true;
@@ -107,11 +107,11 @@ cc.Class({
 
         this._gameover.active = true;
 
-		var roominfo = this._gameover.getChildByName('roominfo').getComponent(cc.Label);
+        var roominfo = this._gameover.getChildByName('roominfo').getComponent(cc.Label);
         roominfo.string = this._roominfo;
 
-		var nSeats = data.length;
-		var huSeats = [];
+        var nSeats = data.length;
+        var huSeats = [];
 
         for (var i = 0; i < nSeats; i++) {
             var seatView = this._seats[i];
@@ -123,22 +123,22 @@ cc.Class({
             var mjs = seatView.mjs;
             var hupai = mjs.getChildByName('hupai');
 
-			seatView.seat.active = true;
+            seatView.seat.active = true;
 
-			console.log(userData.userId);
-			seatView.icon.setUserID(userData.userId);
+            console.log(userData.userId);
+            seatView.icon.setUserID(userData.userId);
 			
-			hupai.active = hued;
+            hupai.active = hued;
 
-			if (hued) {
-				var nc = hupai.getChildByName('south_meld');
-				var mj = nc.getComponent('Majiang');
+            if (hued) {
+                var nc = hupai.getChildByName('south_meld');
+                var mj = nc.getComponent('Majiang');
 
-				nc.active = true;
-				mj.setMJID(hu.pai);
+                nc.active = true;
+                mj.setMJID(hu.pai);
 
-				huSeats.push(i);
-			}
+                huSeats.push(i);
+            }
 
             seatView.username.string = userData.name;
             seatView.zhuang.active = userData.button;
@@ -147,18 +147,18 @@ cc.Class({
                 seatView.reason.string = detail.tips ? detail.tips : '';
             }
 
-			var score = userData.score;
+            var score = userData.score;
 
-			console.log('score=' + score);
-			if (score >= 0) {
-				seatView.winScore.string = '+' + score;
-				seatView.winScore.node.active = true;
-				seatView.loseScore.node.active = false;
-			} else {
-				seatView.loseScore.string = score;
-				seatView.loseScore.node.active = true;
-				seatView.winScore.node.active = false;
-			}
+            console.log('score=' + score);
+            if (score >= 0) {
+                seatView.winScore.string = '+' + score;
+                seatView.winScore.node.active = true;
+                seatView.loseScore.node.active = false;
+            } else {
+                seatView.loseScore.string = score;
+                seatView.loseScore.node.active = true;
+                seatView.winScore.node.active = false;
+            }
 
             var action = seatView.action;
             var spriteMgr = action.getComponent('SpriteMgr');
@@ -187,7 +187,7 @@ cc.Class({
             for (var k = 0; k < total && k + lackingNum < holds.childrenCount; k++) {
                 var pai = userData.holds[k];
                 var mjnode = holds.children[k + lackingNum];
-				var mj = mjnode.getComponent("Majiang");
+                var mj = mjnode.getComponent("Majiang");
 
                 mjnode.active = true;
                 mj.setMJID(pai);
@@ -230,53 +230,53 @@ cc.Class({
                 }
             }
 
-			var chis = userData.chis;
-			if (chis) {
-				for (var k = 0; k < chis.length; k++) {
-					var mjid = chis[k];
-					this.initChis(seatView, index, mjid);
-					index++;
-				}
-        	}
+            var chis = userData.chis;
+            if (chis) {
+                for (var k = 0; k < chis.length; k++) {
+                    var mjid = chis[k];
+                    this.initChis(seatView, index, mjid);
+                    index++;
+                }
+            }
         }
 
-		for (var i = nSeats; i < 4; i++) {
+        for (var i = nSeats; i < 4; i++) {
             var seat = this._seats[i].seat;
 
-			seat.active = false;
-		}
+            seat.active = false;
+        }
 
-		var si = cc.vv.gameNetMgr.seatIndex;
-		var id = 0;
+        var si = cc.vv.gameNetMgr.seatIndex;
+        var id = 0;
 
-		if (huSeats.length == 0) {
-			id = 2;
-		} else if (huSeats.indexOf(si) >= 0) {
-			id = 0;
-		} else {
-			id = 1;
-		}
+        if (huSeats.length == 0) {
+            id = 2;
+        } else if (huSeats.indexOf(si) >= 0) {
+            id = 0;
+        } else {
+            id = 1;
+        }
 
-		this._title.setIndex(id);
+        this._title.setIndex(id);
     },
 
-	getChiArr: function(pai) {
-		var type = parseInt(pai / 100);
-		var c = pai % 100;
+    getChiArr: function(pai) {
+        var type = parseInt(pai / 100);
+        var c = pai % 100;
 
-		var begin = c - type;
+        var begin = c - type;
 
-		var arr = [];
-		for (var i = 0; i < 3; i++) {
-			var k = begin + i;
+        var arr = [];
+        for (var i = 0; i < 3; i++) {
+            var k = begin + i;
 
-			arr.push(k);
-		}
+            arr.push(k);
+        }
 
-		return arr;
+        return arr;
     },
 
-	initChis: function(seatView, index, mjid) {
+    initChis: function(seatView, index, mjid) {
         var pgroot = null;
         var mgr = cc.vv.mahjongmgr;
 
@@ -319,7 +319,7 @@ cc.Class({
             pgroot.active = true;
         }
 
-		mjid = mjid % 100;
+        mjid = mjid % 100;
 		
         var side = 'south';
         for (var i = 0; i < pgroot.childrenCount; i++) {
@@ -336,15 +336,15 @@ cc.Class({
                     continue;
                 }
 
-				board.spriteFrame = mgr.getBoardSpriteFrame(side, "meld");
-				tile.spriteFrame = mgr.getTileSpriteFrame(side, "meld", mjid);
+                board.spriteFrame = mgr.getBoardSpriteFrame(side, "meld");
+                tile.spriteFrame = mgr.getTileSpriteFrame(side, "meld", mjid);
             } else {
-	            if (flag == "angang") {
+                if (flag == "angang") {
                     board.spriteFrame = mgr.getBoardSpriteFrame(side, "meld_cover");
                     tile.spriteFrame = null;
                 } else {
-					board.spriteFrame = mgr.getBoardSpriteFrame(side, "meld");
-					tile.spriteFrame = mgr.getTileSpriteFrame(side, "meld", mjid);
+                    board.spriteFrame = mgr.getBoardSpriteFrame(side, "meld");
+                    tile.spriteFrame = mgr.getTileSpriteFrame(side, "meld", mjid);
                 }
             }
         }
