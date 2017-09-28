@@ -34,6 +34,7 @@ import android.content.DialogInterface;
 import org.cocos2dx.javascript.SDKWrapper;
 
 import com.rentai.island.WXAPI;
+import com.rentai.island.Image;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -48,6 +49,7 @@ public class AppActivity extends Cocos2dxActivity {
         app = this;
         SDKWrapper.getInstance().init(this);
         WXAPI.Init(this);
+        Image.Init(this);
     }
 	
     @Override
@@ -97,6 +99,8 @@ public class AppActivity extends Cocos2dxActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         SDKWrapper.getInstance().onActivityResult(requestCode, resultCode, data);
+
+        Image.getInstance().onActivityResult(requestCode, resultCode, data);
     }
 
     @Override

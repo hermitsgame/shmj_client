@@ -103,6 +103,10 @@ cc.Class({
         return this.seats[this.seatIndex];
     },
 
+    getLocalIdxByUID : function(uid) {
+        return this.getLocalIndex(this.getSeatIndexByID(uid));
+    },
+
     getLocalIndex: function(index) {
         var id = 0;
         var nSeats = this.numOfSeats;
@@ -734,6 +738,10 @@ cc.Class({
 
         net.addHandler("emoji_push",function(data){
             self.dispatchEvent("emoji_push",data);
+        });
+
+        net.addHandler("demoji_push", data=>{
+            self.dispatchEvent("demoji_push", data);
         });
 
         net.addHandler("dissolve_notice_push",function(data){

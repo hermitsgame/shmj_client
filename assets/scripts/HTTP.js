@@ -56,5 +56,35 @@ var HTTP = cc.Class({
             xhr.send();
             return xhr;
         },
+        
+        post : function(path, data, handler, extraUrl) {
+            var xhr = cc.loader.getXMLHttpRequest();
+            xhr.timeout = 5000;
+            
+            if(extraUrl == null) {
+                extraUrl = HTTP.url;
+            }
+            
+            var requestURL = extraUrl + path;
+            xhr.open("POST",requestURL, true);
+            xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+
+            xhr.onreadystatechange = function() {
+                if(xhr.readyState === 4 && (xhr.status >= 200 && xhr.status < 300)){
+                    console.log("http res("+ xhr.responseText.length + "):" + xhr.responseText);
+                    try {
+                        var ret = JSON.parse(xhr.responseText);
+                        if(handler !== null){
+                            handler(ret);
+                        }
+                    } catch (e) {
+                        console.log("err:" + e);
+                    }
+                }
+            };
+
+            xhr.send(JSON.stringify(data));
+            return xhr;
+        }
     },
 });

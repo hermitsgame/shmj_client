@@ -16,7 +16,10 @@ cc.Class({
 
         _isTimeline : false,
 
-        _pickNotify: null
+        _pickNotify: null,
+        _receiptPath: null,
+        
+        _isBuying : false
     },
 
     // use this for initialization
@@ -32,6 +35,17 @@ cc.Class({
 		this.ANDROID_API = 'com/' + cc.vv.company + '/' + cc.vv.appname + '/WXAPI';
         this.ANDROID_IMG_API = 'com/' + cc.vv.company + '/' + cc.vv.appname + '/Image';
         this.IOS_API = "AppController";
+        
+        if (cc.sys.os == cc.sys.OS_IOS) {
+            var receipts = jsb.fileUtils.getWritablePath() + "receipts/";
+            
+            this._receiptPath = receipts;
+            
+            if (!jsb.fileUtils.isDirectoryExist(receipts))
+                jsb.fileUtils.createDirectory(receipts);
+            
+            jsb.reflection.callStaticMethod(this.IOS_API, "initIAP:receipts:", 'gem6', receipts);
+        }
     },
 	
     login:function(){
@@ -140,6 +154,14 @@ cc.Class({
 	pay: function(token, id) {
 		if (cc.sys.os == cc.sys.OS_ANDROID) {
 			jsb.reflection.callStaticMethod(this.ANDROID_API, "Pay", "(Ljava/lang/String;I)V", token, id);
+		} else if (cc.sys.os == cc.sys.OS_IOS) {
+		    if (this._isBuying) {
+		        console.log('isBuying...');
+		        return;
+		    }
+
+		    this._isBuying = true;
+		    jsb.reflection.callStaticMethod(this.IOS_API, "buyProduct:", 'gem6');
 		}
     },
 
@@ -194,11 +216,51 @@ cc.Class({
 		return true;
 	},
 
-	onBuyIAPResp: function(ret) {
-		console.log('onBuyIAPResp');
+    onBuyIAPResp: function(ret, receipt) {
+        console.log('onBuyIAPResp');
 
+        cc.vv.anysdkMgr._isBuying = false;
+
+        if (ret != 0) {
+            cc.vv.alert.show('购买失败');
+            return true;
+        }
+
+        console.log('receipt: ' + receipt);
+
+        var path = jsb.fileUtils.getWritablePath() + "receipts/" + receipt;
+
+        if (!jsb.fileUtils.isFileExist(path)) {
+            console.log('receipt not exist !!!');
+            return true;
+        }
 		
-	},
+        var content = jsb.fileUtils.getStringFromFile(path);
+
+        console.log('the path: ' + path);
+
+        var args = {
+            token : cc.vv.userMgr.sign,
+            receipt : content
+        };
+
+        cc.vv.http.post('/pay_iap/query_order', args, ret=>{
+            console.log('ret from pay_iap');
+            var errcode = ret.errcode;
+            if (errcode == cc.vv.global.const_code.ORDER.ORDER_SUCCESS) {
+                var data = {
+                    currency : ret.currency,
+                    amount : ret.quantity
+                };
+
+                cc.vv.gg.show(data);
+
+                jsb.fileUtils.removeFile(path);
+            }
+        });
+
+        return true;
+    },
 
     onLoginResp: function(code) {
     	console.log('onLoginResp');
@@ -237,9 +299,9 @@ cc.Class({
     },
 
     setPortrait: function() {
-		var view = cc.view;
-		if (cc.sys.isNative && cc.sys.os === cc.sys.OS_ANDROID) {
-			jsb.reflection.callStaticMethod(this.ANDROID_API, "changeOrientation", "(I)V", 1);
+        var view = cc.view;
+        if (cc.sys.isNative && cc.sys.os === cc.sys.OS_ANDROID) {
+            jsb.reflection.callStaticMethod(this.ANDROID_API, "changeOrientation", "(I)V", 1);
         } else if (cc.sys.isNative && cc.sys.os === cc.sys.OS_IOS) {
             jsb.reflection.callStaticMethod("IOSHelper", "changeOrientation:", 1);
         }

@@ -26,6 +26,34 @@
 
 @implementation IAPHelper
 
+- (NSString *)getUUIDString
+{
+    CFUUIDRef uuidRef = CFUUIDCreate(kCFAllocatorDefault);
+    CFStringRef strRef = CFUUIDCreateString(kCFAllocatorDefault , uuidRef);
+    NSString *uuidString = [(__bridge NSString*)strRef stringByReplacingOccurrencesOfString:@"-" withString:@""];
+    CFRelease(strRef);
+    CFRelease(uuidRef);
+    return uuidString;
+}
+
+//持久化存储用户购买凭证(这里最好还要存储当前日期，用户id等信息，用于区分不同的凭证)
+-(NSString *)saveReceipt:(NSData *)receipt {
+    NSString *fileName = [self getUUIDString];
+    NSString *savedPath = [NSString stringWithFormat:@"%s%s.plist", [self.receiptsPath UTF8String], [fileName UTF8String]];
+    
+    NSLog(@"savePath: %s", [savedPath UTF8String]);
+    
+    NSString *receiptBase64 = [NSString base64StringFromData:receipt length:[receipt length]];
+    NSError *error;
+
+    if (![receiptBase64 writeToFile:savedPath atomically:YES encoding:NSUTF8StringEncoding error:&error]) {
+        NSLog(@"写入文件错误 %@",error);
+        return fileName;
+    }
+
+    return fileName;
+}
+
 - (id)initWithProductIdentifiers:(NSSet *)productIdentifiers {
     if ((self = [super init])) {
         
@@ -80,17 +108,21 @@
 }
 
 - (void)requestProductsWithCompletion:(IAPProductsResponseBlock)completion {
-    
+    NSLog(@"request products");
     self.request = [[SKProductsRequest alloc] initWithProductIdentifiers:_productIdentifiers];
-    _request.delegate = self;
+    
+    NSLog(@"prds: %@", _productIdentifiers);
+    
+    [self.request setDelegate:self];
     self.requestProductsBlock = completion;
     
-    [_request start];
+    [self.request start];
     
 }
 
 - (void)productsRequest:(SKProductsRequest *)request didReceiveResponse:(SKProductsResponse *)response {
     
+    NSLog(@"get response");
     self.products = response.products;
     self.request = nil;
 
@@ -99,6 +131,11 @@
     }
 
 }
+
+- (void)request:(SKRequest *)request didFailWithError:(NSError *)error {
+    NSLog(@"request did fail: %@", error);
+}
+
 
 - (void)recordTransaction:(SKPaymentTransaction *)transaction {    
     // TODO: Record the transaction on the server side...    

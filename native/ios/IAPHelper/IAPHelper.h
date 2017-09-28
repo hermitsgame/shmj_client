@@ -25,6 +25,9 @@ typedef void (^resoreProductsCompleteResponseBlock) (SKPaymentQueue* payment,NSE
 @property (nonatomic,strong) NSMutableSet *purchasedProducts;
 @property (nonatomic,strong) SKProductsRequest *request;
 @property (nonatomic) BOOL production;
+@property (nonatomic) NSString *receiptsPath;
+
+-(NSString *)saveReceipt:(NSData *)receipt;
 
 //init With Product Identifiers
 - (id)initWithProductIdentifiers:(NSSet *)productIdentifiers;

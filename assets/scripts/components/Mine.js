@@ -20,5 +20,11 @@ cc.Class({
 
 		club_list.active = true;
     },
+
+    onShopClicked: function() {
+        var shop = cc.find('Canvas/shop');
+
+        shop.active = true;
+    },
 });
 

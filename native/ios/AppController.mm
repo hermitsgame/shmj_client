@@ -31,6 +31,8 @@
 #import "RootViewController.h"
 #import "platform/ios/CCEAGLView-ios.h"
 #import "VoiceSDK.h"
+#import "IAPShare.h"
+
 
 @implementation AppController
 
@@ -87,12 +89,12 @@ static bool __isWxLogin = false;
     
     //向微信注册
     [WXApi registerApp:@"wx202a4edf0d54c822" withDescription:@"island"];
-
     return YES;
 }
 
 - (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary*)options{
     [WXApi handleOpenURL:url delegate:self];
+
     return YES;
 }
 
@@ -104,76 +106,6 @@ static bool __isWxLogin = false;
      */
     cocos2d::Director::getInstance()->pause();
 }
-
-/*
-+(void) initProducts:(NSString*)products
-{
-    NSArray *array = [string componentsSeparatedByString:@","];
-    NSSet *dataSet = [NSSet setWithArray:array];
-
-    if(![IAPShare sharedHelper].iap) {
-        [IAPShare sharedHelper].iap = [[IAPHelper alloc] initWithProductIdentifiers:dataSet];
-    }
-
-    [IAPShare sharedHelper].iap.production = NO;
-
-    [[IAPShare sharedHelper].iap requestProductsWithCompletion:^(SKProductsRequest* request,SKProductsResponse* response)
-     {
-
-     }];
-}
-
-+(void) buyProduct:(NSString*)product
-{
-    NSArray *products = [IAPShare sharedHelper].iap.products;
-    SKProduct *found = nil;
-
-    for (var i = 0; i < products.count; i++) {
-        SKProduct *tmp = [products objectAtIndex:i];
-        NSString *name = tmp.productIdentifier;
-
-        if ([name isEqualToString:product]) {
-            found = tmp;
-            break;
-        }
-    }
-    
-    if (!found) {
-        NSLog(@"product not found");
-        return;
-    }
-
-    [[IAPShare sharedHelper].iap buyProduct:found
-                                  onCompletion:^(SKPaymentTransaction* trans) {
-
-              if(trans.error)
-              {
-                  NSLog(@"Fail %@",[trans.error localizedDescription]);
-              }
-              else if(trans.transactionState == SKPaymentTransactionStatePurchased) {
-
-                  [[IAPShare sharedHelper].iap checkReceipt:[NSData dataWithContentsOfURL:[[NSBundle mainBundle] appStoreReceiptURL]] AndSharedSecret:@"0b71da6ba04a48128683bc4ba8220878" onCompletion:^(NSString *response, NSError *error) {
-
-                      //Convert JSON String to NSDictionary
-                      NSDictionary* rec = [IAPShare toJSON:response];
-
-                      if([rec[@"status"] integerValue]==0)
-                      {
-                          //[[IAPShare sharedHelper].iap provideContentWithTransaction:trans];
-                          NSLog(@"SUCCESS %@",response);
-                          //NSLog(@"Pruchases %@",[IAPShare sharedHelper].iap.purchasedProducts);
-                      }
-                      else {
-                          NSLog(@"Fail");
-                      }
-                  }];
-              }
-              else if(trans.transactionState == SKPaymentTransactionStateFailed) {
-                   NSLog(@"Fail");
-              }
-                                  }];//end of buy product
-}
-*/
 
 +(void) share:(NSString*)url shareTitle:(NSString*)title shareDesc:(NSString*)desc timeLine:(BOOL)tl
 {
@@ -187,15 +119,7 @@ static bool __isWxLogin = false;
     ext.webpageUrl = url;
     
     message.mediaObject = ext;
-/*
-    GetMessageFromWXResp* resp = [[[GetMessageFromWXResp alloc] init] autorelease];
-    resp.message = message;
-    resp.bText = NO;
- 
     
-    __isWxLogin = false;
-    [WXApi sendResp:resp];
- */
     SendMessageToWXReq* req = [[[SendMessageToWXReq alloc] init] autorelease];
     
     req.message = message;
@@ -215,14 +139,7 @@ static bool __isWxLogin = false;
     WXImageObject *ext = [WXImageObject object];
     ext.imageData = [NSData dataWithContentsOfFile:filePath];
     message.mediaObject = ext;
-/*
-    GetMessageFromWXResp* resp = [[[GetMessageFromWXResp alloc] init] autorelease];
-    resp.message = message;
-    resp.bText = NO;
-    
-    __isWxLogin = false;
-    [WXApi sendResp:resp];
- */
+
     SendMessageToWXReq* req = [[[SendMessageToWXReq alloc] init] autorelease];
     
     req.message = message;
@@ -296,6 +213,125 @@ static bool __isWxLogin = false;
      */
 }
 
+
+
++(void) initIAP:(NSString *)products receipts:(NSString *)receipts {
+    NSLog(@"initIAP");
+    
+    NSLog(@"receipt path: %@", receipts);
+    
+    if(![IAPShare sharedHelper].iap) {
+        NSArray *array = [products componentsSeparatedByString:@","];
+        NSSet* dataSet = [[NSSet alloc] initWithArray:array];
+        
+        NSLog(@"set: %@", dataSet);
+        
+        [IAPShare sharedHelper].iap = [[IAPHelper alloc] initWithProductIdentifiers:dataSet];
+        [IAPShare sharedHelper].iap.receiptsPath = [NSString stringWithString:receipts];
+    }
+}
+
++(void) buyProduct:(NSString*)type
+{
+    NSLog(@"buyProduct %s", [type UTF8String]);
+    
+    [IAPShare sharedHelper].iap.production = YES;
+    
+    [[IAPShare sharedHelper].iap requestProductsWithCompletion:^(SKProductsRequest* request,SKProductsResponse* response)
+     {
+         if(response > 0 ) {
+             SKProduct *p = nil;
+             
+             for (SKProduct *prd in [IAPShare sharedHelper].iap.products) {
+                 if ([prd.productIdentifier isEqualToString:type]) {
+                     p = prd;
+                     break;
+                 }
+             }
+             
+             if (!p) {
+                 NSLog(@"product %s not found", [type UTF8String]);
+                 char tmp[256] = {0};
+                 sprintf(tmp, "cc.vv.anysdkMgr.onBuyIAPResp(%d)", 5);
+                 ScriptingCore::getInstance()->evalString(tmp);
+
+                 return;
+             }
+             
+             [[IAPShare sharedHelper].iap buyProduct:p onCompletion:^(SKPaymentTransaction* trans) {
+                 if (trans.error)
+                 {
+                     NSLog(@"Fail %@",[trans.error localizedDescription]);
+                     char tmp[256] = {0};
+                     sprintf(tmp, "cc.vv.anysdkMgr.onBuyIAPResp(%d)", 2);
+                     ScriptingCore::getInstance()->evalString(tmp);
+                 } else if(trans.transactionState == SKPaymentTransactionStatePurchased) {
+                     NSData *data = [NSData dataWithContentsOfURL:[[NSBundle mainBundle] appStoreReceiptURL]];
+
+                     {
+                         NSString *file = [[IAPShare sharedHelper].iap saveReceipt:data];
+                         char tmp[256] = {0};
+                         sprintf(tmp, "cc.vv.anysdkMgr.onBuyIAPResp(%d, '%s.plist')", 0, [file UTF8String]);
+                         ScriptingCore::getInstance()->evalString(tmp);
+                         return;
+                     }
+                     
+                     [[IAPShare sharedHelper].iap checkReceipt:data AndSharedSecret:nil  onCompletion:^(NSString *response, NSError *error) {
+                         
+                         NSDictionary* rec = [IAPShare toJSON:response];
+                         
+                         if([rec[@"status"] integerValue]==0)
+                         {
+                             
+                             [[IAPShare sharedHelper].iap provideContentWithTransaction:trans];
+                             NSLog(@"SUCCESS %@",response);
+                             NSLog(@"Pruchases %@",[IAPShare sharedHelper].iap.purchasedProducts);
+                             
+                             char tmp[256] = {0};
+                             sprintf(tmp, "cc.vv.anysdkMgr.onBuyIAPResp(%d)", 1);
+                             ScriptingCore::getInstance()->evalString(tmp);
+                         }
+                         else if ([rec[@"status"] integerValue]==21007) {
+                             [IAPShare sharedHelper].iap.production = NO;
+                             [[IAPShare sharedHelper].iap checkReceipt:data AndSharedSecret:nil  onCompletion:^(NSString *response2, NSError *error2) {
+                                
+                                 NSDictionary* rec2 = [IAPShare toJSON:response2];
+                                 if ([rec2[@"status"] integerValue]==0)
+                                 {
+                                     [[IAPShare sharedHelper].iap provideContentWithTransaction:trans];
+                                     NSLog(@"SUCCESS %@",response2);
+                                     NSLog(@"Pruchases %@",[IAPShare sharedHelper].iap.purchasedProducts);
+                                     
+                                     char tmp[256] = {0};
+                                     sprintf(tmp, "cc.vv.anysdkMgr.onBuyIAPResp(%d)", 1);
+                                     ScriptingCore::getInstance()->evalString(tmp);
+                                     
+                                 } else {
+                                     NSLog(@"Fail");
+                                     char tmp[256] = {0};
+                                     sprintf(tmp, "cc.vv.anysdkMgr.onBuyIAPResp(%d)", 3);
+                                     ScriptingCore::getInstance()->evalString(tmp);
+                                 }
+                             }];
+                         }
+                         else {
+                             NSLog(@"Fail");
+                             char tmp[256] = {0};
+                             sprintf(tmp, "cc.vv.anysdkMgr.onBuyIAPResp(%d)", 4);
+                             ScriptingCore::getInstance()->evalString(tmp);
+                         }
+                     }];
+                 }
+                 else if(trans.transactionState == SKPaymentTransactionStateFailed) {
+                     NSLog(@"Fail");
+                     char tmp[256] = {0};
+                     sprintf(tmp, "cc.vv.anysdkMgr.onBuyIAPResp(%d)", 5);
+                     ScriptingCore::getInstance()->evalString(tmp);
+                 }
+             }];//end of buy product
+         }
+     }];
+}
 
 #pragma mark -
 #pragma mark Memory management

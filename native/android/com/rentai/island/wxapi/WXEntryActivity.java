@@ -111,10 +111,11 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler{
 					}
 				});
 			} else {
+				final int _result = result;
 				Cocos2dxHelper.runOnGLThread(new Runnable() {
 					@Override
 					public void run() {
-						Cocos2dxJavascriptJavaBridge.evalString("cc.vv.anysdkMgr.onShareResp(" + result + ")");
+						Cocos2dxJavascriptJavaBridge.evalString("cc.vv.anysdkMgr.onShareResp(" + _result + ")");
 					}
 				});
 			}

@@ -3,6 +3,7 @@ package com.rentai.island;
 import java.io.File;
 
 import android.app.Activity;
+import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.view.WindowManager;

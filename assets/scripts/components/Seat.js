@@ -40,7 +40,9 @@ cc.Class({
         this._lblName = this.node.getChildByName("name").getComponent(cc.Label);
         this._lblScore = this.node.getChildByName("score").getComponent(cc.Label);
         this._voicemsg = this.node.getChildByName("voicemsg");
-        this._info = this.node.getChildByName("info");
+        var info = this.node.getChildByName("info");
+
+        this._info = info;
 
         var flower = this.node.getChildByName("flower");
         if (flower) {
@@ -60,12 +62,19 @@ cc.Class({
             cc.vv.utils.addClickEvent(this._icon, this.node, "Seat", "onIconClicked");
         }
 
-        if (this._info) {
-            this._info.active = false;
+        if (info) {
+            info.active = false;
             
-            var button = this._info.getComponent(cc.Button);
-            if (button) {
-                cc.vv.utils.addClickEvent(this._info, this.node, "Seat", "onInfoClicked");
+            var button = info.getComponent(cc.Button);
+            if (button)
+                cc.vv.utils.addClickEvent(info, this.node, "Seat", "onInfoClicked");
+
+            var emojis = cc.find('emojis/view/content', info);
+            if (emojis) {
+                for (var i = 0; i < emojis.childrenCount; i++) {
+                    var e = emojis.children[i];
+                    cc.vv.utils.addClickEvent(e, this.node, 'Seat', 'onEmojiClicked', '' + i);
+                }
             }
         }
 
@@ -101,8 +110,14 @@ cc.Class({
             sptIcon.setUserID(this._userId);
         }
     },
-    
-    onIconClicked:function(){
+
+    onEmojiClicked: function(event, data) {
+        var id = parseInt(data);
+
+        cc.vv.net.send('demoji', { id: id, target: this._userId });
+    },
+
+    onIconClicked: function() {
         var iconSprite = this._icon.getComponent(cc.Sprite);
         if (this._userId != null && this._userId > 0) {
            var seat = cc.vv.gameNetMgr.getSeatByID(this._userId);

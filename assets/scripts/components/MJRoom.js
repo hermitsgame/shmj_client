@@ -14,7 +14,10 @@ cc.Class({
         _playingSeat:null,
         _lastPlayTime:null,
 
-        _emoji : null
+        _emoji : null,
+
+        _demoji : [],
+        _semoji : [],
     },
 
     onLoad: function () {
@@ -34,17 +37,25 @@ cc.Class({
 		var valids = net.getValidLocalIDs();
 		var nSeats = net.numOfSeats;
 
-        for (var i = 0; i < seats.children.length; ++i) {
+        for (var i = 0; i < seats.childrenCount; ++i) {
 			var child = seats.children[i];
 
 			this._seats.push(child.getComponent("Seat"));
 			child.active = (valids.indexOf(i) >= 0);
+
+            var demoji = child.getChildByName('demoji');
+            var semoji = child.getChildByName('semoji');
+
+            this._demoji.push(demoji);
+            this._semoji.push(semoji);
+            child.removeChild(demoji);
+            child.removeChild(semoji);
         }
 
         this.refreshBtns();
 
         this.lblRoomNo = cc.find("Canvas/infobar/room/room_id").getComponent(cc.Label);
-        this.lblRoomNo.string = cc.vv.gameNetMgr.roomId;
+        this.lblRoomNo.string = net.roomId;
 
         var btnInvite = cc.find('actions/btnInvite', prepare);
         var btnDissolve = cc.find('actions/btnDissolve', prepare);
@@ -96,39 +107,42 @@ cc.Class({
 
     initEventHandlers: function() {
         var self = this;
-        this.node.on('new_user',function(data){
+        var node = this.node;
+        var net = cc.vv.gameNetMgr;
+        
+        node.on('new_user',function(data){
             self.initSingleSeat(data.detail);
         });
 
-        this.node.on('user_state_changed',function(data){
+        node.on('user_state_changed',function(data){
             self.refreshBtns();
             self.initSingleSeat(data.detail);
         });
 
-        this.node.on('game_begin',function(data) {
+        node.on('game_begin',function(data) {
             self.refreshBtns();
             self.initSeats();
         });
 
-        this.node.on('game_sync', function(data) {
+        node.on('game_sync', function(data) {
             self.refreshBtns();
             self.initSeats();
         });
 
-        this.node.on('game_num', function(data) {
+        node.on('game_num', function(data) {
             self.refreshBtns();
         });
 
-        this.node.on('game_state', function(data) {
+        node.on('game_state', function(data) {
             self.refreshBtns();
             self.initSeats();
         });
 
-        this.node.on('ting_notify', function(data) {
+        node.on('ting_notify', function(data) {
             self.initSingleSeat(data.detail);
         });
 
-        this.node.on('gang_notify', function(info) {
+        node.on('gang_notify', function(info) {
             var data = info.detail;
 
             if (cc.vv.replayMgr.isReplay()) {
@@ -136,23 +150,23 @@ cc.Class({
             }
         });
 
-        this.node.on('voice_msg',function(data){
+        node.on('voice_msg',function(data){
             var data = data.detail;
             self._voiceMsgQueue.push(data);
             self.playVoice();
         });
 
-        this.node.on('chat_push',function(data){
+        node.on('chat_push',function(data){
             var data = data.detail;
-            var idx = cc.vv.gameNetMgr.getSeatIndexByID(data.sender);
-            var localIdx = cc.vv.gameNetMgr.getLocalIndex(idx);
+            var idx = net.getSeatIndexByID(data.sender);
+            var localIdx = net.getLocalIndex(idx);
             self._seats[localIdx].chat(data.content);
         });
 
-        this.node.on('quick_chat_push',function(data){
+        node.on('quick_chat_push',function(data){
             var data = data.detail;
-            var idx = cc.vv.gameNetMgr.getSeatIndexByID(data.sender);
-            var localIdx = cc.vv.gameNetMgr.getLocalIndex(idx);
+            var idx = net.getSeatIndexByID(data.sender);
+            var localIdx = net.getLocalIndex(idx);
 
             var index = parseInt(data.content);
 
@@ -170,15 +184,71 @@ cc.Class({
             });
         });
 
-        this.node.on('emoji_push',function(data) {
+        node.on('emoji_push',function(data) {
             var data = data.detail;
-            var idx = cc.vv.gameNetMgr.getSeatIndexByID(data.sender);
-            var localIdx = cc.vv.gameNetMgr.getLocalIndex(idx);
+            var idx = net.getSeatIndexByID(data.sender);
+            var localIdx = net.getLocalIndex(idx);
             console.log(data);
             //self._seats[localIdx].emoji(data.content + 1);
 
             self.emoji(idx, data.content + 1);
         });
+
+        node.on('demoji_push', data=>{
+            var data = data.detail;
+            var sender = net.getLocalIdxByUID(data.sender);
+            var target = net.getLocalIdxByUID(data.target);
+            var id = data.id;
+
+            console.log('demoji_push: ' + sender + ' to ' + target + ' ' + id);
+
+            self.demoji(sender, target, id);
+        });
+    },
+
+    demoji: function(sender, target, id) {
+        var seats = this.node.getChildByName("seats");
+        var sseat = seats.children[sender];
+        var dseat = seats.children[target];
+        var demoji = cc.instantiate(this._demoji[target]);
+        var semoji = cc.instantiate(this._semoji[sender]);
+
+        sseat.addChild(semoji);
+        dseat.addChild(demoji);
+
+        console.log('d1');
+
+        var anims = [ 'fanqie' ];
+        var anim = anims[id];
+
+        var spos = sseat.convertToWorldSpace(semoji.getPosition());
+        var dpos = dseat.convertToWorldSpace(demoji.getPosition());
+
+        var fnPlay = cc.callFunc(()=>{
+            var dnode = demoji.getComponent(cc.Animation);
+
+            console.log('d4');
+
+            dnode.on('finished', ()=>{
+                dseat.removeChild(demoji);
+                sseat.removeChild(semoji);
+                console.log('d5');
+            });
+
+            dnode.play(anim);
+        });
+
+        semoji.getComponent('SpriteMgr').setIndex(id);
+
+        console.log('d2');
+
+        var acts = cc.sequence(cc.moveBy(0.3, dpos.x - spos.x, dpos.y - spos.y),
+                                cc.hide(),
+                                fnPlay);
+
+        semoji.runAction(acts);
+
+        console.log('d3');
     },
 
     emoji: function(seatindex, emoji_id) {
