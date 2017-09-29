@@ -48,6 +48,18 @@ cc.Class({
         }
     },
 	
+	checkWechat: function() {
+        if (!cc.sys.isNative)
+            return false;
+
+        if (cc.sys.os == cc.sys.OS_ANDROID)
+            return true;
+
+        console.log('check wechat');
+
+        return jsb.reflection.callStaticMethod(this.IOS_API, 'checkWechat');
+	},
+	
     login:function(){
         if (cc.sys.os == cc.sys.OS_ANDROID) {
 

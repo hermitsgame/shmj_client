@@ -213,7 +213,17 @@ static bool __isWxLogin = false;
      */
 }
 
-
++(BOOL) checkWechat {
+    if ([WXApi isWXAppInstalled] && [WXApi isWXAppSupportApi]) {
+        NSLog(@"wc ok");
+        
+        return true;
+    }
+    
+    NSLog(@"wc fail");
+    
+    return false;
+}
 
 +(void) initIAP:(NSString *)products receipts:(NSString *)receipts {
     NSLog(@"initIAP");
