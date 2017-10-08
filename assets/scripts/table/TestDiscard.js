@@ -17,6 +17,8 @@ cc.Class({
     },
 
     initLayout () {
+        console.log('TestDiscard initLayout');
+
         let curPos = cc.p(0, 0);
         for (let i = 0; i < this.rowCount; ++i) {
             let rowN = cc.instantiate(this.rowPrefab);

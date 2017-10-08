@@ -1,3 +1,4 @@
+
 cc.Class({
     extends: cc.Component,
 
@@ -14,5 +15,22 @@ cc.Class({
         this.tileText.node.rotation = textTrans.rotation;
         this.tileText.node.skewX = textTrans.skew.x;        
         this.tileText.node.skewY = textTrans.skew.y;        
-    }
+    },
+    
+    setMJID (id) {
+        this.tileText.spriteFrame = cc.vv.mahjongmgr.getTileSprite3D(id);
+    },
+
+    refresh() {
+
+    },
+
+    setFocus(status) {
+
+    },
+
+    showFocus() {
+
+    },
 });
+

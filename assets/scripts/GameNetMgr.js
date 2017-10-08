@@ -241,7 +241,7 @@ cc.Class({
 
         net.addHandler("login_finished",function(data){
             console.log("login_finished");
-            cc.director.loadScene("mjgame");
+            cc.director.loadScene("mjgame3d");
         });
 
         net.addHandler("exit_result",function(data) {

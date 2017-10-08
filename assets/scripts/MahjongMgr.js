@@ -25,6 +25,11 @@ cc.Class({
             type: cc.SpriteAtlas
         },
 
+        atlas3D: {
+            default: null,
+            type: cc.SpriteAtlas
+        },
+
         _sides: null,
     },
     
@@ -131,6 +136,10 @@ cc.Class({
         var fullname = direction + "_" + name + "_board_" + this.getMJStyle();
 
         return this.getSpriteFrame(direction, fullname);
+    },
+
+    getTileSprite3D: function(mjid) {
+        return this.atlas3D.getSpriteFrame(mjid);
     },
     
     getTileSpriteFrame3d: function(sprite, direction, name, mjid, angle) {
