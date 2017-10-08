@@ -1,0 +1,30 @@
+{
+  "ver": "1.0.0",
+  "uuid": "43f736ea-f230-4177-9ccc-00516ed73015",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "subMetas": {
+    "north_meld_board_0": {
+      "ver": "1.0.3",
+      "uuid": "1b2dc4c1-91b6-48af-b27f-681132dc643c",
+      "rawTextureUuid": "43f736ea-f230-4177-9ccc-00516ed73015",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": 0,
+      "trimX": 0,
+      "trimY": 0,
+      "width": 47,
+      "height": 62,
+      "rawWidth": 47,
+      "rawHeight": 62,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

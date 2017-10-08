@@ -18,6 +18,7 @@ cc.Class({
         }
         
         this.initMgr();
+        cc.vv.anysdkMgr.setPortrait();
         
         this._splash = cc.find("Canvas/splash");
         this._splash.active = true;
@@ -39,10 +40,13 @@ cc.Class({
         var self = this;
         var SHOW_TIME = 1000;
         var FADE_TIME = 300;
+        var splash = this._splash;
+
         if(cc.sys.os != cc.sys.OS_IOS || !cc.sys.isNative){
-            self._splash.active = true;
+            splash.active = true;
+
             var t = Date.now();
-            var fn = function(){
+            var fn = function() {
                 var dt = Date.now() - t;
                 if(dt < SHOW_TIME){
                     setTimeout(fn,33);
@@ -50,19 +54,19 @@ cc.Class({
                 else {
                     var op = (1 - ((dt - SHOW_TIME) / FADE_TIME)) * 255;
                     if(op < 0){
-                        self._splash.opacity = 0;
-                        //self.checkVersion();    
+                        splash.opacity = 0;
+                        //self.checkVersion();
                     }
-                    else{
-                        self._splash.opacity = op;
-                        setTimeout(fn,33);   
+                    else {
+                        splash.opacity = op;
+                        setTimeout(fn,33);
                     }
                 }
             };
             setTimeout(fn,33);
         }
-        else{
-            this._splash.active = false;
+        else {
+            splash.active = false;
             //this.checkVersion();
         }
     },
@@ -70,8 +74,8 @@ cc.Class({
     initMgr: function() {
         cc.vv = {};
 
-        cc.vv.company = 'rentai';  // dinosaur
-        cc.vv.appname = 'island';  // shmj
+        cc.vv.company = 'dinosaur';
+        cc.vv.appname = 'shmj';
 
         var pclient = require("pclient");
         cc.vv.pclient = new pclient();

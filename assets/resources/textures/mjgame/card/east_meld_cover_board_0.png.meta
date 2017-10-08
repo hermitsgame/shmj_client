@@ -1,0 +1,30 @@
+{
+  "ver": "1.0.0",
+  "uuid": "8d71b52b-13d1-4bad-8542-13a53d1c374c",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "subMetas": {
+    "east_meld_cover_board_0": {
+      "ver": "1.0.3",
+      "uuid": "8429a5a6-3906-4f94-983c-37fd3b4bf7aa",
+      "rawTextureUuid": "8d71b52b-13d1-4bad-8542-13a53d1c374c",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": 0,
+      "trimX": 0,
+      "trimY": 0,
+      "width": 86,
+      "height": 53,
+      "rawWidth": 86,
+      "rawHeight": 53,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

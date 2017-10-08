@@ -37,6 +37,11 @@ cc.Class({
 
 	onBtnClose: function() {
 		this.node.active = false;
+		
+		var pp = this.node.parent_page;
+		
+		if (pp)
+		    pp.refresh();
     },
 
 	onBtnEdit: function() {
@@ -111,7 +116,7 @@ cc.Class({
 
 		name.string = data.name;
 		headcount.string = data.member_num + ' / ' + data.max_member_num;
-		cc.vv.utils.loadImage(data.logo, head);
+		cc.vv.utils.loadImage(data.logo, head, true);
 
 		var content = cc.find('items/view/content', this.node);
 		var creator = content.children[0];

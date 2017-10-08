@@ -35,17 +35,6 @@ cc.Class({
 		this.ANDROID_API = 'com/' + cc.vv.company + '/' + cc.vv.appname + '/WXAPI';
         this.ANDROID_IMG_API = 'com/' + cc.vv.company + '/' + cc.vv.appname + '/Image';
         this.IOS_API = "AppController";
-        
-        if (cc.sys.os == cc.sys.OS_IOS) {
-            var receipts = jsb.fileUtils.getWritablePath() + "receipts/";
-            
-            this._receiptPath = receipts;
-            
-            if (!jsb.fileUtils.isDirectoryExist(receipts))
-                jsb.fileUtils.createDirectory(receipts);
-            
-            jsb.reflection.callStaticMethod(this.IOS_API, "initIAP:receipts:", 'gem6', receipts);
-        }
     },
 	
 	checkWechat: function() {
@@ -214,8 +203,15 @@ cc.Class({
 		}
 
 		var args = identifiers.join(',');
+        var receipts = jsb.fileUtils.getWritablePath() + "receipts/";
 
-		jsb.reflection.callStaticMethod(this.IOS_API, "initProducts", args);
+        this._receiptPath = receipts;
+
+        if (!jsb.fileUtils.isDirectoryExist(receipts))
+            jsb.fileUtils.createDirectory(receipts);
+
+        jsb.reflection.callStaticMethod(this.IOS_API, "initIAP:receipts:", args, receipts);
+		
 		return true;
     },
 
@@ -315,7 +311,7 @@ cc.Class({
         if (cc.sys.isNative && cc.sys.os === cc.sys.OS_ANDROID) {
             jsb.reflection.callStaticMethod(this.ANDROID_API, "changeOrientation", "(I)V", 1);
         } else if (cc.sys.isNative && cc.sys.os === cc.sys.OS_IOS) {
-            jsb.reflection.callStaticMethod("IOSHelper", "changeOrientation:", 1);
+            jsb.reflection.callStaticMethod(this.IOS_API, "changeOrientation:", true);
         }
         else {
             view.setOrientation(cc.macro.ORIENTATION_PORTRAIT);
@@ -325,7 +321,8 @@ cc.Class({
         let height = view.getFrameSize().height < view.getFrameSize().width ? view.getFrameSize().width : view.getFrameSize().height;
 
         view.setFrameSize(width, height);
-        view.setDesignResolutionSize(720, 1280, cc.ResolutionPolicy.FIXED_WIDTH);
+        console.log('set width=' + width + ' height=' + height);
+        view.setDesignResolutionSize(720, 1280, cc.ResolutionPolicy.FIXED_HEIGHT);
     },
 
     setLandscape: function() {
@@ -333,7 +330,7 @@ cc.Class({
         if (cc.sys.isNative && cc.sys.os === cc.sys.OS_ANDROID) {
             jsb.reflection.callStaticMethod(this.ANDROID_API, "changeOrientation", "(I)V", 0);
         } else if (cc.sys.isNative && cc.sys.os === cc.sys.OS_IOS) {
-            jsb.reflection.callStaticMethod("IOSHelper", "changeOrientation:", 0);
+            jsb.reflection.callStaticMethod(this.IOS_API, "changeOrientation:", false);
         }
         else {
             view.setOrientation(cc.macro.ORIENTATION_LANDSCAPE);
@@ -343,7 +340,9 @@ cc.Class({
         let height = view.getFrameSize().height > view.getFrameSize().width ? view.getFrameSize().width : view.getFrameSize().height;
 
         cc.view.setFrameSize(width, height);
+        console.log('set width=' + width + ' height=' + height);
         cc.view.setDesignResolutionSize(1280, 720, cc.ResolutionPolicy.FIXED_WIDTH);
+
     },
 
     pick: function(notify) {
@@ -364,7 +363,7 @@ cc.Class({
         if (cc.sys.os === cc.sys.OS_ANDROID) {
             jsb.reflection.callStaticMethod(this.ANDROID_IMG_API, "pickImage", "(Ljava/lang/String;)V", path);
         } else if (cc.sys.os === cc.sys.OS_IOS) {
-
+            jsb.reflection.callStaticMethod(this.IOS_API, "pickImage:", path);
         }
     },
 

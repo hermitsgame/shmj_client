@@ -133,6 +133,44 @@ cc.Class({
         return this.getSpriteFrame(direction, fullname);
     },
     
+    getTileSpriteFrame3d: function(sprite, direction, name, mjid, angle) {
+        var id = this.getResourceMJID(mjid);
+        var fullname = direction + "_" + name;
+
+        if (name == 'discard') {
+            fullname += '_' + (angle || '0');
+        }
+
+        fullname += '/' + id;
+        
+        var url = cc.url.raw('resources/textures/mjgame/card/' + fullname);
+
+        cc.loader.load({ url : url, type : 'png' }, (err, tex)=>{
+            if (err) {
+                console.log(err);
+                sprite.spriteFrame = null;
+                return;
+            }
+
+            sprite.spriteFrame = new cc.SpriteFrame(tex, cc.Rect(0, 0, tex.width, tex.height), false, 0);
+        });
+    },
+    
+    getBoardSpriteFrame3d: function(sprite, direction, name, angle) {
+        var fullname = direction + '_' + name + '_board_' + (angle || '0') + '.png';
+        var url = cc.url.raw("resources/textures/mjgame/card/" + fullname);
+
+        cc.loader.load({ url : url, type : 'png' }, (err, tex)=>{
+            if (err) {
+                console.log(err);
+                sprite.spriteFrame = null;
+                return;
+            }
+
+            sprite.spriteFrame = new cc.SpriteFrame(tex, cc.Rect(0, 0, tex.width, tex.height), false, 0);
+        });
+    },
+    
     getAnySpriteFrame: function(direction, name) {
         var fullname = direction + "_" + name + "_" + this.getMJStyle();
 

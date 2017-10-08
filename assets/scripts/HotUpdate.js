@@ -201,10 +201,13 @@ cc.Class({
             this.done();
             return;
         }
+        
+        this.done();
+        return; // not used now.
 
         this._percent = this.node.getChildByName('progress').getComponent('Progress');
 
-        var storagePath = ((jsb.fileUtils ? jsb.fileUtils.getWritablePath() : '/') + 'island-asset');
+        var storagePath = ((jsb.fileUtils ? jsb.fileUtils.getWritablePath() : '/') + 'shmj-asset');
         console.log('Storage path for remote asset : ' + storagePath);
 
         // Setup your own version compare handler, versionA and B is versions in string

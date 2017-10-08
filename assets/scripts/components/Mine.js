@@ -26,5 +26,17 @@ cc.Class({
 
         shop.active = true;
     },
+    
+    onFeedback: function() {
+        var fb = cc.find('Canvas/feedback');
+
+        fb.active = true;
+    },
+    
+    onSetting: function() {
+        var setting = cc.find('Canvas/setting');
+
+        setting.active = true;
+    },
 });
 

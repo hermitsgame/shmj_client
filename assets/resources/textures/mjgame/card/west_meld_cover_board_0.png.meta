@@ -1,0 +1,30 @@
+{
+  "ver": "1.0.0",
+  "uuid": "794267d0-5eae-4b67-baa5-85d7d15d74c6",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "subMetas": {
+    "west_meld_cover_board_0": {
+      "ver": "1.0.3",
+      "uuid": "c197abbb-e17f-450b-a950-9d4b9336df73",
+      "rawTextureUuid": "794267d0-5eae-4b67-baa5-85d7d15d74c6",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": 0,
+      "trimX": 0,
+      "trimY": 0,
+      "width": 86,
+      "height": 53,
+      "rawWidth": 86,
+      "rawHeight": 53,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

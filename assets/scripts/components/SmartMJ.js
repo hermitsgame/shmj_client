@@ -31,12 +31,16 @@ cc.Class({
     
     getMJ: function() {
         var child =  this.node.children[this.index];
+        var mj = null;
 
-        if (child) {
-            return child.getComponent("Majiang");
-        } else {
+        if (!child)
             return null;
-        }
+
+        mj = child.getComponent("Majiang");
+        if (mj == null)
+            mj = child.getComponent('Majiang3d');
+            
+        return mj;
     },
     
     setFunction: function(idx) {

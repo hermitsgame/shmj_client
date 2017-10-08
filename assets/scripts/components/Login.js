@@ -44,6 +44,8 @@ cc.Class({
             cc.director.loadScene("loading");
             return;
         }
+        
+        cc.vv.anysdkMgr.setPortrait();
 
         cc.vv.http.url = cc.vv.http.master_url;
 

@@ -33,6 +33,7 @@ cc.Class({
 
 		club_detail.club_id = item.club_id;
 		club_detail.is_admin = item.is_admin;
+		club_detail.parent_page = this;
 
 		club_detail.active = true;
     },

@@ -1,0 +1,140 @@
+[
+  {
+    "__type__": "cc.Prefab",
+    "_name": "",
+    "_objFlags": 0,
+    "_rawFiles": null,
+    "data": {
+      "__id__": 1
+    }
+  },
+  {
+    "__type__": "cc.Node",
+    "_name": "row_discard",
+    "_objFlags": 0,
+    "_parent": null,
+    "_children": [],
+    "_tag": -1,
+    "_active": true,
+    "_components": [
+      {
+        "__id__": 2
+      }
+    ],
+    "_prefab": {
+      "__id__": 3
+    },
+    "_id": "",
+    "_opacity": 255,
+    "_color": {
+      "__type__": "cc.Color",
+      "r": 255,
+      "g": 255,
+      "b": 255,
+      "a": 255
+    },
+    "_cascadeOpacityEnabled": true,
+    "_anchorPoint": {
+      "__type__": "cc.Vec2",
+      "x": 0.5,
+      "y": 0.5
+    },
+    "_contentSize": {
+      "__type__": "cc.Size",
+      "width": 0,
+      "height": 0
+    },
+    "_rotationX": 0,
+    "_rotationY": 0,
+    "_scaleX": 1,
+    "_scaleY": 1,
+    "_position": {
+      "__type__": "cc.Vec2",
+      "x": -121.4,
+      "y": -94.8
+    },
+    "_skewX": 0,
+    "_skewY": 0,
+    "_localZOrder": 0,
+    "_globalZOrder": 0,
+    "_opacityModifyRGB": false,
+    "groupIndex": 0
+  },
+  {
+    "__type__": "d2af8vPS9BE0r45EQEgsOPq",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 1
+    },
+    "_enabled": true,
+    "test": false,
+    "direction": 2,
+    "tileTextures": [
+      {
+        "__uuid__": "c4f9a5a3-50b0-445b-9562-9a48b6a0bd22"
+      },
+      {
+        "__uuid__": "c29132f8-746d-4ed4-a741-394bc1384ab6"
+      },
+      {
+        "__uuid__": "6b2a6dd7-e845-4030-b17b-c2bd017e0cd1"
+      },
+      {
+        "__uuid__": "854c50bd-3e75-49fd-b4e9-2829a8b151eb"
+      },
+      {
+        "__uuid__": "c25b78ca-90ca-4660-9b59-1da37478d0e5"
+      },
+      {
+        "__uuid__": "75905c1c-d924-4605-902c-e97d1ac9eefd"
+      },
+      {
+        "__uuid__": "5b293035-0cb0-4818-99c0-fd3911e6f883"
+      },
+      {
+        "__uuid__": "8440488c-fd1c-47d8-ad40-7c2e5638d941"
+      }
+    ],
+    "tileText": {
+      "__uuid__": "af191722-20c2-464a-8f72-8609899c1ef0"
+    },
+    "textPos": {
+      "__type__": "cc.Vec2",
+      "x": 0,
+      "y": 9.2
+    },
+    "textRotation": 0,
+    "textStartSkew": {
+      "__type__": "cc.Vec2",
+      "x": -3,
+      "y": 0
+    },
+    "skewStepSign": 1,
+    "textScale": {
+      "__type__": "cc.Vec2",
+      "x": 0.4,
+      "y": 0.32
+    },
+    "textScaleStep": 1,
+    "tileStep": {
+      "__type__": "cc.Vec2",
+      "x": -34,
+      "y": 0
+    },
+    "tilePrefab": {
+      "__uuid__": "82c7b1a9-5289-40e9-af2a-9f05fcd6fe72"
+    }
+  },
+  {
+    "__type__": "cc.PrefabInfo",
+    "root": {
+      "__id__": 1
+    },
+    "asset": {
+      "__uuid__": "90c538fb-c4d0-46f6-86d2-88caeb8c88f6"
+    },
+    "fileId": "570a2HICr1PPLq7VkPFpqeV",
+    "sync": false
+  }
+]
