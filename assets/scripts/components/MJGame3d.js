@@ -1588,98 +1588,95 @@ cc.Class({
     },
 
     getMJPosition: function(localIndex, id) {
-        var start = 0;
-        var xoff = 0;
-        var yoff = 0;
+        let startx = 0;
+        let starty = 0;
+        let xoff = 0;
+        let yoff = 0;
 
         if (0 == localIndex) {
-            start = 42.5;
+            startx = 42.5;
             xoff = 83;
         } else if (localIndex == 1) {
-            start = 32;
-            yoff = 32;
+            startx = 0;
+            starty = -123.5;
+            xoff = -7;
+            yoff = 19;
         } else if (localIndex == 2) {
-            start = -20.5;
+            startx = -20.5;
             xoff = -39;
         } else if (localIndex == 3) {
-            start = -32;
+            starty = -32;
             yoff = -32;
         }
 
-        if (xoff != 0) {
-            var x = start + xoff * id;
+        let x = startx + xoff * id;
+        let y = starty + yoff * id;
 
-            return cc.p(x, 0);
-        } else if (yoff != 0) {
-            var y = start + yoff * id;
-
-            return cc.p(0, y)
-        }
+        return cc.p(x, y);
     },
 
 	setMJLocation: function(mjnode, localIndex, index, board, mopai) {
-		var start = 0;
-		var xoff = 0;
-		var yoff = 0;
-		var barrier = 0;
-		var id = index;
+		let startx = 0;
+		let starty = 0;
+		let xoff = 0;
+		let yoff = 0;
+		let barrierx = 0;
+		let barriery = 0;
+		let id = index;
 
 		if (localIndex == 0) {
-			start = 42.5;
+			startx = 42.5;
 			xoff = 83;
 
 			if (mopai) {
-				barrier = 20;
+				barrierx = 20;
 			}
 		} else if (localIndex == 1) {
 			if (board) {
-				start = 32
+				starty = 32
 				yoff = 32;
 			} else {
-				start = 29;
-				yoff = 36;
+			    startx = 0;
+				starty = -123.5;
+				xoff = -7;
+				yoff = 19;
 			}
 
 			if (mopai) {
-				barrier = 20;
+			    barrierx = -7
+				barriery = 19;
 			}
 		} else if (localIndex == 2) {
 			if (board) {
-				start = -20.5;
+				startx = -20.5;
 				xoff = -39;
 			} else {
-				start = -22;
+				startx = -22;
 				xoff = -41;
 			}
 
 			if (mopai) {
-				barrier = -20;
+				barrierx = -20;
 			}
 		} else if (localIndex == 3) {
 			if (board) {
-				start = -32;
+				starty = -32;
 				yoff = -32;
 			} else {
-				start = -29;
+				starty = -29;
 				yoff = -36;
 			}
 
 			if (mopai) {
-				barrier = -20;
+				barriery = -20;
 			}
 		}
 
-		if (xoff != 0) {
-			var x = start + xoff * id + barrier;
-
-			mjnode.x = x;
-			mjnode.y = 0;
-		} else if (yoff != 0) {
-			var y = start + yoff * id + barrier;
-
-			mjnode.y = y;
-			mjnode.x = 0;
-		}
+        let x = startx + xoff * id + barrierx;
+        let y = starty + yoff * id + barriery;
+        
+        mjnode.x = x;
+        mjnode.y = y;
     },
 
     sortHolds: function(seatData) {
