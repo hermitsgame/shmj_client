@@ -45,8 +45,6 @@ cc.Class({
         _tempHolds: [],
         _tempPrompt: null,
 
-        _tempFlowers: [],
-
         _chipeng: false,
     },
 
@@ -71,6 +69,7 @@ cc.Class({
         this.addComponent("GameResult");
         this.addComponent("Chat");
         this.addComponent("Folds3d");
+        this.addComponent('Flowers');
         this.addComponent("ReplayCtrl");
         this.addComponent("PopupMgr");
         this.addComponent("Voice");
@@ -139,12 +138,6 @@ cc.Class({
             }
 
             this._tempHolds[i] = holds;
-
-            var flowers = sideChild.getChildByName('flowers');
-            var flower = flowers.children[0];
-            this._tempFlowers.push(flower);
-            flowers.removeAllChildren();
-            flowers.active = false;
 
             sideChild.active = valid.indexOf(i) >= 0;
         }
@@ -271,82 +264,6 @@ cc.Class({
         }
     },
 
-	updateFlowers: function(sd) {
-		var net = cc.vv.gameNetMgr;
-		var seats = sd ? [ sd ] : net.seats;
-		var gameChild = this.node.getChildByName("game");
-		var cards = [ 45, 46, 47, 51, 52, 53, 54, 55, 56, 57, 58 ];
-		var self = this;
-
-		var getFlower = function(flowers, localidx, id) {
-			var temp = self._tempFlowers[localidx];
-
-			if (flowers.childrenCount > id) {
-				return flowers.children[id];
-			}
-
-			var _fl = cc.instantiate(temp);
-			flowers.addChild(_fl);
-
-			return _fl;
-		};
-
-		console.log('updateFlowers');
-
-		for (var i = 0; i < seats.length; i++) {
-			var seat = seats[i];
-			if (!seat || seat.flowers == null)
-				continue;
-
-			var seatindex = net.getSeatIndexByID(seat.userid);
-			var local = net.getLocalIndex(seatindex);
-			var side = net.getSide(local);
-			var flowers = cc.find(side + '/flowers', gameChild);
-			var index = 0;
-
-			console.log('seat ' + i + ' flowers ' + seat.flowers.length);
-			flowers.active = seat.flowers.length > 0;
-			if (seat.flowers.length == 0)
-				continue;
-
-			var fls = {};
-			for (var j = 0; j < seat.flowers.length; j++) {
-				var fl = seat.flowers[j];
-
-				if (fls[fl] == null) {
-					fls[fl] = 1;
-				} else {
-					fls[fl] += 1;
-				}
-			}
-
-			console.log(fls);
-
-			for (var key in fls) {
-				var pai = parseInt(key);
-				var off = cards.indexOf(pai);
-				if (off == -1) {
-					console.log('card not found ' + pai);
-					continue;
-				}
-
-				var item = getFlower(flowers, local, index);
-				var tile = item.getChildByName('tile').getComponent('SpriteMgr');
-				var num = item.getChildByName('num').getComponent(cc.Label);
-
-				tile.setIndex(off);
-				num.string = fls[key];
-
-				index++;
-			}
-
-			while (flowers.childrenCount > index) {
-				var child = flowers.children[index];
-				flowers.removeChild(child);
-			}
-		}
-    },
-
     showTingOpt: function(enable) {
         this._tingOpt.active = enable;
     },
@@ -409,11 +326,6 @@ cc.Class({
 
         node.on('game_action', function(data) {
             self.showAction(data.detail);
-        });
-
-        node.on('user_hf_updated', function(data) {
-            console.log('user_hf_updated');
-            self.updateFlowers(data.detail);
         });
 
         node.on('hupai',function(data) {
@@ -711,10 +623,6 @@ cc.Class({
 
                 this.putMJItem(sideHolds, i, mjnode);
             }
-
-            var flowers = cc.find('game/' + sides[i] + '/flowers', this.node);
-
-            flowers.active = false;
         }
     },
 
@@ -724,7 +632,10 @@ cc.Class({
 
         this.hideAllHolds();
 
-        var gameover = this.node.getComponent('GameOver');
+        let flowers = this.node.getComponent('Flowers');
+        flowers.hideAllFlowers();
+
+        let gameover = this.node.getComponent('GameOver');
         gameover.onGameOver(data);
     },
 
@@ -911,35 +822,25 @@ cc.Class({
     },
 
     addOption: function(name) {
-        var ops = [ "peng", "gang", "hu", "chi", "ting", "guo" ];
+        let ops = [ 'guo', 'hu', 'ting', 'chi', 'peng', 'gang' ];
 
-        var id = ops.indexOf(name);
+        let id = ops.indexOf(name);
         if (id == -1) {
             console.log("addOption: unknown option name");
             return;
         }
 
-        for (var i = 0; i < this._options.childrenCount; ++i) {
-            var child = this._options.children[i];
-            if (child.name == "op" && child.active == false) {
-                child.active = true;
-
-                var sprite = child.getComponent("SpriteMgr");
-                sprite.setIndex(id);
-                break;
-            }
-        }
+        let op = this._options.children[id];
+        op.active = true;
     },
 
     hideOptions:function(data) {
-        var options = this._options;
+        let options = this._options;
+
         options.active = false;
-        for (var i = 0; i < options.childrenCount; ++i) {
-            var child = options.children[i];
-            if (child.name == "op") {
-                child.active = false;
-            }
-        }
+        options.children.forEach(x=>{
+            x.active = false;
+        });
     },
 
     hasOptions: function() {
@@ -1419,12 +1320,13 @@ cc.Class({
         net.send('chi', { type: type, pai: pai });
     },
 
-    onOptionClicked: function(event) {
-        var target = event.target;
-        var spriteMgr = target.getComponent("SpriteMgr");
-        var index = spriteMgr.index;
-        var net = cc.vv.net;
-        var data = this._optionsData;
+    onOptionClicked: function(event, customData) {
+        let target = event.target;
+        let net = cc.vv.net;
+        let data = this._optionsData;
+        let ops = [ 'peng', 'gang', 'hu', 'chi', 'ting', 'guo' ];
+
+        let index = ops.indexOf(customData);
 
         this.showTingPrompts();
 
@@ -1605,8 +1507,10 @@ cc.Class({
             startx = -20.5;
             xoff = -39;
         } else if (localIndex == 3) {
-            starty = -32;
-            yoff = -32;
+            startx = 0;
+            starty = 123.5;
+            xoff = -7;
+            yoff = -19;
         }
 
         let x = startx + xoff * id;
@@ -1663,12 +1567,15 @@ cc.Class({
 				starty = -32;
 				yoff = -32;
 			} else {
-				starty = -29;
-				yoff = -36;
+			    startx = 0;
+				starty = 123.5;
+				xoff = -7;
+				yoff = -19;
 			}
 
 			if (mopai) {
-				barriery = -20;
+			    barrierx = -7;
+				barriery = -19;
 			}
 		}
 
