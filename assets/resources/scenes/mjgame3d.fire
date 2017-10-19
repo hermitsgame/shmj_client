@@ -127,9 +127,6 @@
       },
       {
         "__id__": 3167
-      },
-      {
-        "__id__": 3168
       }
     ],
     "_prefab": null,
@@ -2461,11 +2458,11 @@
       "__uuid__": "6e649af7-7f49-4419-9283-8ee6fd20168b"
     },
     "rowCount": 3,
-    "rowScaleStep": 1.03,
+    "rowScaleStep": 1.06,
     "rowPositionStep": {
       "__type__": "cc.Vec2",
-      "x": -3,
-      "y": -35
+      "x": -7,
+      "y": -47
     },
     "skewStep": {
       "__type__": "cc.Vec2",
@@ -3214,7 +3211,7 @@
       "x": 580,
       "y": -180
     },
-    "_skewX": 11,
+    "_skewX": 0,
     "_skewY": 0,
     "_localZOrder": 0,
     "_globalZOrder": 0,
@@ -60624,8 +60621,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 35.77,
-      "height": 23.33
+      "width": 38,
+      "height": 19.36
     },
     "_rotationX": 0,
     "_rotationY": 0,
@@ -60634,7 +60631,7 @@
     "_position": {
       "__type__": "cc.Vec2",
       "x": 0,
-      "y": 63
+      "y": 61
     },
     "_skewX": 0,
     "_skewY": 0,
@@ -60652,9 +60649,9 @@
     },
     "_enabled": true,
     "_useOriginalSize": false,
-    "_actualFontSize": 26,
-    "_fontSize": 26,
-    "_lineHeight": 30,
+    "_actualFontSize": 19.36,
+    "_fontSize": 19.36,
+    "_lineHeight": 19.36,
     "_enableWrapText": true,
     "_N$file": {
       "__uuid__": "7e263fed-c220-469d-b11a-4e367e0ce77e"
@@ -67346,7 +67343,7 @@
     "_position": {
       "__type__": "cc.Vec2",
       "x": 0,
-      "y": -78
+      "y": -34
     },
     "_skewX": 0,
     "_skewY": 0,
@@ -69773,7 +69770,7 @@
     "_position": {
       "__type__": "cc.Vec2",
       "x": 0,
-      "y": -78
+      "y": -34
     },
     "_skewX": 0,
     "_skewY": 0,
@@ -72185,7 +72182,7 @@
     "_cascadeOpacityEnabled": true,
     "_anchorPoint": {
       "__type__": "cc.Vec2",
-      "x": 0,
+      "x": 0.5,
       "y": 0.5
     },
     "_contentSize": {
@@ -72199,8 +72196,8 @@
     "_scaleY": 1,
     "_position": {
       "__type__": "cc.Vec2",
-      "x": 50,
-      "y": 20
+      "x": 0,
+      "y": -34
     },
     "_skewX": 0,
     "_skewY": 0,
@@ -74627,7 +74624,7 @@
     "_position": {
       "__type__": "cc.Vec2",
       "x": 0,
-      "y": -78
+      "y": -34
     },
     "_skewX": 0,
     "_skewY": 0,
@@ -106180,7 +106177,7 @@
       "__id__": 3164
     },
     "_name": "waiting",
-    "_active": true,
+    "_active": false,
     "_position": {
       "__type__": "cc.Vec2",
       "x": 0,
@@ -106256,42 +106253,5 @@
       "__uuid__": "231d3dab-994c-41ce-ac11-1b467f5de417"
     },
     "_sides": null
-  },
-  {
-    "__type__": "62ba5PLPspPHIf4oNNLtr4M",
-    "_name": "",
-    "_objFlags": 0,
-    "node": {
-      "__id__": 2
-    },
-    "_enabled": true,
-    "gameRoot": {
-      "__id__": 68
-    },
-    "prepareRoot": {
-      "__id__": 26
-    },
-    "_options": null,
-    "_optionsData": null,
-    "_selectedMJ": null,
-    "_chupais": [],
-    "_mopais": [],
-    "_mjcount": null,
-    "_gamecount": null,
-    "_hupaiTips": [],
-    "_tingFlags": [],
-    "_huPrompts": [],
-    "_huTemplates": [],
-    "_playEfxs": [],
-    "_tingOpt": null,
-    "_tingState": -1,
-    "_gangState": -1,
-    "_bgMgr": null,
-    "_maima": null,
-    "_acting": 0,
-    "_gameover": null,
-    "_tempHolds": [],
-    "_tempPrompt": null,
-    "_chipeng": false
   }
 ]

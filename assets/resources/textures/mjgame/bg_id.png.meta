@@ -7,7 +7,7 @@
   "subMetas": {
     "bg_id": {
       "ver": "1.0.3",
-      "uuid": "2d32ca31-acf9-40f3-92e8-247711fe951c",
+      "uuid": "4b0ff09d-ebf7-4cdb-9b7d-2d956d4e3846",
       "rawTextureUuid": "4e3a79ba-9c10-4887-875f-7b103b0c5c09",
       "trimType": "auto",
       "trimThreshold": 1,
@@ -16,10 +16,10 @@
       "offsetY": 0,
       "trimX": 0,
       "trimY": 0,
-      "width": 72,
-      "height": 17,
-      "rawWidth": 72,
-      "rawHeight": 17,
+      "width": 75,
+      "height": 19,
+      "rawWidth": 75,
+      "rawHeight": 19,
       "borderTop": 0,
       "borderBottom": 0,
       "borderLeft": 0,
