@@ -63,7 +63,7 @@ cc.Class({
         }
 
         this.addComponent("GameOver");
-        this.addComponent("PengGangs");
+        this.addComponent("PengGangs3d");
         this.addComponent("MJRoom");
         this.addComponent("TimePointer");
         this.addComponent("GameResult");
@@ -111,6 +111,7 @@ cc.Class({
             var side = sides[i];
 
             var sideChild = gameChild.getChildByName(side);
+            
             this._hupaiTips.push(sideChild.getChildByName("hupai"));
             this._tingFlags.push(sideChild.getChildByName('ting'));
 
@@ -1537,8 +1538,10 @@ cc.Class({
 			}
 		} else if (localIndex == 1) {
 			if (board) {
-				starty = 32
-				yoff = 32;
+			    startx = 0;
+				starty = -123.5;
+				xoff = -7.7;
+				yoff = 20;
 			} else {
 			    startx = 0;
 				starty = -123.5;
@@ -1564,8 +1567,10 @@ cc.Class({
 			}
 		} else if (localIndex == 3) {
 			if (board) {
-				starty = -32;
-				yoff = -32;
+			    startx = 0;
+				starty = 123.5;
+				xoff = -8;
+				yoff = -19;
 			} else {
 			    startx = 0;
 				starty = 123.5;
@@ -1994,6 +1999,7 @@ cc.Class({
         var side = net.getSide(localIndex);
         var game = this.node.getChildByName("game");
         var sideRoot = game.getChildByName(side);
+        let layout = sideRoot.getChildByName('layout');
         var sideHolds = cc.find("layout/holds", sideRoot);
         var holds = this.sortHolds(seatData);
         var swap = 'east' == side;
@@ -2072,6 +2078,22 @@ cc.Class({
             }
         }
 
+        if (side == 'east' || side == 'west') {
+            let pgnum = this.getPengGangsNum(seatData) / 3;
+            let position = null;
+
+            if (side == 'east') {
+                position = [ [ 621, -175 ], [ 602, -128 ], [ 598, -42 ], [ 590, 44 ], [ 575, 135 ] ];
+            } else {
+                position = [ [ -53, 293 ], [ -53, 293 ], [ -71, 201 ], [ -81, 116 ], [ -94, 25 ] ];
+            }
+
+            layout.x = position[pgnum][0];
+            layout.y = position[pgnum][1];
+            
+            console.log('set ' + side + ' layout position: ' + layout.x + ', ' + layout.y);
+        }
+        
         console.log('initOtherMahjongs end');
     },
 

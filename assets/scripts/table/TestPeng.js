@@ -13,6 +13,8 @@ const Peng = cc.Class({
         textScale: cc.Vec2,
         textScaleStep: 1,
         tileStep: cc.Vec2,
+        
+        gangStep: cc.Vec2,
     }
 });
 
@@ -29,7 +31,19 @@ cc.Class({
         textRotation: 0,
         zStep: 0,
         gap: cc.Vec2,
-        tilePrefab: cc.Prefab
+        tilePrefab: cc.Prefab,
+        
+        _nodes: []
+    },
+    
+    getStack(id) {
+        let nodes = [];
+        
+        for (let i = 0; i < 4; i++) {
+            nodes.push(this._nodes[id * 4 + i]);
+        }
+        
+        return nodes;
     },
 
     onLoad () {
@@ -47,10 +61,15 @@ cc.Class({
 
     initStack (index) {
         let stack = this.stacks[index];
+        let zStep = this.zStep;
         let tileCount = stack.tileTextures.length;
+        let tileM = null;
+        let nodes = this._nodes;
         for (let i = 0; i < tileCount; ++i) {
             let tileN = cc.instantiate(this.tilePrefab);
             let tile = tileN.getComponent('TestTile');
+            
+            tileN.name = 'peng';
             this.node.addChild(tileN);
             tileN.position = this.curPos;
             tileN.setLocalZOrder(this.zStep * (i + index * tileCount));
@@ -61,8 +80,30 @@ cc.Class({
                 position: cc.pMult(stack.textPos, Math.pow(stack.textScaleStep, i)),
                 rotation: this.textRotation
             });
-            this.curPos = cc.pAdd(this.curPos, cc.pMult(stack.tileStep, Math.pow(stack.textScaleStep, i)));            
+            
+            nodes.push(tileN);
+            
+            if (1 == i) {
+                tileM = cc.instantiate(this.tilePrefab);
+                let tilem = tileM.getComponent('TestTile');
+
+                tileM.name = 'gang';
+                tileM.position = cc.pAdd(this.curPos, stack.gangStep);
+                tileM.setLocalZOrder(zStep * ((index + (zStep > 0 ? 1 : 0)) * tileCount));
+                tilem.init(stack.tileTextures[i], stack.tileText, {
+                    scale: cc.pMult(stack.textScale, Math.pow(stack.textScaleStep, i)),
+                    skew: curSkew,
+                    position: cc.pMult(stack.textPos, Math.pow(stack.textScaleStep, i)),
+                    rotation: this.textRotation
+                });
+            }
+            
+            this.curPos = cc.pAdd(this.curPos, cc.pMult(stack.tileStep, Math.pow(stack.textScaleStep, i)));
         }
+        
+        this.node.addChild(tileM);
+        nodes.push(tileM);
+
         this.curPos = cc.pAdd(this.curPos, this.gap);
     }
 });
