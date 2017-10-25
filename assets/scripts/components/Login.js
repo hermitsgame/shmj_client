@@ -54,6 +54,12 @@ cc.Class({
         cc.find("Canvas/btn_guest").active = (!cc.sys.isNative || cc.sys.os == cc.sys.OS_WINDOWS);
 
         //this._agreeCheck = cc.find("Canvas/agreement/check").getComponent("CheckBox");
+
+        let btn_login = this.node.getChildByName('btn_login');
+        let btn_guest = this.node.getChildByName('btn_guest');
+        
+        btn_login.active = cc.vv.anysdkMgr.checkWechat();
+        //btnGuest.active = !cc.sys.isNative;
     },
     
     start:function() {
@@ -82,7 +88,8 @@ cc.Class({
             cc.vv.alert.show("您必须先同意用户协议！", null, false);
         }
 */
-        cc.vv.userMgr.guestAuth();
+        let input = this.node.getChildByName('input');
+        cc.vv.utils.showDialog(input, 'body', true);
     },
     
     onBtnWeichatClicked: function() {
