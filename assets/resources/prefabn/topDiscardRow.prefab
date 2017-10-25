@@ -72,54 +72,51 @@
     "direction": 2,
     "tileTextures": [
       {
-        "__uuid__": "c4f9a5a3-50b0-445b-9562-9a48b6a0bd22"
+        "__uuid__": "ac651080-8353-4592-a95d-b34c0921aea4"
       },
       {
-        "__uuid__": "c29132f8-746d-4ed4-a741-394bc1384ab6"
+        "__uuid__": "43552a05-e35a-4138-8fa5-142e1903c920"
       },
       {
-        "__uuid__": "6b2a6dd7-e845-4030-b17b-c2bd017e0cd1"
+        "__uuid__": "b3232864-a37d-4704-b2b6-aac8405c9576"
       },
       {
-        "__uuid__": "854c50bd-3e75-49fd-b4e9-2829a8b151eb"
+        "__uuid__": "bbe859ad-86b4-447e-81f3-6f3fe2d68ba2"
       },
       {
-        "__uuid__": "c25b78ca-90ca-4660-9b59-1da37478d0e5"
+        "__uuid__": "f779c771-1683-4599-9145-2eca198f585d"
       },
       {
-        "__uuid__": "75905c1c-d924-4605-902c-e97d1ac9eefd"
+        "__uuid__": "3cf3d6e8-faff-4b4c-b0ad-c06f2ffa1748"
       },
       {
-        "__uuid__": "5b293035-0cb0-4818-99c0-fd3911e6f883"
-      },
-      {
-        "__uuid__": "8440488c-fd1c-47d8-ad40-7c2e5638d941"
+        "__uuid__": "64fadc6f-3a24-4f69-9155-5ec56c484a66"
       }
     ],
     "tileText": {
-      "__uuid__": "af191722-20c2-464a-8f72-8609899c1ef0"
+      "__uuid__": "4022f16b-c931-45c8-bf50-bc674c934f87"
     },
     "textPos": {
       "__type__": "cc.Vec2",
       "x": 0,
-      "y": 9.2
+      "y": 12.5
     },
     "textRotation": 0,
     "textStartSkew": {
       "__type__": "cc.Vec2",
-      "x": -3,
+      "x": -6,
       "y": 0
     },
     "skewStepSign": 1,
     "textScale": {
       "__type__": "cc.Vec2",
-      "x": 0.4,
-      "y": 0.32
+      "x": 0.54,
+      "y": 0.45
     },
     "textScaleStep": 1,
     "tileStep": {
       "__type__": "cc.Vec2",
-      "x": -34,
+      "x": -44,
       "y": 0
     },
     "tilePrefab": {

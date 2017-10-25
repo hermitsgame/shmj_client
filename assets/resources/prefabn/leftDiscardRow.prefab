@@ -71,32 +71,32 @@
     "test": false,
     "direction": 1,
     "tileTexture": {
-      "__uuid__": "6ea7628f-d946-4edc-bd8d-1f827c8078b8"
+      "__uuid__": "4e13ff82-8d06-4a2c-b4ae-8d10c1d22cee"
     },
     "tileCount": 7,
     "tileText": {
-      "__uuid__": "7d230b8c-3b31-4616-af98-ffae2ee76f39"
+      "__uuid__": "0c353363-b897-4bf7-b64b-0f78ae74df22"
     },
     "textPos": {
       "__type__": "cc.Vec2",
-      "x": 0,
-      "y": 8
+      "x": -2.5,
+      "y": 13
     },
     "textRotation": 90,
     "textSkew": {
       "__type__": "cc.Vec2",
       "x": 0,
-      "y": -4
+      "y": -11
     },
     "textScale": {
       "__type__": "cc.Vec2",
-      "x": 0.31,
-      "y": 0.42
+      "x": 0.43,
+      "y": 0.5
     },
     "tileStep": {
       "__type__": "cc.Vec2",
-      "x": -1.5,
-      "y": -25
+      "x": -4,
+      "y": -30
     },
     "tilePrefab": {
       "__uuid__": "3773fb43-bdca-42c2-9e2e-2fc431ac6d17"
