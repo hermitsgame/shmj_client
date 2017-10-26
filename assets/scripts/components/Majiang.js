@@ -41,7 +41,7 @@ cc.Class({
     },
     
     setBoard: function() {
-        return;
+        //return;
         var dir = this._direction;
         var loc = this._location;
         
@@ -60,7 +60,7 @@ cc.Class({
     },
     
     setTile: function() {
-        return;
+        //return;
         var dir = this._direction;
         var loc = this._location;
         var mjid = this.mjid;

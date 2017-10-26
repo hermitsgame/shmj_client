@@ -51,8 +51,6 @@ cc.Class({
 
         //cc.vv.audioMgr.playBackGround(); // TODO
 
-        cc.find("Canvas/btn_guest").active = (!cc.sys.isNative || cc.sys.os == cc.sys.OS_WINDOWS);
-
         //this._agreeCheck = cc.find("Canvas/agreement/check").getComponent("CheckBox");
 
         let btn_login = this.node.getChildByName('btn_login');
