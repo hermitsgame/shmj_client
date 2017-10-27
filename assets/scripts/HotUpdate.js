@@ -201,9 +201,6 @@ cc.Class({
             this.done();
             return;
         }
-        
-        this.done();
-        return; // not used now.
 
         this._percent = this.node.getChildByName('progress').getComponent('Progress');
 
