@@ -40,13 +40,10 @@ cc.Class({
         var self = this;
         var SHOW_TIME = 1000;
         var FADE_TIME = 300;
-        var splash = this._splash;
-
         if(cc.sys.os != cc.sys.OS_IOS || !cc.sys.isNative){
-            splash.active = true;
-
+            self._splash.active = true;
             var t = Date.now();
-            var fn = function() {
+            var fn = function(){
                 var dt = Date.now() - t;
                 if(dt < SHOW_TIME){
                     setTimeout(fn,33);
@@ -54,19 +51,19 @@ cc.Class({
                 else {
                     var op = (1 - ((dt - SHOW_TIME) / FADE_TIME)) * 255;
                     if(op < 0){
-                        splash.opacity = 0;
-                        //self.checkVersion();
+                        self._splash.opacity = 0;
+                        //self.checkVersion();    
                     }
-                    else {
-                        splash.opacity = op;
-                        setTimeout(fn,33);
+                    else{
+                        self._splash.opacity = op;
+                        setTimeout(fn,33);   
                     }
                 }
             };
             setTimeout(fn,33);
         }
-        else {
-            splash.active = false;
+        else{
+            this._splash.active = false;
             //this.checkVersion();
         }
     },
