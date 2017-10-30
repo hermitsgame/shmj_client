@@ -41,7 +41,7 @@ cc.Class({
     },
     
     setBoard: function() {
-        //return;
+        return;
         var dir = this._direction;
         var loc = this._location;
         
@@ -60,21 +60,12 @@ cc.Class({
     },
     
     setTile: function() {
-        //return;
-        var dir = this._direction;
-        var loc = this._location;
-        var mjid = this.mjid;
-        
-        if (!dir || !loc) {
+        let mjid = this.mjid;
+        let tile = this.node.getChildByName("tile");
+        if (!tile)
             return;
-        }
-        
-        var tile = this.node.getChildByName("tile");
-        if (!tile) {
-            return;
-        }
 
-        var sprite = tile.getComponent(cc.Sprite);
+        let sprite = tile.getComponent(cc.Sprite);
         if (!sprite || mjid < 0) {
 			tile.active = false;
             return;
@@ -82,27 +73,23 @@ cc.Class({
 
 		tile.active = true;
 
-        var mgr = cc.vv.mahjongmgr;
-
-        var tileSpriteFrame = mgr.getTileSpriteFrame(dir, loc, mjid);
-        if (tileSpriteFrame) {
-                sprite.spriteFrame = tileSpriteFrame;
-        }
+        let mgr = cc.vv.mahjongmgr;
+        let sp = mgr.getTileSprite2D(mjid);
+        if (sp)
+            sprite.spriteFrame = sp;
     },
     
     setTing: function(status) {
         var ting = this.node.getChildByName("ting");
 
-        if (ting) {
+        if (ting)
             ting.active = status;
-        }
     },
     
     setKou: function(status) {
         var kou = this.node.getChildByName("kou");
-        if (kou) {
+        if (kou)
             kou.active = status;
-        }
     },
 
 	setFocus: function(status) {
@@ -115,48 +102,31 @@ cc.Class({
 
 	showFocus: function() {
 		var focus = this.node.getChildByName('focus');
-		if (focus && focus.active) {
+		if (focus && focus.active)
 			focus.opacity = 255;
-		}
     },
 
     setFlag: function(name, status) {
         var flag = this.node.getChildByName(name);
-        if (flag) {
+        if (flag)
             flag.active = status;
-        }
     },
 
     setContent: function(name, content) {
         var item = this.node.getChildByName(name);
-        if (item) {
+        if (item)
             item.getComponent(cc.Label).string = content;
-        }
     },
 
     setInteractable: function(status) {
         var mask = this.node.getChildByName("mask");
-        if (mask) {
+        if (mask)
             mask.active = !status;
-        }
     },
 
     setMJID: function(mjid) {
         this.mjid = mjid;
         this.setTile();
-    },
-
-	update: function (dt) {
-		var focus = this.node.getChildByName('focus');
-		if (focus && focus.active) {
-			this._focusDt += dt;
-			if (this._focusDt > 0.2) {
-				this._focusDt -= 0.2;
-
-				this._focusID = (this._focusID + 1) % 6;
-				focus.getComponent(cc.Label).string = this._focusID;
-			}
-		}
     },
 });
 

@@ -332,10 +332,11 @@ cc.Class({
 
 				var item = getFlower(flowers, local, index);
 				var tile = item.getChildByName('tile').getComponent('SpriteMgr');
-				var num = item.getChildByName('num').getComponent(cc.Label);
+				var num = item.getChildByName('num').getComponent('SpriteMgr');
 
+                console.log('set tile off: ' + off);
 				tile.setIndex(off);
-				num.string = fls[key];
+				num.setIndex(fls[key] - 1);
 
 				index++;
 			}
@@ -402,8 +403,8 @@ cc.Class({
             var localIndex = cc.vv.gameNetMgr.getLocalIndex(detail.seatIndex);
             if (0 == localIndex) {
                 self.checkChuPai(true);
-                self.checkTingPai(true);
-                self.showTings(true);
+                //self.checkTingPai(true);
+                //self.showTings(true);
             }
         });
 
@@ -509,8 +510,8 @@ cc.Class({
             if (seatData.seatindex == cc.vv.gameNetMgr.seatIndex) {
                 self.initMahjongs();
                 self.checkChuPai(true);
-                self.checkTingPai();
-                self.showTings(true);
+                //self.checkTingPai();
+                //self.showTings(true);
             } else {
                 self.initOtherMahjongs(seatData, '', true);
             }
@@ -551,8 +552,8 @@ cc.Class({
             if (seatData.seatindex == cc.vv.gameNetMgr.seatIndex) {
                 self.initMahjongs();
                 self.checkChuPai(true);
-                self.checkTingPai();
-                self.showTings(true);
+                //self.checkTingPai();
+                //self.showTings(true);
             }
             else {
                 self.initOtherMahjongs(seatData, '', true);
@@ -911,24 +912,16 @@ cc.Class({
     },
 
     addOption: function(name) {
-        var ops = [ "peng", "gang", "hu", "chi", "ting", "guo" ];
+        let ops = [ 'gang', 'peng', 'chi', 'hu', 'ting', 'guo' ];
 
-        var id = ops.indexOf(name);
+        let id = ops.indexOf(name);
         if (id == -1) {
             console.log("addOption: unknown option name");
             return;
         }
 
-        for (var i = 0; i < this._options.childrenCount; ++i) {
-            var child = this._options.children[i];
-            if (child.name == "op" && child.active == false) {
-                child.active = true;
-
-                var sprite = child.getComponent("SpriteMgr");
-                sprite.setIndex(id);
-                break;
-            }
-        }
+        let op = this._options.children[id];
+        op.active = true;
     },
 
     hideOptions:function(data) {
@@ -1241,13 +1234,12 @@ cc.Class({
         if (this._tingState == 0) {
             this.enterTingState(1, mjid);
         } else {
-        if (this.hasOptions()) {
-            net.send("guo");
-        }
+            if (this.hasOptions())
+                net.send("guo");
 
-        this.showTings(false);
+            this.showTings(false);
 
-        net.send('chupai', mjid);
+            net.send('chupai', mjid);
         }
 
         this._optionsData = null;
@@ -1322,7 +1314,8 @@ cc.Class({
     checkTingPai: function() {
         var holds = cc.find("game/south/layout/holds", this.node);
 		var mjcnt = holds.childrenCount;
-        var tingouts = this._optionsData.tingouts;
+        let op = this._optionsData;
+        let tingouts = op ? op.tingouts : null;
         
         for (var i = 0; i < mjcnt; i++) {
             var mjnode = holds.children[i];
@@ -1333,17 +1326,16 @@ cc.Class({
             }
 
             var mjid = mj.mjid;
-            var ting = (tingouts.indexOf(mjid) != -1);
+            var ting = !tingouts || (tingouts.indexOf(mjid) != -1);
 
             mj.setInteractable(ting);
-            console.log('1342: setInteractable: ' + ting);
-            mj.setTing(ting);
         }
     },
 
     showTings: function(enable) {
         var holds = cc.find("game/south/layout/holds", this.node);
 		var mjcnt = holds.childrenCount;
+        var tingouts = this._optionsData.tingouts;
 
         for (var i = 0; i < mjcnt; i++) {
 			var mjnode = holds.children[i];
@@ -1353,7 +1345,7 @@ cc.Class({
                 continue;
             }
 
-            var ting = enable && (this._optionsData.tingouts.indexOf(mj.mjid) != -1);
+            var ting = enable && tingouts && tingouts.indexOf(mj.mjid) != -1;
 
             mj.setTing(ting);
         }
@@ -1411,12 +1403,13 @@ cc.Class({
         net.send('chi', { type: type, pai: pai });
     },
 
-    onOptionClicked: function(event) {
-        var target = event.target;
-        var spriteMgr = target.getComponent("SpriteMgr");
-        var index = spriteMgr.index;
-        var net = cc.vv.net;
-        var data = this._optionsData;
+    onOptionClicked: function(event, customData) {
+        let target = event.target;
+        let net = cc.vv.net;
+        let data = this._optionsData;
+        let ops = [ 'peng', 'gang', 'hu', 'chi', 'ting', 'guo' ];
+
+        let index = ops.indexOf(customData);
 
         this.showTingPrompts();
 
@@ -1586,16 +1579,16 @@ cc.Class({
 
         if (0 == localIndex) {
             start = 42.5;
-            xoff = 83;
+            xoff = 85;
         } else if (localIndex == 1) {
-            start = 32;
-            yoff = 32;
+            start = 19;
+            yoff = 36.5;
         } else if (localIndex == 2) {
-            start = -20.5;
-            xoff = -39;
+            start = -21.8;
+            xoff = -43.6;
         } else if (localIndex == 3) {
-            start = -32;
-            yoff = -32;
+            start = -13.68;
+            yoff = -36.5;
         }
 
         if (xoff != 0) {
@@ -1618,47 +1611,38 @@ cc.Class({
 
 		if (localIndex == 0) {
 			start = 42.5;
-			xoff = 83;
+			xoff = 85;
 
-			if (mopai) {
+			if (mopai)
 				barrier = 20;
-			}
 		} else if (localIndex == 1) {
 			if (board) {
-				start = 32
-				yoff = 32;
+				start = 19
+				yoff = 36.5;
 			} else {
-				start = 29;
-				yoff = 36;
+				start = 19;
+				yoff = 38;
 			}
 
-			if (mopai) {
+			if (mopai)
 				barrier = 20;
-			}
 		} else if (localIndex == 2) {
-			if (board) {
-				start = -20.5;
-				xoff = -39;
-			} else {
-				start = -22;
-				xoff = -41;
-			}
+            start = -21.8;
+            xoff = -43.6;
 
-			if (mopai) {
+			if (mopai)
 				barrier = -20;
-			}
 		} else if (localIndex == 3) {
 			if (board) {
-				start = -32;
-				yoff = -32;
+				start = -13.68;
+				yoff = -36.5;
 			} else {
-				start = -29;
-				yoff = -36;
+				start = -13.68;
+				yoff = -38;
 			}
 
-			if (mopai) {
+			if (mopai)
 				barrier = -20;
-			}
 		}
 
 		if (xoff != 0) {

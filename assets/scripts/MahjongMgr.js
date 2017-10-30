@@ -30,6 +30,11 @@ cc.Class({
             type: cc.SpriteAtlas
         },
 
+        atlas2D: {
+            default: null,
+            type: cc.SpriteAtlas
+        },
+
         _sides: null,
     },
     
@@ -136,6 +141,18 @@ cc.Class({
         var fullname = direction + "_" + name + "_board_" + this.getMJStyle();
 
         return this.getSpriteFrame(direction, fullname);
+    },
+
+    getTileSprite2D: function(mjid) {
+        return this.atlas2D.getSpriteFrame(mjid);
+    },
+
+    getBoardSprite2D: function(side, name) {
+        let dir = 'south';
+        if (side == 'west' || side == 'east') 
+            dir = 'side'; 
+    
+        return this.atlas2D.getSpriteFrame(dir + '_' + name + '_board');
     },
 
     getTileSprite3D: function(mjid) {

@@ -291,21 +291,28 @@ cc.Class({
 
 		pgroot.children[3].active = false;
 
-		var mjs = this.getChiArr(mjid);
-		var side = 'south';
+		let mjs = this.getChiArr(mjid);
+		let side = 'south';
 
-        for (var i = 0; i < 3; i++) {
-            var child = pgroot.children[i];
+        for (let i = 0; i < 3; i++) {
+            let child = pgroot.children[i];
+            let board = child.getComponent(cc.Sprite);
+            let tile = child.children[0].getComponent(cc.Sprite);
+            let chi = child.getChildByName('chi');
+            let arrow = child.getChildByName('arrow');
 
-            var board = child.getComponent(cc.Sprite);
-            var tile = child.children[0].getComponent(cc.Sprite);
+            if (chi)
+                chi.active = false;
 
-			board.spriteFrame = mgr.getBoardSpriteFrame(side, "meld");
-			tile.spriteFrame = mgr.getTileSpriteFrame(side, "meld", mjs[i]);
+            if (arrow)
+                arrow.active = false;
+
+			board.spriteFrame = mgr.getBoardSprite2D(side, "meld");
+			tile.spriteFrame = mgr.getTileSprite2D(mjs[i]);
 		}
     },
 
-    initPengAndGangs:function(seatView,index,mjid,flag){
+    initPengAndGangs: function(seatView,index,mjid,flag) {
         var pgroot = null;
         var mgr = cc.vv.mahjongmgr;
         
@@ -322,29 +329,35 @@ cc.Class({
         mjid = mjid % 100;
 		
         var side = 'south';
-        for (var i = 0; i < pgroot.childrenCount; i++) {
-            var child = pgroot.children[i];
+        for (let i = 0; i < pgroot.childrenCount; i++) {
+            let child = pgroot.children[i];
+            let board = child.getComponent(cc.Sprite);
+            let tile = child.children[0].getComponent(cc.Sprite);
+            let chi = child.getChildByName('chi');
+            let arrow = child.getChildByName('arrow');
 
-            var board = child.getComponent(cc.Sprite);
-            var tile = child.children[0].getComponent(cc.Sprite);
+            if (chi)
+                chi.active = false;
+
+            if (arrow)
+                arrow.active = false;
 
             if (child.name == "gang") {
                 var isGang = flag != "peng";
                 child.active = isGang;
 
-                if (!isGang) {
+                if (!isGang)
                     continue;
-                }
 
-                board.spriteFrame = mgr.getBoardSpriteFrame(side, "meld");
-                tile.spriteFrame = mgr.getTileSpriteFrame(side, "meld", mjid);
+                board.spriteFrame = mgr.getBoardSprite2D(side, "meld");
+                tile.spriteFrame = mgr.getTileSprite2D(mjid);
             } else {
                 if (flag == "angang") {
-                    board.spriteFrame = mgr.getBoardSpriteFrame(side, "meld_cover");
+                    board.spriteFrame = mgr.getBoardSprite2D(side, "meld_cover");
                     tile.spriteFrame = null;
                 } else {
-                    board.spriteFrame = mgr.getBoardSpriteFrame(side, "meld");
-                    tile.spriteFrame = mgr.getTileSpriteFrame(side, "meld", mjid);
+                    board.spriteFrame = mgr.getBoardSprite2D(side, "meld");
+                    tile.spriteFrame = mgr.getTileSprite2D(mjid);
                 }
             }
         }

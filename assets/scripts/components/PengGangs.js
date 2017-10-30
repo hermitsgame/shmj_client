@@ -377,7 +377,7 @@ cc.Class({
         for (var i = 0; i < pgroot.childrenCount; i++) {
             var child = pgroot.children[i];
             var board = child.getComponent(cc.Sprite);
-            var tile = child.getChildByName('tile');
+            var tile = child.getChildByName('text');
             var tileSprite = tile.getComponent(cc.Sprite);
             var chi = child.getChildByName('chi');
             var arrow = child.getChildByName('arrow');
@@ -392,26 +392,20 @@ cc.Class({
                 if (!isGang)
                     continue;
 
-                board.spriteFrame = mgr.getBoardSpriteFrame(side, "meld");
+                //board.spriteFrame = mgr.getBoardSpriteFrame(side, "meld");
 
-                var sprite = mgr.getTileSpriteFrame(side, "meld", mjid);
-                if (!sprite) {
-                    sprite = mgr.getTileSpriteFrame(side, "table", mjid);
-                }
+                let sprite = mgr.getTileSprite2D(mjid);
 
                 tile.active = true;
                 tileSprite.spriteFrame = sprite;
             } else {
             	if (flag == "angang") {
-                    board.spriteFrame = mgr.getBoardSpriteFrame(side, "meld_cover");
+                    board.spriteFrame = mgr.getBoardSprite2D(side, 'meld_cover');
                     tile.active = false;
                 } else {
-                    board.spriteFrame = mgr.getBoardSpriteFrame(side, "meld");
+                    board.spriteFrame = mgr.getBoardSprite2D(side, 'meld');
 
-                    var sprite = mgr.getTileSpriteFrame(side, "meld", mjid);
-                    if (!sprite) {
-                        sprite = mgr.getTileSpriteFrame(side, "table", mjid);
-                    }
+                    let sprite = mgr.getTileSprite2D(mjid);
 
                     tile.active = true;
                     tileSprite.spriteFrame = sprite;
@@ -419,50 +413,53 @@ cc.Class({
                     if (arrow) {
                         arrow.active = !isGang;
                         if (!isGang)
-                            this.setArrow(arrow, seatindex);
+                            this.setArrow(side, arrow, seatindex);
                     }
                 }
             }
         }
     },
 
-    setArrow: function(arrow, seatindex) {
-        var net = cc.vv.gameNetMgr;
-        var local = net.getLocalIndex(seatindex);
-        var angels = [ 90, 0, -90, 180 ];
+    setArrow: function(side, arrow, seatindex) {
+        let net = cc.vv.gameNetMgr;
+        let local = net.getLocalIndex(seatindex);
+        let spriteMgr = arrow.getComponent('SpriteMgr');
+        let sides = [ 'south', 'east', 'north', 'west' ];
+        let myself = sides.indexOf(side);
 
-        arrow.rotation = angels[local];
+        let idx = (4 + local - myself) % 4 - 1;
+
+        spriteMgr.setIndex(idx);
     },
 
 	initChis:function(pengangroot, side, index, mjid) {
-        var pgroot = null;
-        var mgr = cc.vv.mahjongmgr;
+        let pgroot = null;
+        let mgr = cc.vv.mahjongmgr;
+        let net = cc.vv.gameNetMgr;
 
         pgroot = this.getPengGangItem(pengangroot, side, index);
         pgroot.active = true;
-
         pgroot.children[3].active = false;
 
-        var mjs = cc.vv.gameNetMgr.getChiArr(mjid);
+        let mjs = net.getChiArr(mjid);
 
-        for (var i = 0; i < 3; i++) {
-            var child = pgroot.children[i];
+        for (let i = 0; i < 3; i++) {
+            let child = pgroot.children[i];
+            let board = child.getComponent(cc.Sprite);
+            let tile = child.getChildByName('text');
+            let tileSprite = tile.getComponent(cc.Sprite);
+            let chi = child.getChildByName('chi');
+            let arrow = child.getChildByName('arrow');
 
-            var board = child.getComponent(cc.Sprite);
-            var tile = child.getChildByName('tile');
-            var tileSprite = tile.getComponent(cc.Sprite);
-            var chi = child.getChildByName('chi');
-            var arrow = child.getChildByName('arrow');
-
-            board.spriteFrame = mgr.getBoardSpriteFrame(side, "meld");
+            board.spriteFrame = mgr.getBoardSprite2D(side, "meld");
             tile.active = true;
-            tileSprite.spriteFrame = mgr.getTileSpriteFrame(side, "meld", mjs[i]);
+            tileSprite.spriteFrame = mgr.getTileSprite2D(mjs[i]);
 
             if (chi)
                 chi.active = mjs[i] == (mjid % 100);
 
-                if (arrow)
-                    arrow.active = false;
+            if (arrow)
+                arrow.active = false;
         }
     },
 });
