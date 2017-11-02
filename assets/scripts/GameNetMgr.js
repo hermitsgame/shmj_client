@@ -192,16 +192,30 @@ cc.Class({
         var conf = this.conf;
         var strArr = [];
 
-        if (conf) {
-            if (conf.maxGames != null && conf.maxFan != null) {
-                var type = conf.type;
-                // TODO
+        if (!conf)
+            return '';
+
+        if (conf.maxGames != null && conf.maxFan != null) {
+            let type = conf.type;
+
+            if (conf.huafen)
+                strArr.push('花分' + conf.huafen);
+
+            if (conf.maxfan != null) {
+                if (conf.maxfan > 10)
+                    strArr.push('不封顶');
+                else
+                    strArr.push('封顶' + conf.maxfan + '番');
             }
 
-            return strArr.join(' ');
+            if (conf.maima)
+                strArr.push('飞苍蝇');
+
+            if (conf.qidui)
+                strArr.push('七对');
         }
 
-        return '';
+        return strArr.join(' ');
     },
 	
 
@@ -887,10 +901,10 @@ cc.Class({
     },
 
     doPeng: function(seatIndex, pai, skip) {
-        var seatData = this.seats[seatIndex];
-        var holds = seatData.holds;
-
-        var c = pai % 100;
+        let seatData = this.seats[seatIndex];
+        let holds = seatData.holds;
+        let pengs = seatData.pengs;
+        let c = pai % 100;
 
         if (holds != null && holds.length > 0) {
             for (var i = 0; i < 2; i++) {
@@ -903,12 +917,10 @@ cc.Class({
             }
         }
 
-        var pengs = seatData.pengs;
         pengs.push(pai);
 
-        if (skip) {
+        if (skip)
             return;
-        }
 
         this.dispatchEvent('peng_notify', { seatData: seatData, pai: pai });
     },
@@ -929,23 +941,28 @@ cc.Class({
     },
 
     getGangType: function(seatData, pai) {
-        if(seatData.pengs.indexOf(pai) != -1){
-            return "wangang";
+        
+        let pengs = seatData.pengs;
+
+        for (let i = 0; i < pengs.length; i++) {
+            let c = pengs[i] % 100;
+
+            if (c == pai)
+                return 'wangang';
         }
-        else{
-            var cnt = 0;
-            for(var i = 0; i < seatData.holds.length; ++i){
-                if(seatData.holds[i] == pai){
-                    cnt++;
-                }
-            }
-            if(cnt == 3){
-                return "diangang";
-            }
-            else{
-                return "angang";
-            }
-        }
+
+        let cnt = 0;
+        seatData.holds.forEach(x=>{
+            if (x == pai)
+                cnt++;
+        });
+
+        if (cnt == 3)
+            return "diangang";
+        else if (cnt == 4)
+            return "angang";
+        else
+            return 'unknown';
     },
 
     doGang: function(seatIndex, pai, gangtype, skip) {
@@ -956,15 +973,28 @@ cc.Class({
 
         if(!gangtype){
             gangtype = this.getGangType(seatData,pai);
+
+            if (gangtype == 'unknown') {
+                console.log('ERROR: unknown gangtype');
+                console.log('pengs:')
+                console.log(seatData.pengs);
+                console.log('holds:');
+                console.log(seatData.holds);
+            }
         }
 
-        if(gangtype == "wangang"){
-            if(seatData.pengs.indexOf(pai) != -1){
-                var idx = seatData.pengs.indexOf(pai);
-                if(idx != -1){
-                    seatData.pengs.splice(idx,1);
+        if (gangtype == "wangang") {
+            let pengs = seatData.pengs;
+
+            for (let i = 0; i < pengs.length; i++) {
+                let c = pengs[i] % 100;
+
+                if (c == pai) {
+                    pengs.splice(i, 1);
+                    break;
                 }
             }
+
             seatData.wangangs.push(pai);
         }
 
@@ -979,23 +1009,14 @@ cc.Class({
             }
         }
 
-        if (seatData.kou) {
-            var id = seatData.kou.indexOf(pai);
-            if (id != -1) {
-                seatData.kou.splice(id, 1);
-            }
-        }
-
         if (gangtype == "angang") {
             seatData.angangs.push(pai);
-        }
-        else if(gangtype == "diangang") {
+        } else if (gangtype == "diangang") {
             seatData.diangangs.push(pai);
         }
 
-        if (skip) {
+        if (skip)
             return;
-        }
 
         this.dispatchEvent('gang_notify', { seatData: seatData, gangtype: gangtype, pai: pai });
     },

@@ -94,7 +94,7 @@ cc.Class({
 
         this._mjcount = cc.find("mj_count/mj_count", gameChild).getComponent(cc.Label);
         this._mjcount.string = net.numOfMJ;
-        this._gamecount = cc.find("Canvas/infobar/room/game_count").getComponent(cc.Label);
+        this._gamecount = cc.find("Canvas/roominfo/game_count").getComponent(cc.Label);
         this._gamecount.string = "" + net.numOfGames + " / " + net.maxNumOfGames;
 
         var south = gameChild.getChildByName("south");
@@ -357,69 +357,66 @@ cc.Class({
     },
 
     initEventHandlers: function() {
-        var node = this.node;
-        var self = this;
-        var net = cc.vv.gameNetMgr;
+        let node = this.node;
+        let self = this;
+        let net = cc.vv.gameNetMgr;
 
         net.dataEventHandler = node;		
 
-        node.on('game_holds', function(data) {
+        node.on('game_holds', data=>{
            self.initMahjongs();
         });
 
-        node.on('game_holds_update', function(data) {
+        node.on('game_holds_update', data=>{
             self.updateHolds();
         });
 
-        node.on('game_holds_len', function(data) {
+        node.on('game_holds_len', data=>{
             self.updateOtherHolds(data.detail);
         });
 
-        node.on('game_holds_updated', function(data) {
+        node.on('game_holds_updated', data=>{
             self.holdsUpdated();
         });
 
-        node.on('game_begin', function(data) {
+        node.on('game_begin', data=>{
             cc.vv.audioMgr.playSFX('Sound/GAME_START0.mp3');
             self.onGameBegin();
         });
 
-        node.on('game_sync', function(data) {
+        node.on('game_sync', data=>{
             console.log('game sync');
-            if (cc.vv.gameNetMgr.isPlaying()) {
+            if (net.isPlaying()) {
                 self.onGameSync();
             }
         });
 
-        node.on('game_chupai', function(data) {
+        node.on('game_chupai', data=>{
             self.hideChupai();
         });
 
-        node.on('game_mopai',function(data) {
-            var detail = data.detail;
+        node.on('game_mopai', data=>{
+            let detail = data.detail;
             self.hideChupai();
             self.showMopai(detail.seatIndex, detail.pai);
 
-            var localIndex = cc.vv.gameNetMgr.getLocalIndex(detail.seatIndex);
+            let localIndex = net.getLocalIndex(detail.seatIndex);
             if (0 == localIndex) {
                 self.checkChuPai(true);
-                //self.checkTingPai(true);
-                //self.showTings(true);
             }
         });
 
-        node.on('game_action', function(data) {
+        node.on('game_action', data=>{
             self.showAction(data.detail);
         });
 
-        node.on('user_hf_updated', function(data) {
+        node.on('user_hf_updated', data=>{
             console.log('user_hf_updated');
             self.updateFlowers(data.detail);
         });
 
-        node.on('hupai',function(data) {
+        node.on('hupai', data=>{
             var data = data.detail;
-            var net = cc.vv.gameNetMgr;
             var seatIndex = data.seatindex;
             var localIndex = net.getLocalIndex(seatIndex);
             var hupai = self._hupaiTips[localIndex];
@@ -456,15 +453,15 @@ cc.Class({
             }
         });
 
-        node.on('mj_count',function(data) {
-            self._mjcount.string = cc.vv.gameNetMgr.numOfMJ;
+        node.on('mj_count', data=>{
+            self._mjcount.string = net.numOfMJ;
         });
 
-        node.on('game_num', function(data) {
-            self._gamecount.string = "" + cc.vv.gameNetMgr.numOfGames + " / " + cc.vv.gameNetMgr.maxNumOfGames;
+        node.on('game_num', data=>{
+            self._gamecount.string = "" + net.numOfGames + " / " + net.maxNumOfGames;
         });
 
-        node.on('game_over', function(data) {
+        node.on('game_over', data=>{
             var go_data = data.detail;
 
             self.playHuAction(go_data.results, ()=>{
@@ -474,12 +471,12 @@ cc.Class({
             });
         });
 
-        node.on('game_chupai_notify', function(data) {
+        node.on('game_chupai_notify', data=>{
             self.hideChupai();
             var seatData = data.detail.seatData;
             var pai = data.detail.pai;
 
-            if (seatData.seatindex == cc.vv.gameNetMgr.seatIndex) {
+            if (seatData.seatindex == net.seatIndex) {
                 self.doChupai(seatData, pai);
                 self.checkChuPai(false);
                 self.showTingPrompts();
@@ -492,26 +489,24 @@ cc.Class({
             cc.vv.audioMgr.playDialect(content, seatData.userid);
         });
 
-        node.on('guo_notify',function(data){
+        node.on('guo_notify', data=>{
             self.hideChupai();
             self.hideOptions();
             var seatData = data.detail;
         });
 
-        node.on('guo_result',function(data) {
+        node.on('guo_result', data=>{
             self.hideOptions();
         });
 
-        node.on('peng_notify', function(data) {
+        node.on('peng_notify', data=>{
             self.hideChupai();
 
             var seatData = data.detail.seatData;
             self._chipeng = true;
-            if (seatData.seatindex == cc.vv.gameNetMgr.seatIndex) {
+            if (seatData.seatindex == net.seatIndex) {
                 self.initMahjongs();
                 self.checkChuPai(true);
-                //self.checkTingPai();
-                //self.showTings(true);
             } else {
                 self.initOtherMahjongs(seatData, '', true);
             }
@@ -525,13 +520,13 @@ cc.Class({
             self.hideOptions();
         });
 
-        node.on('ting_notify', function(data) {
+        node.on('ting_notify', data=>{
             var seatData = data.detail;
             var localIndex = self.getLocalIndex(seatData.seatindex);
             var ting = self._tingFlags[localIndex];
 
             ting.active = true;
-            if(seatData.seatindex == cc.vv.gameNetMgr.seatIndex) {
+            if(seatData.seatindex == net.seatIndex) {
                 //self.initMahjongs();
                 self.updateTingpai(localIndex, seatData.tings);
                 self.checkChuPai(true);
@@ -543,22 +538,18 @@ cc.Class({
             //cc.vv.audioMgr.playAction('ming');
         });
 
-        node.on('chi_notify', function(data) {
+        node.on('chi_notify', data=>{
             self.hideChupai();
 
             var seatData = data.detail.seatData;
             var pai = data.detail.pai;
             self._chipeng = true;
-            if (seatData.seatindex == cc.vv.gameNetMgr.seatIndex) {
+            if (seatData.seatindex == net.seatIndex) {
                 self.initMahjongs();
                 self.checkChuPai(true);
-                //self.checkTingPai();
-                //self.showTings(true);
-            }
-            else {
+            } else {
                 self.initOtherMahjongs(seatData, '', true);
 
-                var net = cc.vv.gameNetMgr;
                 var sd = net.getSelfData();
 
                 if (sd.hastingpai) {
@@ -587,7 +578,7 @@ cc.Class({
             self.hideOptions();
         });
 
-        node.on('gang_notify',function(info) {
+        node.on('gang_notify', info=>{
             self.hideChupai();
             var data = info.detail;
             var seatData = data.seatData;
@@ -611,17 +602,17 @@ cc.Class({
             cc.vv.audioMgr.playDialect('gang', seatData.userid);
         });
 
-        node.on("hangang_notify",function(data){
+        node.on("hangang_notify", data=>{
             var data = data.detail;
             var localIndex = self.getLocalIndex(data);
             self.hideOptions();
         });
 
-        node.on('refresh_mj', function() {
+        node.on('refresh_mj', ()=>{
             self.refreshMJ();
         });
 
-        node.on('refresh_bg', function(data) {
+        node.on('refresh_bg', data=>{
             self._bgMgr.setIndex(data.detail);
         });
 
@@ -1335,7 +1326,8 @@ cc.Class({
     showTings: function(enable) {
         var holds = cc.find("game/south/layout/holds", this.node);
 		var mjcnt = holds.childrenCount;
-        var tingouts = this._optionsData.tingouts;
+        let op = this._optionsData;
+        let tingouts = op ? op.tingouts : null;
 
         for (var i = 0; i < mjcnt; i++) {
 			var mjnode = holds.children[i];

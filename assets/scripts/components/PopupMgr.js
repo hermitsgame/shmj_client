@@ -15,12 +15,15 @@ cc.Class({
         _noticeLabel:null, 
     },
 
-    onLoad: function () {
-        if (cc.vv == null) {
+    onLoad: function() {
+        if (cc.vv == null)
             return;
-        }
         
         cc.vv.popupMgr = this;
+
+        let btnMenu = this.node.getChildByName('btn_menu');
+
+        cc.vv.utils.addClickEvent(btnMenu, this.node, 'PopupMgr', 'onBtnMenu');
         
         var root = cc.find("Canvas/popups");
 
@@ -47,7 +50,7 @@ cc.Class({
         this.addBtnHandler("dissolve_notice/body/btn_dissolve");
 
         this.addBtnHandler('menu/btnAudio');
-        this.addBtnHandler('menu/btnSkin');
+        //this.addBtnHandler('menu/btnSkin');
         this.addBtnHandler('menu/btnDissolve');
         this.addBtnHandler('menu/mask');
 
@@ -82,6 +85,10 @@ cc.Class({
         if(cc.vv.gameNetMgr.dissoveData){
             this.showDissolveNotice(cc.vv.gameNetMgr.dissoveData);
         }
+    },
+
+    onBtnMenu: function() {
+        this.showMenu();
     },
     
     addBtnHandler:function(btnName){
@@ -186,73 +193,67 @@ cc.Class({
 
     showDissolveNotice: function(data) {
         this._endTime = Date.now()/1000 + data.time;
-        var dissolveNotice = this._dissolveNotice;
-        var body = dissolveNotice.getChildByName('body');
+        let dn = this._dissolveNotice;
+        let body = dn.getChildByName('body');
+        let seats = body.getChildByName('seats');
+        let net = cc.vv.gameNetMgr;
 
-        var seats = body.getChildByName('seats');
-
-        if (!(dissolveNotice.active && this._popuproot.active)) {
+        if (!(dn.active && this._popuproot.active)) {
             this.closeAll();
             this._popuproot.active = true;
 
-            cc.vv.utils.showDialog(dissolveNotice, 'body', true);
+            cc.vv.utils.showDialog(dn, 'body', true);
 
-            var index = 0;
-            for (var i = 0; i < seats.childrenCount && i < cc.vv.gameNetMgr.seats.length; i++) {
-                var seat = seats.children[i];
-                var icon = seat.getChildByName('icon');
-                var imageLoader = icon.getComponent('ImageLoader');
-                var name = seat.getChildByName('name').getComponent(cc.Label);
+            let index = 0;
+            for (let i = 0; i < seats.childrenCount && i < net.seats.length; i++, index++) {
+                let seat = seats.children[i];
+                let icon = cc.find('mask/icon', seat);
+                let imageLoader = icon.getComponent('ImageLoader');
+                let name = seat.getChildByName('name').getComponent(cc.Label);
 
                 seat.active = true;
-                imageLoader.setUserID(cc.vv.gameNetMgr.seats[i].userid);
-                name.string = cc.vv.gameNetMgr.seats[i].name;
-
-                index++;
+                imageLoader.setUserID(net.seats[i].userid);
+                name.string = net.seats[i].name.slice(0, 5);
             }
 
-            for (var i = index; i < seats.childrenCount; i++) {
-                var seat = seats.children[i];
+            for (let i = index; i < seats.childrenCount; i++) {
+                let seat = seats.children[i];
 
                 seat.active = false;
             }
         }
 
-        var notice = ['(等待中)', '(拒绝)', '(同意)', '(离线)'];
-        var color = [ new cc.Color(180, 180, 180, 255), new cc.Color(255, 0, 0, 255), new cc.Color(0, 255, 0, 255), new cc.Color(255, 0, 0, 255) ];
+        let notice = ['(等待中)', '(拒绝)', '(同意)', '(离线)'];
 
-        for (var i = 0; i < seats.childrenCount && i < cc.vv.gameNetMgr.seats.length; i++) {
-            var seat = seats.children[i];
-            var owner = seat.getChildByName('owner');
-            var status = seat.getChildByName('status');
-            var lblStatus = status.getComponent(cc.Label);
+        for (let i = 0; i < seats.childrenCount && i < net.seats.length; i++) {
+            let seat = seats.children[i];
+            let status = seat.getChildByName('status');
+            let sprite = status.getComponent('SpriteMgr');
+            let state = data.states[i];
+            let index = 0;
 
-            var state = data.states[i];
+            if (state > 2)
+                index = 4;
 
-            var showOwner = (state > 2);
-            owner.active = showOwner;
-            status.active = !showOwner;
-
-            var online = data.online[i];
-            if (!showOwner) {
-                if (!online) {
-                    state = 3;
-                }
-
-                lblStatus.string = notice[state];
-                status.color = color[state];
+            let online = data.online[i];
+            if (state <= 2) {
+                if (!online)
+                    index = 3;
+                else
+                    index = state;
             }
+
+            sprite.setIndex(index);
         }
         
-        var check = [ false, false, false, false ];
+        let check = [ false, false, false, false ];
         
-        var btnAgree = body.getChildByName('btn_agree');
-        var btnReject = body.getChildByName('btn_reject');
-        var btnDissolve = body.getChildByName('btn_dissolve');
-        var wait = body.getChildByName('wait');
-        var seatIndex = cc.vv.gameNetMgr.seatIndex;
-        
-        var state = data.states[seatIndex];
+        let btnAgree = body.getChildByName('btn_agree');
+        let btnReject = body.getChildByName('btn_reject');
+        let btnDissolve = body.getChildByName('btn_dissolve');
+        //let wait = body.getChildByName('wait');
+        let seatIndex = net.seatIndex;
+        let state = data.states[seatIndex];
         
         if (data.reason == 'offline') {
             check[2] = true;
@@ -268,7 +269,7 @@ cc.Class({
         btnAgree.active = check[0];
         btnReject.active = check[1];
         btnDissolve.active = check[2];
-        wait.active = check[3];
+        //wait.active = check[3];
     },
 
     update: function (dt) {

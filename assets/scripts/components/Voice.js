@@ -1,93 +1,74 @@
+
 cc.Class({
     extends: cc.Component,
 
     properties: {
         _lastTouchTime: null,
-        _voice:null,
-        _volume:null,
-        _mic: null,
+        _voice: null,
         _notice: null,
-        _cancel: null,
-		_warning: null,
-
-        _lastCheckTime:-1,
-        _timeBar:null,
-        MAX_TIME:15000,
+        _bar: null,
+        MAX_TIME: 15000,
 
 		_state: -1,
     },
 
-    // use this for initialization
-    onLoad: function () {
-        
-        var voice = cc.find("Canvas/voice");
+    onLoad: function() {
+        let voice = cc.find("Canvas/voice");
 		this._voice = voice;
 
         voice.active = false;
 
-        var volume = voice.getChildByName('volume');
-		this._volume = volume;
-		
-        for (var i = 0; i < volume.children.length; ++i) {
-            volume.children[i].active = false;
-        }
+        let bar = this._bar = voice.getChildByName('bar');
+        this._notice = voice.getChildByName('notice').getComponent(cc.Label);
 
-		this._notice = voice.getChildByName('notice').getComponent(cc.Label);
-		this._mic = voice.getChildByName('mic');
-		this._cancel = voice.getChildByName('cancel');
-		this._warning = voice.getChildByName('warning');
-		
-		this._timeBar = voice.getChildByName('time');
-		this._timeBar.scaleX = 0.0;
-        
-        var self = this;
-        var btnVoice = cc.find("Canvas/btn_voice");
+        bar.old_width = bar.width;
 
-        if (btnVoice) {
-            btnVoice.on(cc.Node.EventType.TOUCH_START, function(event) {
-                console.log("cc.Node.EventType.TOUCH_START");
-                self.enterState(0);
-            });
+        this.initTouchEvent();
+    },
 
-            btnVoice.on(cc.Node.EventType.TOUCH_MOVE, function(event) {
-                console.log("cc.Node.EventType.TOUCH_MOVE");
+    initTouchEvent() {
+        let btn = cc.find('Canvas/btn_voice');
+        let self = this;
+        let type = cc.Node.EventType;
 
-				var target = event.getCurrentTarget();
-				var touches = event.getTouches();
-				var locationInNode = target.convertTouchToNodeSpaceAR(touches[0]);
+        btn.on(type.TOUCH_START, event=>{
+            console.log('TOUCH_START');
+            self.enterState(0);
+        });
 
-				var s = target.getContentSize();
-				var rect = cc.rect(0 - s.width / 2, 0 - s.height / 2, s.width, s.height);
+        btn.on(type.TOUCH_MOVE, event=>{
+            console.log('TOUCH_MOVE');
 
-				if (cc.rectContainsPoint(rect, locationInNode)) {
-					self.enterState(2);
-				} else {
-					self.enterState(1);
-				}
-            });
-                        
-            btnVoice.on(cc.Node.EventType.TOUCH_END, function(event) {
-                console.log("cc.Node.EventType.TOUCH_END");
-				self.enterState(4);
-            });
-            
-            btnVoice.on(cc.Node.EventType.TOUCH_CANCEL, function(event) {
-                console.log("cc.Node.EventType.TOUCH_CANCEL");
-				self.enterState(3);
-            });
-        }
+            let target = event.getCurrentTarget();
+            let touches = event.getTouches();
+            let locationInNode = target.convertTouchToNodeSpaceAR(touches[0]);
 
-		btnVoice.active = !cc.vv.replayMgr.isReplay();
+            let s = target.getContentSize();
+            let rect = cc.rect(0 - s.width / 2, 0 - s.height / 2, s.width, s.height);
+
+            if (cc.rectContainsPoint(rect, locationInNode))
+                self.enterState(2);
+            else
+                self.enterState(1);
+        });
+
+        btn.on(type.TOUCH_END, event=>{
+            console.log('TOUCH_END');
+            self.enterState(4);
+        });
+
+        btn.on(type.TOUCH_CANCEL, event=>{
+            console.log('TOUCH_CANCEL');
+            self.enterState(3);
+        });
+
+        btn.active = !cc.vv.replayMgr.isReplay();
     },
 
 	enterState: function(state) {
-		var voice = this._voice;
-		var mic = this._mic;
-		var volume = this._volume;
-		var notice = this._notice;
-		var cancel = this._cancel;
-		var warning = this._warning;
-		var timeBar = this._timeBar;
+		let notice = this._notice;
+		let bar = this._bar;
+        let voice = this._voice;
 
         console.log('enterState: ' + state);
 
@@ -96,37 +77,21 @@ cc.Class({
 				cc.vv.voiceMgr.prepare("record.amr");
                 this._lastTouchTime = Date.now();
 
-				voice.active = true;
-				mic.active = true;
-				volume.active = true;
-				cancel.active = false;
-				warning.active = false;
-
-                timeBar.scaleX = 0;
-
-				notice.string = '滑动手指，取消发送';
+                bar.width = 0;
+				notice.string = '请按住说话';
+                voice.active = true;
 				break;
 			case 1:  // touch move - out of button
     			console.log('1');
-				if (this._lastTouchTime != null) {
-					mic.active = false;
-					volume.active = false;
-					cancel.active = true;
-					warning.active = false;
-
+				if (this._lastTouchTime != null)
 					notice.string = '松开手指，取消发送';
-				}
+
 				break;
 			case 2: // touch move - in button
     			console.log('2');
-				if (this._lastTouchTime != null) {
-					mic.active = true;
-					volume.active = true;
-					cancel.active = false;
-					warning.active = false;
+				if (this._lastTouchTime != null)
+					notice.string = '请按住说话';
 
-					notice.string = '滑动手指，取消发送';
-				}
 				break;
 			case 3:  // touch cancel
     			console.log('3');
@@ -141,15 +106,11 @@ cc.Class({
 				if (this._lastTouchTime != null) {
 					if (Date.now() - this._lastTouchTime < 1000) {
 						cc.vv.voiceMgr.cancel();
-						voice.active = true;
-						mic.active = false;
-					    volume.active = false;
-					    cancel.active = false;
-					    warning.active = true;
-						timeBar.scaleX = 0;
+                        voice.active = true;
+						bar.width = 0;
 						notice.string = '录制时间太短';
 						
-						setTimeout(function() {
+						setTimeout(()=>{
 						    voice.active = false;
 						}, 1000);
 					} else {
@@ -168,9 +129,9 @@ cc.Class({
     onVoiceOK: function() {
         if (this._lastTouchTime != null) {
             cc.vv.voiceMgr.release();
-            var time = Date.now() - this._lastTouchTime;
-            var msg = cc.vv.voiceMgr.getVoiceData("record.amr");
-            cc.vv.net.send("voice_msg", {msg: msg, time: time});
+            let time = Date.now() - this._lastTouchTime;
+            let msg = cc.vv.voiceMgr.getVoiceData("record.amr");
+            cc.vv.net.send("voice_msg", { msg: msg, time: time });
         }
 
         this._voice.active = false;
@@ -180,31 +141,19 @@ cc.Class({
         this._voice.active = false;
     },
 
-    // called every frame, uncomment this function to activate update callback
     update: function(dt) {
-    	var now = Date.now();
-
-        if (this._voice.active && this._volume.active) {
-            if (now - this._lastCheckTime > 300) {
-				var v = cc.vv.voiceMgr.getVoiceLevel(5);
-
-                for (var i = 0; i < this._volume.children.length; ++i) {
-					this._volume.children[i].active = v > i;
-                }
-
-                this._lastCheckTime = now;
-            }
-        }
+    	let now = Date.now();
         
         if (this._lastTouchTime != null) {
-            var time = now - this._lastTouchTime;
+            let time = now - this._lastTouchTime;
             if (time >= this.MAX_TIME) {
                 this.onVoiceOK();
                 this._lastTouchTime = null;
             } else {
-                var percent = time / this.MAX_TIME;
-                this._timeBar.scaleX = percent;
+                let bar = this._bar;
+                bar.width = (time / this.MAX_TIME) * bar.old_width;
             }
         }
     },
 });
+

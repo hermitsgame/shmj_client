@@ -94,6 +94,18 @@ cc.Class({
         }
     },
 
+    getProgress: function() {
+        let index = this._currentIndex / 3;
+        let records = this._actionRecords;
+
+        if (records == null || records == 0)
+            return 0;
+
+        let total = records.length / 3;
+
+        return index / total;
+    },
+
     getNextAction: function() {
         var index = this._currentIndex;
         if (index >= this._actionRecords.length) {

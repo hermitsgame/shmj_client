@@ -15,7 +15,7 @@ cc.Class({
         this._pointer = gameChild.getChildByName("arrow");
 
         this._timeLabel = gameChild.getChildByName("lblTime").getComponent(cc.Label);
-        this._timeLabel.string = "0";
+        this._timeLabel.string = "00";
 
         this.initPointer();
         
@@ -33,10 +33,12 @@ cc.Class({
         });
 		
         this.node.on('game_chupai', function(data) {
-            self.initPointer();
-        });
             self._time = 10 + Date.now() / 1000;
             self._alertTime = 3;
+
+            self.initPointer();
+        });
+            
         this.node.on('game_over', function(data) {
             self._time = -1;
             self.initPointer();
@@ -93,9 +95,9 @@ cc.Class({
                 this._alertTime = -1;
             }
             
-            var t = Math.ceil(left);
+            let t = Math.ceil(left);
 
-            this._timeLabel.string = t;
+            this._timeLabel.string = t < 10 ? '0' + t : t;
         }
     },
 });

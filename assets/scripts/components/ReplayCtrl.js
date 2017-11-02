@@ -13,15 +13,26 @@ cc.Class({
     },
 
     onLoad: function() {
-        if (cc.vv == null) {
+        if (cc.vv == null)
             return;
-        }
 
-        var replay = cc.find("Canvas/replay");
+        let replay = cc.find("Canvas/replay");
         replay.active = cc.vv.replayMgr.isReplay();
 
-		this._btnPlay = replay.getChildByName('btn_play');
-		this._btnPause = replay.getChildByName('btn_pause');
+		let btnPlay = replay.getChildByName('btn_play');
+		let btnPause = replay.getChildByName('btn_pause');
+        let btnBack = replay.getChildByName('btn_back');
+        let btnPrev = replay.getChildByName('btn_prev');
+        let btnForward = replay.getChildByName('btn_forward');
+        let btnStop = replay.getChildByName('btn_stop');
+        let utils = cc.vv.utils;
+
+        utils.addClickEvent(btnPlay, this.node, 'ReplayCtrl', 'onBtnPlayClicked');
+        utils.addClickEvent(btnPause, this.node, 'ReplayCtrl', 'onBtnPauseClicked');
+        utils.addClickEvent(btnBack, this.node, 'ReplayCtrl', 'onBtnBackClicked');
+        utils.addClickEvent(btnPrev, this.node, 'ReplayCtrl', 'onBtnPrevClicked');
+        utils.addClickEvent(btnForward, this.node, 'ReplayCtrl', 'onBtnForwardClicked');
+        utils.addClickEvent(btnStop, this.node, 'ReplayCtrl', 'onBtnStopClicked');
 
 		this._over = replay.getChildByName('over');
 		this._over.active = false;
@@ -32,8 +43,12 @@ cc.Class({
     },
 
 	refreshBtn: function() {
-		this._btnPlay.active = !this._isPlaying;
-		this._btnPause.active = this._isPlaying;
+	    let replay = cc.find("Canvas/replay");
+        let btnPlay = replay.getChildByName('btn_play');
+		let btnPause = replay.getChildByName('btn_pause');
+
+		btnPlay.active = !this._isPlaying;
+		btnPause.active = this._isPlaying;
     },
 
 	replayOver: function(status) {
@@ -83,6 +98,7 @@ cc.Class({
 		cc.vv.replayMgr.prev(2);
 		cc.vv.gameNetMgr.doSync();
 
+        this.updateProgress(true);
 		this._nextPlayTime = 2.0;
 		this._isPlaying = old;
 
@@ -100,25 +116,53 @@ cc.Class({
 		cc.vv.replayMgr.forward(2);
 		cc.vv.gameNetMgr.doSync();
 
+        this.updateProgress(true);
 		this._nextPlayTime = 2.0;
 		this._isPlaying = old;
 
 		this.refreshBtn();
     },
 
+    onBtnStopClicked: function() {
+        cc.vv.audioMgr.playButtonClicked();
+        this._isPlaying = false;
+
+        cc.vv.replayMgr.prev(1000);
+		cc.vv.gameNetMgr.doSync();
+
+        this.updateProgress(true);
+		this._nextPlayTime = 2.0;
+		this.refreshBtn();
+		this.replayOver(false);
+    },
+
+    updateProgress: function(enable) {
+        let progress = cc.find("Canvas/replay/progress");
+
+        progress.active = enable;
+        if (!enable)
+            return;
+
+        let percent = Math.floor(cc.vv.replayMgr.getProgress() * 100);
+
+        progress.getComponent(cc.Label).string = percent + '%';
+    },
+
     update: function(dt) {
-        if (cc.vv) {
-            if (this._isPlaying && cc.vv.replayMgr.isReplay() && this._nextPlayTime > 0) {
-                this._nextPlayTime -= dt;
-                if (this._nextPlayTime < 0) {
-                    var next = cc.vv.replayMgr.takeAction();
+        if (!cc.vv)
+            return;
 
-                    if (next < 0) {
-                        this.replayOver(true);
-                    }
-
-                    this._nextPlayTime = next;
+        if (this._isPlaying && cc.vv.replayMgr.isReplay() && this._nextPlayTime > 0) {
+            this._nextPlayTime -= dt;
+            if (this._nextPlayTime < 0) {
+                var next = cc.vv.replayMgr.takeAction();
+                if (next < 0) {
+                    this.replayOver(true);
                 }
+
+                this._nextPlayTime = next;
+
+                this.updateProgress(true);
             }
         }
     },

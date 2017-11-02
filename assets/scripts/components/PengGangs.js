@@ -98,26 +98,27 @@ cc.Class({
     },
 
     playPengAnimation: function(data) {
-        var seatData = data.seatData;
-        var pai = data.pai;
-        var localIndex = cc.vv.gameNetMgr.getLocalIndex(seatData.seatindex);
-        var side = cc.vv.gameNetMgr.getSide(localIndex);
-        var gameChild = this.node.getChildByName('game');
-        var myself = gameChild.getChildByName(side);
-        var pg = myself.getChildByName('peng');
-        var bg = pg.getChildByName('bg');
-        var mahjongs = pg.getChildByName('mahjongs');
-        var temp = this._tempMJ[localIndex];
+        let sd = data.seatData;
+        let pai = data.pai % 100;
+        let net = cc.vv.gameNetMgr;
+        let localIndex = net.getLocalIndex(sd.seatindex);
+        let side = net.getSide(localIndex);
+        let gameChild = this.node.getChildByName('game');
+        let myself = gameChild.getChildByName(side);
+        let pg = myself.getChildByName('peng');
+        let bg = pg.getChildByName('bg');
+        let mahjongs = pg.getChildByName('mahjongs');
+        let temp = this._tempMJ[localIndex];
 
-        var oldPos = [ -120, 0, 120 ];
-        var newPos = [ -68, 0, 68 ];
+        let oldPos = [ -120, 0, 120 ];
+        let newPos = [ -68, 0, 68 ];
 
         mahjongs.removeAllChildren();
         pg.active = true;
 
-        for (var i = 0; i < 3; i++) {
-            var node = cc.instantiate(temp);
-            var mj = node.getComponent('SmartMJ');
+        for (let i = 0; i < 3; i++) {
+            let node = cc.instantiate(temp);
+            let mj = node.getComponent('SmartMJ');
 
             mahjongs.addChild(node);
 
@@ -125,11 +126,10 @@ cc.Class({
             mj.setMJID(pai);
             node.x = oldPos[i];
 
-            if (oldPos[i] == newPos[i]) {
+            if (oldPos[i] == newPos[i])
                 continue;
-            }
 
-            var action = cc.moveTo(0.2, cc.p(newPos[i], 0));
+            let action = cc.moveTo(0.2, cc.p(newPos[i], 0));
             node.runAction(action);
         }
 

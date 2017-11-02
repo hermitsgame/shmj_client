@@ -54,7 +54,7 @@ cc.Class({
 
         this.refreshBtns();
 
-        this.lblRoomNo = cc.find("Canvas/infobar/room/room_id").getComponent(cc.Label);
+        this.lblRoomNo = cc.find("Canvas/roominfo/room_id").getComponent(cc.Label);
         this.lblRoomNo.string = net.roomId;
 
         var btnInvite = cc.find('actions/btnInvite', prepare);
