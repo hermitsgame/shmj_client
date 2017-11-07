@@ -376,5 +376,65 @@ cc.Class({
         if (notify != null)
             notify.emit('pick_result', { result: code, path: path });
     },
+    
+    getBatteryInfo: function() {
+        let info = {
+            power: 100,
+            state: 'full'   // unplugged: 1, charging: 2, full: 3
+        };
+        
+        if (!cc.sys.isNative)
+            return info;
+
+        if (cc.sys.os == cc.sys.OS_ANDROID)
+            return info;    // TODO
+        else if (cc.sys.os === cc.sys.OS_IOS) {
+            let val = jsb.reflection.callStaticMethod(this.IOS_API, 'getBatteryInfo');
+            
+            console.log('getBatteryInfo ret=' + val);
+            
+            info.power = val % 1000;
+        
+            let tmp = parseInt(val / 1000);
+            if (tmp == 2)
+                info.state = 'charging';
+            else if (tmp == 3)
+                info.state = 'full';
+            else
+                info.state = 'unplugged';
+
+            return info;
+        }
+    },
+    
+    getNetworkInfo: function() {
+        let info = {
+            type: 'wifi',
+            strength: 4
+        }
+        
+        if (!cc.sys.isNative)
+            return info;
+            
+        if (cc.sys.os == cc.sys.OS_ANDROID)
+            return info;    // TODO
+        else if (cc.sys.os === cc.sys.OS_IOS) {
+            let val = jsb.reflection.callStaticMethod(this.IOS_API, 'getNetworkInfo');
+            
+            console.log('getNetworkInfo ret=' + val);
+            
+            info.strength = val % 1000;
+        
+            let tmp = parseInt(val / 1000);
+            let types = [ 'N', 'wifi', '2G', '3G', '4G', '5G' ];
+            
+            if (tmp >= types.length)
+                info.type = 'N';
+            else
+                info.type = types[tmp];
+
+            return info;
+        }
+    },
 });
 

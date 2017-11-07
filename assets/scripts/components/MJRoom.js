@@ -18,6 +18,8 @@ cc.Class({
 
         _demoji : [],
         _semoji : [],
+        
+        _lastCheck: 0,
     },
 
     onLoad: function () {
@@ -82,6 +84,40 @@ cc.Class({
             cc.vv.net.send('ready');
         } else if (!isIdle) {
             cc.vv.net.send('ready');
+        }
+    },
+    
+    updateBattery: function() {
+        let power = cc.find('devinfo/power', this.node);
+        let progress = power.getChildByName('progress');
+        let sptmgr = progress.getComponent('SpriteMgr');
+        let sprite = progress.getComponent(cc.Sprite);
+        let info = cc.vv.anysdkMgr.getBatteryInfo();
+
+        power.active = true;
+        sptmgr.setIndex(info.state == 'charging' ? 1 : 0);
+
+        sprite.fillRange = info.power  / 100;
+    },
+    
+    updateSignal: function() {
+        let network = cc.find('devinfo/network', this.node);
+        let state = network.getChildByName('state');
+        let wifi = network.getChildByName('wifi');
+        let signal = wifi.getComponent('SpriteMgr');
+        let desc = state.getComponent(cc.Label);
+        
+        let info = cc.vv.anysdkMgr.getNetworkInfo();
+        let type = info.type;
+        let isWifi = type == 'wifi';
+        
+        wifi.active = isWifi;
+        state.active = !isWifi;
+        
+        if (isWifi) {
+            signal.setIndex(info.strength - 1);
+        } else {
+            desc.string = type;
         }
     },
 
@@ -370,15 +406,22 @@ cc.Class({
             this._timeLabel.string = "" + h + ":" + m;
         }
 */
+        let now = Date.now();
 
-        if(this._lastPlayTime != null){
-            if(Date.now() > this._lastPlayTime + 200){
+        if (this._lastPlayTime != null) {
+            if (now > this._lastPlayTime + 200) {
                 this.onPlayerOver();
                 this._lastPlayTime = null;
             }
-        }
-        else{
+        } else {
             this.playVoice();
+        }
+        
+        let secs = parseInt(now / 1000);
+        if (secs > this._lastCheck && secs % 2 == 0) {
+            this.updateBattery();
+            this.updateSignal();
+            this._lastCheck = secs;
         }
     },
 

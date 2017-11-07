@@ -166,6 +166,7 @@ cc.Class({
 
         mjnode.opacity = 0;
         mjnode.active = true;
+        mj.setFocus(false);
         mj.setMJID(pai);
         var oldx = mj.oldx;
         var oldy = mj.oldy;
@@ -178,6 +179,7 @@ cc.Class({
             data.showFocus(true);
             data.node.x = data.oldx;
             data.node.y = data.oldy;
+            data.setFocus(true);
         }, this, mj);
 
         var actions = cc.sequence(cc.hide(),
