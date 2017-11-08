@@ -14,28 +14,29 @@ cc.Class({
             return;
 
         cc.vv.chat = this;
+        let addClickEvent = cc.vv.utils.addClickEvent;
 
         this._btnChat = this.node.getChildByName("btn_chat");
         this._btnChat.active = !cc.vv.replayMgr.isReplay();
-        cc.vv.utils.addClickEvent(this._btnChat, this.node, 'Chat', 'onBtnChatClicked');
+        addClickEvent(this._btnChat, this.node, 'Chat', 'onBtnChatClicked');
 
-        var root = this.node.getChildByName("chat");
+        let root = this.node.getChildByName("chat");
 
         root.active = false;
         this._chatRoot = root;
 
-        var bg = root.getChildByName("bg");
+        let bg = root.getChildByName("mask");
 
-        cc.vv.utils.addClickEvent(bg, this.node, 'Chat', 'onBgClicked');
+        addClickEvent(bg, this.node, 'Chat', 'onBgClicked');
 
-        var content = cc.find("quick/view/content", root);
-        var temp = content.getChildByName("item");
+        let content = cc.find("quick/view/content", root);
+        let temp = content.getChildByName("item");
 
-        cc.vv.utils.addClickEvent(temp, this.node, 'Chat', 'onQuickChatItemClicked');
+        addClickEvent(temp, this.node, 'Chat', 'onQuickChatItemClicked');
 
         content.removeChild(temp, false);
 
-        var qc = [
+        let qc = [
             { content: '打快一点呀！', sound: '1.mp3' },
             { content: '快点撒，我等到花儿都谢了！', sound: '2.mp3' },
             { content: '牌太好了，打哪张呢？', sound: '3.mp3' },
@@ -49,47 +50,54 @@ cc.Class({
             { content: '输完回家睡觉', sound: '11.mp3' },
         ];
 
-        for (var i = 0; i < qc.length; i++) {
-            var info = qc[i];
-            var item = cc.instantiate(temp);
+        for (let i = 0; i < qc.length; i++) {
+            let info = qc[i];
+            let item = cc.instantiate(temp);
 
             item.idx = i;
 
-            var lblInfo = item.getChildByName("msg").getComponent(cc.Label);
+            let lblInfo = item.getChildByName("msg").getComponent(cc.Label);
             lblInfo.string = info.content;
 
             content.addChild(item);
+
+            if (i == qc.length - 1) {
+                let line = item.getChildByName('line');
+                line.active = false;
+            }
         }
 
         this._quickChatInfo = qc;
 
-        var emoji = cc.find('emoji/view/content', root);
+        let emoji = cc.find('emoji/view/content', root);
 
-        for (var i = 0; i < emoji.childrenCount; i++) {
-            var item = emoji.children[i];
+        for (let i = 0; i < emoji.childrenCount; i++) {
+            let item = emoji.children[i];
+            
+            if (item.name == 'grid')
+                continue;
 
             item.idx = i;
 
-            cc.vv.utils.addClickEvent(item, this.node, 'Chat', 'onEmojiItemClicked');
+            addClickEvent(item, this.node, 'Chat', 'onEmojiItemClicked');
         }
 
-        var btnSend = root.getChildByName('btn_send');
+        let btnSend = root.getChildByName('btn_send');
 
-        cc.vv.utils.addClickEvent(btnSend, this.node, 'Chat', 'onBtnChatSend');
+        addClickEvent(btnSend, this.node, 'Chat', 'onBtnChatSend');
 
-        var self = this;
-        root.on('rb-updated', function(event) {
-            var id = event.detail.id;
-            self.chooseTag(id);
+        let self = this;
+        root.on('rb-updated', event=>{
+            self.chooseTag(event.detail.id);
         });
     },
 
     chooseTag: function(id) {
-        var root = this._chatRoot;
-        var tags = [ 'quick', 'emoji' ];
+        let root = this._chatRoot;
+        let tags = [ 'quick', 'emoji' ];
 
-        for (var i = 0; i < tags.length; i++) {
-            var item = root.getChildByName(tags[i]);
+        for (let i = 0; i < tags.length; i++) {
+            let item = root.getChildByName(tags[i]);
 
             item.active = id == i;
         }
@@ -100,31 +108,15 @@ cc.Class({
     },
     
     onBtnChatClicked: function() {
-        var root = this._chatRoot;
+        let root = this._chatRoot;
 
         root.active = true
-
-        var act = cc.moveBy(0.3, -400, 0);
-
-        root.runAction(act);
-
-        var menu = this.node.getChildByName('btn_menu');
-
-        menu.runAction(cc.fadeOut(0.3));
     },
 
     hide : function() {
-        var root = this._chatRoot;
+        let root = this._chatRoot;
 
-        var act = cc.sequence(cc.moveBy(0.3, 400, 0), cc.callFunc(()=>{
-            root.active = false;
-        }));
-
-        root.runAction(act);
-
-        var menu = this.node.getChildByName('btn_menu');
-
-        menu.runAction(cc.fadeIn(0.3));
+        root.active = false;
     },
 
     onBgClicked : function(){
@@ -132,7 +124,7 @@ cc.Class({
     },
 
     onQuickChatItemClicked: function(event) {
-        var idx = event.target.idx;
+        let idx = event.target.idx;
         console.log('quick_chat: ' + idx);
         cc.vv.net.send("quick_chat", { id : idx });
 
@@ -140,7 +132,7 @@ cc.Class({
     },
 
     onEmojiItemClicked : function(event) {
-        var idx = event.target.idx;
+        let idx = event.target.idx;
 
         console.log('emoji: ' + idx);
         cc.vv.net.send("emoji", { id : idx });
@@ -149,10 +141,10 @@ cc.Class({
     },
 
     onBtnChatSend: function() {
-        var root = this._chatRoot;
-        var btnSend = root.getChildByName('btn_send');
-        var edt_chat = root.getChildByName('edt_chat').getComponent(cc.EditBox);
-        var msg = edt_chat.string;
+        let root = this._chatRoot;
+        let btnSend = root.getChildByName('btn_send');
+        let edt_chat = root.getChildByName('edt_chat').getComponent(cc.EditBox);
+        let msg = edt_chat.string;
 
         if (msg == '')
             return;
