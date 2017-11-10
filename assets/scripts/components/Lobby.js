@@ -243,7 +243,11 @@ cc.Class({
     },
 
 	onBtnCardClicked: function() {
+        let club_id = this.node.club_id;
+        let share = cc.find('Canvas/share');
 
+        share.club_id = club_id;
+        share.active = true;
     },
 
 	onBtnInviteClicked: function() {
