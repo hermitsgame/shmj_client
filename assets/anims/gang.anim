@@ -3,7 +3,7 @@
   "_name": "gang",
   "_objFlags": 0,
   "_rawFiles": null,
-  "_duration": 1,
+  "_duration": 3,
   "sample": 20,
   "speed": 1,
   "wrapMode": 1,
@@ -14,59 +14,77 @@
           {
             "frame": 0,
             "value": {
-              "__uuid__": "3a2cd098-ceee-40b4-8eaf-fabe23705c88"
+              "__uuid__": "9f277652-b96b-422e-8cb3-595e5c030c7a"
             }
           }
         ]
       }
     },
     "props": {
-      "scaleX": [
-        {
-          "frame": 0,
-          "value": 2
-        },
-        {
-          "frame": 0.2,
-          "value": 2
-        },
-        {
-          "frame": 0.7,
-          "value": 1
-        },
-        {
-          "frame": 0.9,
-          "value": 1
-        }
-      ],
-      "scaleY": [
-        {
-          "frame": 0,
-          "value": 2
-        },
-        {
-          "frame": 0.2,
-          "value": 2
-        },
-        {
-          "frame": 0.7,
-          "value": 1
-        },
-        {
-          "frame": 0.9,
-          "value": 1
-        }
-      ],
       "opacity": [
         {
-          "frame": 0.9,
+          "frame": 0,
+          "value": 50
+        },
+        {
+          "frame": 0.35,
           "value": 255
         },
         {
-          "frame": 1,
+          "frame": 2.5,
+          "value": 255
+        },
+        {
+          "frame": 3,
           "value": 0
         }
       ]
+    },
+    "paths": {
+      "child": {
+        "comps": {
+          "cc.Sprite": {
+            "spriteFrame": [
+              {
+                "frame": 0.25,
+                "value": {
+                  "__uuid__": "0d5b941c-8733-4dcd-92fc-2543dad0a1e3"
+                }
+              }
+            ]
+          }
+        },
+        "props": {
+          "scaleX": [
+            {
+              "frame": 0.25,
+              "value": 0.2
+            },
+            {
+              "frame": 0.85,
+              "value": 1.2
+            },
+            {
+              "frame": 1,
+              "value": 1
+            }
+          ],
+          "scaleY": [
+            {
+              "frame": 0.25,
+              "value": 0.2
+            },
+            {
+              "frame": 0.85,
+              "value": 1.2
+            },
+            {
+              "frame": 1,
+              "value": 1
+            }
+          ]
+        }
+      }
     }
   },
   "events": []

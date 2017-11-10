@@ -59,32 +59,33 @@ cc.Class({
         this.lblRoomNo = cc.find("Canvas/roominfo/room_id").getComponent(cc.Label);
         this.lblRoomNo.string = net.roomId;
 
-        var btnInvite = cc.find('actions/btnInvite', prepare);
-        var btnDissolve = cc.find('actions/btnDissolve', prepare);
-        var btnLeave = prepare.getChildByName('btnLeave');
+        let btnInvite = cc.find('actions/btnInvite', prepare);
+        let btnReady = cc.find('actions/btnReady', prepare);
+        let btnLeave = prepare.getChildByName('btnLeave');
 
         cc.vv.utils.addClickEvent(btnInvite, this.node, 'MJRoom', 'onBtnWeichatClicked');
-        cc.vv.utils.addClickEvent(btnDissolve, this.node, 'MJRoom', 'onBtnDissolveClicked');
+        cc.vv.utils.addClickEvent(btnReady, this.node, 'MJRoom', 'onBtnReady');
         cc.vv.utils.addClickEvent(btnLeave, this.node, 'MJRoom', 'onBtnExit');
 
-        var emoji = this.node.getChildByName('emoji');
+        let emoji = this.node.getChildByName('emoji');
 
         this._emoji = emoji;
         this.node.removeChild(emoji);
     },
 
-    start: function() {
-        var net = cc.vv.gameNetMgr;
-        var isIdle = net.numOfGames == 0;
+    onBtnReady : function() {
+        cc.vv.net.send('ready');
+    },
 
-        if ( cc.vv.replayMgr.isReplay() )
+    start: function() {
+        let net = cc.vv.gameNetMgr;
+        let isIdle = net.numOfGames == 0;
+
+        if (cc.vv.replayMgr.isReplay())
             return;
 
-        if (isIdle) {
+        if (!isIdle)
             cc.vv.net.send('ready');
-        } else if (!isIdle) {
-            cc.vv.net.send('ready');
-        }
     },
     
     updateBattery: function() {
@@ -122,17 +123,20 @@ cc.Class({
     },
 
     refreshBtns:function(){
-    	var net = cc.vv.gameNetMgr;
-        var prepare = this.node.getChildByName("prepare");
-        var isIdle = net.numOfGames == 0;
-        var isOwner = net.isOwner();
-        var actions = prepare.getChildByName('actions');
-        var waiting = prepare.getChildByName('waiting');
-        var btnLeave = prepare.getChildByName('btnLeave');
+    	let net = cc.vv.gameNetMgr;
+        let prepare = this.node.getChildByName("prepare");
+        let isIdle = net.numOfGames == 0;
+        let isOwner = net.isOwner();
+        let seat = net.getSelfData();
+        let actions = prepare.getChildByName('actions');
+        let btnReady = actions.getChildByName('btnReady');
+        let waiting = prepare.getChildByName('waiting');
+        let btnLeave = prepare.getChildByName('btnLeave');
 
         waiting.active = isIdle;
-        actions.active = isIdle && isOwner;
-        btnLeave.active = isIdle && !isOwner;
+        actions.active = isIdle;
+        btnLeave.active = isIdle;
+        btnReady.active = !seat.ready;
 
         if (isIdle) {
             var sprite = waiting.getComponent('SpriteMgr');
@@ -326,7 +330,7 @@ cc.Class({
         var isOffline = !seat.online;
         var isZhuang = (seat.seatindex == net.button);
         var ready = (net.gamestate == '') ? seat.ready : false;
-        var flowers = seat.flowers;
+        //var flowers = seat.flowers;
         if (!seat.userid) {
             this._seats[index].reset();
             return;
@@ -338,7 +342,7 @@ cc.Class({
         this._seats[index].voiceMsg(false);
         this._seats[index].setZhuang(isZhuang);
         this._seats[index].setReady(ready);
-        this._seats[index].setFlowers(flowers);
+        //this._seats[index].setFlowers(flowers);
     },
 
     onBtnSettingsClicked: function() {

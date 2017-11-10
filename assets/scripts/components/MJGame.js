@@ -169,7 +169,7 @@ cc.Class({
         bgMgr.setIndex(mgr.getBGStyle());
         this._bgMgr = bgMgr;
 
-        this._maima = cc.find('Canvas/maima');
+        this._maima = gameChild.getChildByName('maima');
         this.hideMaiMa();
 
         var prompts = gameChild.getChildByName("prompts");
@@ -222,47 +222,19 @@ cc.Class({
         this._maima.active = false;
     },
 
-    showMaiMa: function(ma, fan, cb) {
-        cb();
-        return;
-/*
-        var maima = this._maima;
-        var board = maima.getChildByName('board');
-        var tile = board.getChildByName('tile').getComponent('SpriteMgr');
-        var layout = maima.getChildByName('layout');
-        var num = layout.getChildByName('num').getComponent(cc.Label);
-        var anim = board.getComponent(cc.Animation);
-        var style = cc.vv.mahjongmgr.getMJStyle();
+    showMaiMa: function(pai, fan, cb) {
+        let maima = this._maima;
+        let ma = maima.getChildByName('ma').getComponent('Majiang');
+        let score = maima.getChildByName('score').getComponent(cc.Label);
 
+        ma.setMJID(pai);
+        score.string = '/' + fan;
         maima.active = true;
-        tile.setIndex(-1);
-        layout.active = false;
 
-        var self = this;
-
-        var fn = function() {
-            layout.active = true;
-            num.string = fan;
-            
-            var mj = ma < 18 ? ma : ma - 9;
-            tile.setIndex(mj);
-
-            setTimeout(function() {
-                maima.active = false;
-                if (cb) {
-                    cb();
-                }
-            }, 2000);
-            
-            anim.off('finished', fn);
-        };
-
-        anim.on('finished', fn);
-
-        console.log('showMaiMa');
-
-        anim.play('maima1');    // TODO
-*/
+        setTimeout(()=>{
+            maima.active = false;
+            if (cb) cb();
+        }, 3000);
     },
     
     hideChupai:function() {
@@ -292,6 +264,13 @@ cc.Class({
 		};
 
 		console.log('updateFlowers');
+
+        if (sd != null) {
+            let seatindex = net.getSeatIndexByID(seat.userid);
+			let local = net.getLocalIndex(seatindex);
+
+            this.playEfx(local, 'flower');
+        }
 
 		for (var i = 0; i < seats.length; i++) {
 			var seat = seats[i];
@@ -345,6 +324,9 @@ cc.Class({
 				var child = flowers.children[index];
 				flowers.removeChild(child);
 			}
+
+            let number = cc.find(side + '/flower/num', gameChild).getComponent(cc.Label);
+            number.string = seat.flowers.length;
 		}
     },
 
@@ -735,15 +717,11 @@ cc.Class({
 
             if (done == nSeats) {
                 if (maima) {
-                        self.showMaiMa(maima.pai, maima.fan, function() {
-                        if (cb) {
-                            cb();
-                        }
+                    self.showMaiMa(maima.pai, maima.fan, ()=>{
+                        if (cb) cb();
                     });
                 } else {
-                    if (cb) {
-                        cb();
-                    }
+                    if (cb) cb();
                 }
             }
         };
