@@ -8,7 +8,6 @@ cc.Class({
         _flowers: 0,
         _maima: null,
         _allpairs: null,
-        _bao: null,
 		slider: cc.Slider,
     },
 
@@ -36,7 +35,6 @@ cc.Class({
 
 		this._maima = cc.find('wanfa/horse', content);
 		this._allpairs = cc.find('wanfa/allpairs', content);
-		this._bao = cc.find('wanfa/bao', content);
 		
 		var score = this.slider;
 		score.node.on('slide', this.onScoreChanged, this);
@@ -45,13 +43,20 @@ cc.Class({
 		cc.vv.utils.addClickEvent(btnClose, this.node, 'CreateRoom', 'onBtnClose');
 	},
 
+    onEnable: function() {
+        let usermgr = cc.vv.userMgr;
+        let gem = cc.find('bottom/lbl_gem', this.node).getComponent(cc.Label);
+
+        gem.string = usermgr.gems;
+    },
+
 	onScoreChanged: function(event) {
-		var slide = event.detail;
-		var content = cc.find('body/items/view/content', this.node);
-		var fill = cc.find('base/score/body', content).getComponent(cc.Sprite);
-		var flower = cc.find('base/flower', content).getComponent(cc.Label);
-		var range = [1, 5, 10, 20, 30, 50, 100, 200, 300];
-		var id = Math.round(slide.progress * (range.length - 1));
+		let slide = event.detail;
+		let content = cc.find('body/items/view/content', this.node);
+		let fill = cc.find('base/score/body', content).getComponent(cc.Sprite);
+		let flower = cc.find('base/flower', content).getComponent(cc.Label);
+		let range = [1, 5, 10, 20, 30, 50, 100, 200, 300];
+		let id = Math.round(slide.progress * (range.length - 1));
 
 		flower.string = range[id];
 		this._flowers = range[id];
@@ -59,12 +64,12 @@ cc.Class({
 		fill.fillRange = slide.progress;
 	},
 
-    onBtnClose:function() {
+    onBtnClose: function() {
         cc.vv.audioMgr.playButtonClicked();
 		this.node.active = false;
     },
 
-    onBtnOK:function() {
+    onBtnOK: function() {
         cc.vv.audioMgr.playButtonClicked();
 
 		this.node.active = false;
@@ -89,7 +94,7 @@ cc.Class({
                 return;
             }
 
-            cc.vv.alert.show('create success');
+            //cc.vv.alert.show('create success');
 
             self.node.active = false;
         });
@@ -119,14 +124,13 @@ cc.Class({
 		var flowers = this._flowers;
 		var maima = this._maima.getComponent('CheckBox').checked;
 		var allpairs = this._allpairs.getComponent('CheckBox').checked;
-		var bao = this._bao.getComponent('CheckBox').checked;
 
         var conf = {
             type: 'shmj',
             gamenum: gamenum,
             maxfan: maxfan,
             huafen: flowers,
-            playernum: bao ? 2 : 4,
+            playernum: 4,
             maima: maima,
             qidui: allpairs
         };
