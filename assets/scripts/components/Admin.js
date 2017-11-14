@@ -9,123 +9,127 @@ cc.Class({
     },
 
     onLoad: function() {
-		var content = cc.find('rooms/view/content', this.node);
-		var item = content.children[0];
-		var addClickEvent = cc.vv.utils.addClickEvent;
-		var btn_edit = item.getChildByName('btn_edit');
-		var btn_destroy = item.getChildByName('btn_destroy');
-        var btn_play = item.getChildByName('btn_play');
-		var seats = item.getChildByName('seats');
+		let content = cc.find('rooms/view/content', this.node);
+		let item = content.children[0];
+		let addEvent = cc.vv.utils.addClickEvent;
+		let btn_edit = item.getChildByName('btn_edit');
+		let btn_destroy = item.getChildByName('btn_destroy');
+        let btn_play = item.getChildByName('btn_play');
+		let seats = item.getChildByName('seats');
 
-		for (var i = 0; i < seats.childrenCount; i++) {
-			var seat = seats.children[i];
-            var btn_kick = seat.getChildByName('btn_kick');
+		for (let i = 0; i < seats.childrenCount; i++) {
+			let seat = seats.children[i];
+            let btn_kick = seat.getChildByName('btn_kick');
 
-			addClickEvent(btn_kick, this.node, 'Admin', 'onBtnKickClicked');
+			addEvent(btn_kick, this.node, 'Admin', 'onBtnKickClicked');
 		}
 
-		addClickEvent(btn_edit, this.node, 'Admin', 'onBtnEditClicked');
-		addClickEvent(btn_destroy, this.node, 'Admin', 'onBtnDestroyClicked');
-        addClickEvent(btn_play, this.node, 'Admin', 'onBtnPlayClicked');
+		addEvent(btn_edit, this.node, 'Admin', 'onBtnEditClicked');
+		addEvent(btn_destroy, this.node, 'Admin', 'onBtnDestroyClicked');
+        addEvent(btn_play, this.node, 'Admin', 'onBtnPlayClicked');
 
 		this._tempRoom = item;
 		content.removeChild(item, false);
 
-		var btnClose = cc.find('top/btn_back', this.node);
-		cc.vv.utils.addClickEvent(btnClose, this.node, 'Admin', 'onBtnClose');
+        let top = this.node.getChildByName('top');
+		let btnClose = top.getChildByName('btn_back');
+        let btnEdit = top.getChildByName('btn_edit');
 
-        var btn_create = cc.find('bottom/btn_create', this.node);
+        addEvent(btnClose, this.node, 'Admin', 'onBtnClose');
+        addEvent(btnEdit, this.node, 'Admin', 'onBtnEdit');
 
-        cc.vv.utils.addClickEvent(btn_create, this.node, 'Admin', 'onBtnCreate');
+        let btn_create = cc.find('bottom/btn_create', this.node);
+
+        addEvent(btn_create, this.node, 'Admin', 'onBtnCreate');
 
 		this.initEventHandler();
     },
 
-	initEventHandler: function() {
-		var node = cc.find('Canvas');
-		var lobby = this.node;
-		var self = this;
+    initEventHandler: function() {
+        let node = cc.find('Canvas');
+        let lobby = this.node;
+        let self = this;
 
-		node.on('club_room_updated', function(data) {
-			var room = data.detail;
+        node.on('club_room_updated', data=>{
+            let room = data.detail;
 
-			if (!lobby.active)
-				return;
+            if (!lobby.active)
+                return;
 
-			self.room_updated(room);
-		});
+            self.room_updated(room);
+        });
 
-		node.on('club_room_removed', function(data) {
-			var room = data.detail;
+        node.on('club_room_removed', data=>{
+            let room = data.detail;
 
-			if (!lobby.active)
-				return;
+            if (!lobby.active)
+                return;
 
-			self.room_removed(room);
-		});
+            self.room_removed(room);
+        });
     },
 
-	room_updated: function(data) {
-		var content = cc.find('rooms/view/content', this.node);
-		var item = null;
-		var room = null;
-		var found = false;
+    room_updated: function(data) {
+        let content = cc.find('rooms/view/content', this.node);
+        let item = null;
+        let room = null;
+        let found = false;
 
-		for (var i = 0; i < content.childrenCount; i++) {
-			item = content.children[i];
-			room = item.room;
+        for (let i = 0; i < content.childrenCount; i++) {
+            item = content.children[i];
+            room = item.room;
 
-			if (room.id != data.id)
-				continue;
+            if (room.id != data.id)
+                continue;
 
-			found = true;
-			break;
-		}
+            found = true;
+            break;
+        }
 
-		if (!found)
-			item = this.getRoomItem(content.childrenCount);
+        if (!found)
+            item = this.getRoomItem(content.childrenCount);
 
-		this.updateRoom(item, data);
+        this.updateRoom(item, data);
     },
 
-	room_removed: function(data) {
-		var content = cc.find('rooms/view/content', this.node);
-		var item = null;
-		var room = null;
-		var found = false;
+    room_removed: function(data) {
+        let content = cc.find('rooms/view/content', this.node);
+        let item = null;
+        let room = null;
+        let found = false;
 
-		for (var i = 0; i < content.childrenCount; i++) {
-			item = content.children[i];
-			room = item.room;
+        for (let i = 0; i < content.childrenCount; i++) {
+            item = content.children[i];
+            room = item.room;
 
-			if (room.id != data.id)
-				continue;
+            if (room.id != data.id)
+                continue;
 
-			found = true;
-			break;
-		}
+            found = true;
+            break;
+        }
 
-		if (found)
-			content.removeChild(item);
+        if (found)
+            content.removeChild(item);
     },
 
-	onEnable: function() {
-		this.refresh();
+    onEnable: function() {
+        this.refresh();
 
-		var self = this;
-		var data = {
-			club_id : this.node.club_id
-		};
+        var self = this;
+        var data = {
+            club_id : this.node.club_id
+        };
 		
-		cc.vv.pclient.request_apis('join_club_channel', data, function(ret) {
-			if (!ret)
-				return;
+        cc.vv.pclient.request_apis('join_club_channel', data, function(ret) {
+            if (!ret)
+                return;
 
-			if (ret.errcode != 0) {
-				cc.vv.alert.show(errmsg);
-				return;
-			}
-		});
+            if (ret.errcode != 0) {
+                cc.vv.alert.show(errmsg);
+                return;
+            }
+        });
     },
 
 	onDisable: function() {
@@ -146,13 +150,31 @@ cc.Class({
 		});
     },
 
-	onBtnClose: function(event) {
-		this.node.active = false;
+	onBtnClose: function() {
+        this.node.active = false;
 
-		var userMgr = cc.vv.userMgr;
+        let userMgr = cc.vv.userMgr;
 
-		userMgr.club_id = null;
-		userMgr.is_admin = null;
+        userMgr.club_id = null;
+        userMgr.is_admin = null;
+    },
+
+    onBtnEdit: function() {
+        let set_club = cc.find('Canvas/set_club');
+        let self = this;
+        let pc = cc.vv.pclient;
+        let data = {
+            club_id : this.node.club_id
+        };
+
+        pc.request_apis('get_club_detail', data, ret=>{
+            if (ret.errcode != 0)
+                return;
+
+            set_club.clubInfo = ret.data;
+            set_club.parent_page = self;
+            set_club.active = true;
+        });
     },
 
 	onBtnHistoryClicked: function(event) {
@@ -216,20 +238,16 @@ cc.Class({
         console.log('onBtnEditClicked');
     },
 
-    onBtnDestroyClicked: function(event) {
-        console.log('onBtnDestroyClicked');
-
-		var self = this;
-		var item = event.target.parent;
-		var room = item.room;
-
-		var data = {
+    doDestroy: function(item) {
+		let self = this;
+		let room = item.room;
+		let data = {
 			roomid : room.id,
 			room_tag : room.room_tag,
 			club_id : this.node.club_id
 		};
 
-		cc.vv.pclient.request_apis('destroy_club_room', data, function(ret) {
+		cc.vv.pclient.request_apis('destroy_club_room', data, ret=>{
 			if (!ret || ret.errcode != 0) {
 				console.log('destroy fail');
     			return;
@@ -237,6 +255,17 @@ cc.Class({
 
 			self.refresh();
 		});
+    },
+
+    onBtnDestroyClicked: function(event) {
+        let self = this;
+        let item = event.target.parent;
+
+        console.log('onBtnDestroyClicked');
+
+        cc.vv.alert.show('确定解散房间吗?', ()=>{
+            self.doDestroy(item);
+        }, true);
     },
 
     onBtnPlayClicked: function(event) {
@@ -248,9 +277,8 @@ cc.Class({
 		var self = this;
 
         if (room.status == 'idle') {
-
 			if (room.readys != 4) {
-				cc.vv.alert.show('');
+				cc.vv.alert.show('玩家没有全部准备');
 				return;
         	}
 

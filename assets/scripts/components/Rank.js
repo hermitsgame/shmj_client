@@ -90,7 +90,8 @@ cc.Class({
 			id.string = member.id;
 			score.string = member.score;
 			head.setLogo(member.id, member.logo);
-            transfer.active = member.id != cc.vv.userMgr.userId;
+            //transfer.active = member.id != cc.vv.userMgr.userId;
+            transfer.active = false;
 
 			item.member = member;
 		}

@@ -33,17 +33,17 @@ cc.Class({
     },
 
     initView:function() {
-    	var net = cc.vv.gameNetMgr;
+        var net = cc.vv.gameNetMgr;
         var prepare = this.node.getChildByName("prepare");
         var seats = this.node.getChildByName("seats");
-		var valids = net.getValidLocalIDs();
-		var nSeats = net.numOfSeats;
+        var valids = net.getValidLocalIDs();
+        var nSeats = net.numOfSeats;
 
-        for (var i = 0; i < seats.childrenCount; ++i) {
-			var child = seats.children[i];
+        for (var i = 0; i < seats.children.length; ++i) {
+            var child = seats.children[i];
 
-			this._seats.push(child.getComponent("Seat"));
-			child.active = (valids.indexOf(i) >= 0);
+            this._seats.push(child.getComponent("Seat"));
+            child.active = (valids.indexOf(i) >= 0);
 
             var demoji = child.getChildByName('demoji');
             var semoji = child.getChildByName('semoji');
@@ -61,11 +61,9 @@ cc.Class({
 
         let btnInvite = cc.find('actions/btnInvite', prepare);
         let btnReady = cc.find('actions/btnReady', prepare);
-        let btnLeave = prepare.getChildByName('btnLeave');
 
         cc.vv.utils.addClickEvent(btnInvite, this.node, 'MJRoom', 'onBtnWeichatClicked');
         cc.vv.utils.addClickEvent(btnReady, this.node, 'MJRoom', 'onBtnReady');
-        cc.vv.utils.addClickEvent(btnLeave, this.node, 'MJRoom', 'onBtnExit');
 
         let emoji = this.node.getChildByName('emoji');
 
@@ -81,7 +79,9 @@ cc.Class({
         let net = cc.vv.gameNetMgr;
         let isIdle = net.numOfGames == 0;
 
-        if (cc.vv.replayMgr.isReplay())
+        this.initSeats();
+
+        if ( cc.vv.replayMgr.isReplay() )
             return;
 
         if (!isIdle)
@@ -131,24 +131,22 @@ cc.Class({
         let actions = prepare.getChildByName('actions');
         let btnReady = actions.getChildByName('btnReady');
         let waiting = prepare.getChildByName('waiting');
-        let btnLeave = prepare.getChildByName('btnLeave');
 
         waiting.active = isIdle;
         actions.active = isIdle;
-        btnLeave.active = isIdle;
         btnReady.active = !seat.ready;
 
         if (isIdle) {
-            var sprite = waiting.getComponent('SpriteMgr');
+            let sprite = waiting.getComponent('SpriteMgr');
 
             sprite.setIndex(net.isClubRoom() ? 1 : 0);
         }
     },
 
     initEventHandlers: function() {
-        var self = this;
-        var node = this.node;
-        var net = cc.vv.gameNetMgr;
+        let self = this;
+        let node = this.node;
+        let net = cc.vv.gameNetMgr;
         
         node.on('new_user',function(data){
             self.initSingleSeat(data.detail);
@@ -182,6 +180,10 @@ cc.Class({
             self.initSingleSeat(data.detail);
         });
 
+
+        node.on('user_ready', data=>{
+            self.initSingleSeat(data.detail);
+        });
         node.on('gang_notify', function(info) {
             var data = info.detail;
 
@@ -330,19 +332,17 @@ cc.Class({
         var isOffline = !seat.online;
         var isZhuang = (seat.seatindex == net.button);
         var ready = (net.gamestate == '') ? seat.ready : false;
-        //var flowers = seat.flowers;
         if (!seat.userid) {
             this._seats[index].reset();
             return;
         }
 
-        this._seats[index].setInfo(seat.name, seat.score);
+        this._seats[index].setInfo(seat.name.slice(0, 5), seat.score);
         this._seats[index].setOffline(isOffline);
         this._seats[index].setID(seat.userid);
         this._seats[index].voiceMsg(false);
         this._seats[index].setZhuang(isZhuang);
         this._seats[index].setReady(ready);
-        //this._seats[index].setFlowers(flowers);
     },
 
     onBtnSettingsClicked: function() {
@@ -368,10 +368,6 @@ cc.Class({
         cc.vv.alert.show("解散房间不扣房卡，是否确定解散？", ()=>{
             cc.vv.net.send("dispress");
         }, true);
-    },
-
-    onBtnExit:function() {
-        cc.vv.net.send("exit");
     },
 
     playVoice: function() {
@@ -443,3 +439,4 @@ cc.Class({
 //        cc.vv.voiceMgr.onPlayCallback = null;
     }
 });
+

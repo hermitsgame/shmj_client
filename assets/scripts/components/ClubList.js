@@ -3,70 +3,71 @@ cc.Class({
     extends: cc.Component,
 
     properties: {
-		_temp : null,
+        _temp : null
     },
 
     onLoad: function() {
-		var content = cc.find('items/view/content', this.node);
-		var item = content.children[0];
+        let content = cc.find('items/view/content', this.node);
+        let item = content.children[0];
+        let addEvent = cc.vv.utils.addClickEvent;
 
-		cc.vv.utils.addClickEvent(item, this.node, 'ClubList', 'onBtnClubClicked');
+        addEvent(item, this.node, 'ClubList', 'onBtnClubClicked');
 
-		this._temp = item;
-		content.removeChild(item, false);
+        this._temp = item;
+        content.removeChild(item, false);
 
-		var top = this.node.getChildByName('top');
-		var btn_back = top.getChildByName('btn_back');
-		var btn_add = top.getChildByName('btn_add');
+        let top = this.node.getChildByName('top');
+        let btn_back = top.getChildByName('btn_back');
+        let btn_add = top.getChildByName('btn_add');
 
-		cc.vv.utils.addClickEvent(btn_back, this.node, 'ClubList', 'onBtnClose');
-		cc.vv.utils.addClickEvent(btn_add, this.node, 'ClubList', 'onBtnAdd');
+        addEvent(btn_back, this.node, 'ClubList', 'onBtnClose');
+        addEvent(btn_add, this.node, 'ClubList', 'onBtnAdd');
     },
 
-	onEnable : function() {
-		this.refresh();
+    onEnable : function() {
+        this.refresh();
     },
 
-	onBtnClubClicked: function(event) {
-		var item = event.target;
-		var club_detail = cc.find('Canvas/club_detail');
+    onBtnClubClicked: function(event) {
+        let item = event.target;
+        let club_detail = cc.find('Canvas/club_detail');
 
-		club_detail.club_id = item.club_id;
-		club_detail.is_admin = item.is_admin;
-		club_detail.parent_page = this;
+        club_detail.club_id = item.club_id;
+        club_detail.is_admin = item.is_admin;
+        club_detail.parent_page = this;
 
-		club_detail.active = true;
+        club_detail.active = true;
     },
 
-	onBtnClose : function() {
-		this.node.active = false;
+    onBtnClose : function() {
+        this.node.active = false;
     },
 
-	onBtnAdd : function() {
-		var club_apply = cc.find('Canvas/club_apply');
+    onBtnAdd : function() {
+        let club_apply = cc.find('Canvas/club_apply');
 
-		club_apply.active = true;
+        club_apply.active = true;
     },
 
-	refresh: function() {
-		var self = this;
+    refresh: function() {
+        let self = this;
 
-		cc.vv.pclient.request_apis('list_clubs', {}, function(ret) {
-			if (!ret || ret.errcode != 0)
-				return;
+        cc.vv.pclient.request_apis('list_clubs', {}, ret=>{
+            if (!ret || ret.errcode != 0)
+                return;
 
-			self.showClubs(ret.data);
-		});
+            self.showClubs(ret.data);
+        });
     },
 
-	getClubItem: function(index) {
-		var content = cc.find('items/view/content', this.node);
+    getClubItem: function(index) {
+        let content = cc.find('items/view/content', this.node);
 
         if (content.childrenCount > index) {
             return content.children[index];
         }
 
-        var node = cc.instantiate(this._temp);
+        let node = cc.instantiate(this._temp);
 
         content.addChild(node);
         return node;
@@ -79,30 +80,31 @@ cc.Class({
         }
     },
 
-	showClubs: function(clubs) {
-		var content = cc.find('items/view/content', this.node);
+    showClubs: function(clubs) {
+        let content = cc.find('items/view/content', this.node);
 
-		for (var i = 0; i < clubs.length; i++) {
-			var club = clubs[i];
-			var item = this.getClubItem(i);
-			var name = item.getChildByName('name').getComponent(cc.Label);
-            var id = item.getChildByName('id').getComponent(cc.Label);
-			var head = cc.find('icon/head', item);
-			var desc = item.getChildByName('desc').getComponent(cc.Label);
-			var headcount = item.getChildByName('headcount').getComponent(cc.Label);
+        for (let i = 0; i < clubs.length; i++) {
+            let club = clubs[i];
+            let item = this.getClubItem(i);
+            let name = item.getChildByName('name').getComponent(cc.Label);
+            let id = item.getChildByName('id').getComponent(cc.Label);
+            let head = cc.find('icon/head', item);
+		    let desc = item.getChildByName('desc').getComponent(cc.Label);
+            let headcount = item.getChildByName('headcount').getComponent(cc.Label);
 
-			name.string = club.name;
+            name.string = club.name;
             id.string = 'ID:' + club.id;
-			desc.string = club.desc;
-			headcount.string = club.member_num + ' / ' + club.max_member_num;
+            desc.string = club.desc;
+            headcount.string = club.member_num + ' / ' + club.max_member_num;
 
-			cc.vv.utils.loadImage(club.logo, head);
+            console.log('showClubs: ' + club.logo);
+            cc.vv.utils.loadImage(club.logo, head);
 
-			item.club_id = club.id;
-			item.is_admin = club.is_admin;
-		}
+            item.club_id = club.id;
+            item.is_admin = club.is_admin;
+        }
 
-		this.shrinkContent(content, clubs.length);
+        this.shrinkContent(content, clubs.length);
     },
 });
 

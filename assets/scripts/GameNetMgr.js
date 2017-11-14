@@ -184,8 +184,8 @@ cc.Class({
         this.conf = conf;
 
         this.numOfHolds = 13;
-		this.numOfGames = baseInfo.index + 1;
-		this.maxNumOfGames = conf.maxGames;
+        this.numOfGames = baseInfo.index + 1;
+        this.maxNumOfGames = conf.maxGames;
     },
 
     getWanfa: function() {
@@ -270,7 +270,7 @@ cc.Class({
             };
 
             if (reason == 'kick') {
-                cc.vv.alert.show('you are kicked by admin!', ()=>{
+                cc.vv.alert.show('您已被管理员请出房间', ()=>{
                     fnBack();
                 });
             } else if (reason == 'request') {
@@ -278,13 +278,13 @@ cc.Class({
             }
         });
 
-        net.addHandler("exit_notify_push",function(data){
-           var userId = data;
-           var s = self.getSeatByID(userId);
-           if(s != null){
+        net.addHandler("exit_notify_push", data=>{
+           let userId = data.value;
+           let s = self.getSeatByID(userId);
+           if (s != null) {
                s.userid = 0;
-               s.name = "";
-               self.dispatchEvent("user_state_changed",s);
+               s.name = '';
+               self.dispatchEvent('user_state_changed', s);
            }
         });
 
@@ -398,6 +398,8 @@ cc.Class({
             if (self.gamestate == '') {
                 self.dispatchEvent('user_state_changed', seat);
             }
+
+            self.dispatchEvent('user_ready', seat);
         });
 
         net.addHandler("game_dice_push",function(data) {

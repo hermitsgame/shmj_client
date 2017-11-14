@@ -3,128 +3,141 @@ cc.Class({
     extends: cc.Component,
 
     properties: {
-		_temp : null,
+        _temp : null
     },
 
     onLoad: function() {
-		var content = cc.find('items/view/content', this.node);
-		var item = content.children[0];
+        let content = cc.find('items/view/content', this.node);
+        let item = content.children[0];
+        let addEvent = cc.vv.utils.addClickEvent;
 
-		cc.vv.utils.addClickEvent(item, this.node, 'ClubMessage', 'onBtnApproveClicked');
+        addEvent(item, this.node, 'ClubMessage', 'onBtnApproveClicked');
 
-		this._temp = item;
-		content.removeChild(item, false);
+        this._temp = item;
+        content.removeChild(item, false);
 
-		var btnClose = cc.find('top/btn_back', this.node);
-		cc.vv.utils.addClickEvent(btnClose, this.node, 'ClubMessage', 'onBtnClose');
+        let btnClose = cc.find('top/btn_back', this.node);
+        addEvent(btnClose, this.node, 'ClubMessage', 'onBtnClose');
     },
 
-	onEnable: function() {
-		this.refresh();
+    onEnable: function() {
+        this.refresh();
     },
 
-	onBtnClose: function() {
-		this.node.active = false;
-	},
-
-	onBtnApproveClicked: function(event) {
-		var self = this;
-		var item = event.target.parent;
-
-		var data = {
-			id : item.msg_id,
-			sign : 'approved',
-			score : 20,
-			limit : -5000
-		};
-
-		cc.vv.pclient.request_apis('sign_club_message', data, ret=>{
-			if (!ret || ret.errcode != 0)
-				return;
-
-			self.refresh();
-		});
+    onBtnClose: function() {
+        this.node.active = false;
     },
 
-	refresh: function() {
-		var self = this;
+    onBtnApproveClicked: function(event) {
+        let self = this;
+        let item = event.target.parent;
+        let data = {
+            id : item.msg_id,
+            sign : 'approved',
+            score : 0,
+            limit : 0
+        };
 
-		var data = {
-			club_id : this.node.club_id
-		};
+        cc.vv.pclient.request_apis('sign_club_message', data, ret=>{
+            if (!ret || ret.errcode != 0)
+                return;
 
-		cc.vv.pclient.request_apis('list_club_message', data, function(ret) {
-			if (!ret || ret.errcode != 0)
-				return;
-
-			self.showItems(ret.data);
-		});
+            self.refresh();
+        });
     },
 
-	getItem: function(index) {
-		var content = cc.find('items/view/content', this.node);
+    refresh: function() {
+        let self = this;
+
+        let data = {
+            club_id : this.node.club_id
+        };
+
+        cc.vv.pclient.request_apis('list_club_message', data, function(ret) {
+            if (!ret || ret.errcode != 0)
+                return;
+
+            self.showItems(ret.data);
+        });
+    },
+
+    getItem: function(index) {
+        let content = cc.find('items/view/content', this.node);
 
         if (content.childrenCount > index) {
             return content.children[index];
         }
 
-        var node = cc.instantiate(this._temp);
+        let node = cc.instantiate(this._temp);
 
         content.addChild(node);
         return node;
     },
 
-	shrinkContent: function(content, num) {
+    shrinkContent: function(content, num) {
         while (content.childrenCount > num) {
             var lastOne = content.children[content.childrenCount -1];
             content.removeChild(lastOne);
         }
     },
 
-	showItems: function(data) {
-		var content = cc.find('items/view/content', this.node);
+    showItems: function(data) {
+        let content = cc.find('items/view/content', this.node);
 
-		for (var i = 0; i < data.length; i++) {
-			var msg = data[i];
-			var item = this.getItem(i);
-			var name = item.getChildByName('name').getComponent(cc.Label);
-			var id = item.getChildByName('id').getComponent(cc.Label);
-			var time = item.getChildByName('time').getComponent(cc.Label);
-			var message = item.getChildByName('message').getComponent(cc.Label);
-			var head = cc.find('icon/head', item).getComponent('ImageLoader');
-			var btn_approve = item.getChildByName('btn_approve');
-			var approved = item.getChildByName('approved');
+        data.sort((a, b)=>{
+            let wait_a = a.type == 'apply' && a.sign == 'wait';
+            let wait_b = b.type == 'apply' && b.sign == 'wait';
 
-			name.string = new Buffer(msg.name, 'base64').toString();
-			id.string = msg.user_id;
-			time.string = cc.vv.utils.dateFormat(msg.uptime * 1000);
+            if (wait_a == wait_b)
+                return b.uptime - a.uptime;
 
-			var type = msg.type;
-			var sign = msg.sign;
-			var status = '';
+            if (wait_a && !wait_b)
+                return -1;
+            else
+                return 1;
+        });
 
-			var msgs = {
-				join : '加入了俱乐部',
-				leave : '离开了俱乐部',
-				apply : '申请加入俱乐部'
-			};
+        for (let i = 0; i < data.length; i++) {
+            let msg = data[i];
+            let item = this.getItem(i);
+            let name = item.getChildByName('name').getComponent(cc.Label);
+            let id = item.getChildByName('id').getComponent(cc.Label);
+            let time = item.getChildByName('time').getComponent(cc.Label);
+            let message = item.getChildByName('message').getComponent(cc.Label);
+            let head = cc.find('icon/head', item).getComponent('ImageLoader');
+            let btn_approve = item.getChildByName('btn_approve');
+            let approved = item.getChildByName('approved');
 
-			message.string = msgs[type];
+            name.string = new Buffer(msg.name, 'base64').toString().slice(0, 5);
+            id.string = msg.user_id;
+            time.string = cc.vv.utils.dateFormat(msg.uptime * 1000);
 
-			btn_approve.active = (type == 'apply') && (sign == 'wait');
-			approved.active = (type == 'apply') && (sign != 'wait');
-			if (sign == 'approved')
-				status = '已通过';
-			else if (sign == 'rejected')
-				status = '已拒绝';
+            let type = msg.type;
+            let sign = msg.sign;
+            let status = '';
 
-			approved.getComponent(cc.Label).string = status;
-			head.setLogo(msg.user_id, msg.logo);
+            let msgs = {
+                join : '加入了俱乐部',
+                leave : '离开了俱乐部',
+                apply : '申请加入俱乐部'
+            };
 
-			item.msg_id = msg.id;
-		}
+            message.string = msgs[type];
 
-		this.shrinkContent(content, data.length);
+            btn_approve.active = (type == 'apply') && (sign == 'wait');
+            approved.active = (type == 'apply') && (sign != 'wait');
+            if (sign == 'approved')
+                status = '已通过';
+            else if (sign == 'rejected')
+                status = '已拒绝';
+
+            approved.getComponent(cc.Label).string = status;
+            head.setLogo(msg.user_id, msg.logo);
+
+            item.msg_id = msg.id;
+        }
+
+        this.shrinkContent(content, data.length);
     },
 });
 

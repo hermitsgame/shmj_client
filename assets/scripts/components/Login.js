@@ -49,7 +49,7 @@ cc.Class({
 
         cc.vv.http.url = cc.vv.http.master_url;
 
-        //cc.vv.audioMgr.playBackGround(); // TODO
+        cc.vv.audioMgr.playBackGround();
 
         //this._agreeCheck = cc.find("Canvas/agreement/check").getComponent("CheckBox");
 

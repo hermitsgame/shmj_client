@@ -92,9 +92,9 @@ cc.Class({
 
         this.refreshCoins();
         this.refreshNotice();
-
-        cc.vv.audioMgr.playBackGround();
 */
+        cc.vv.audioMgr.playBackGround();
+
 		var self = this;
 
 		this.node.on("rb-updated", function(event) {

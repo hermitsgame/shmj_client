@@ -169,10 +169,12 @@ cc.Class({
     },
 
     loadImage : function(url, node, force) {
-        if (!url || url.length == 0)
+        let sprite = node.getComponent(cc.Sprite);
+        if (!url || url.length == 0) {
+            sprite.spriteFrame = null;
             return;
+        }
 
-        var sprite = node.getComponent(cc.Sprite);
         var type = url.slice(-3);
         if (type != 'jpg' && type != 'png')
             type = 'jpg';
