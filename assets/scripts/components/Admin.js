@@ -410,7 +410,7 @@ cc.Class({
 
 		btn_play.getComponent('SpriteMgr').setIndex(idle ? 0 : 1);
 		status.string = idle ? '开始' : '游戏中';
-		btn_edit.active = idle;
+		//btn_edit.active = idle; // TODO
 		btn_destroy.active = idle && nplayer == 0;
     },
 

@@ -188,8 +188,6 @@ cc.Class({
 
 			cc.vv.utils.showDialog(invest, 'body', true);
         } else if (name == 'btnBind') {
-			cc.vv.audioMgr.playButtonClicked();
-
 			var bind = this.node.getChildByName('bind');
 
 			cc.vv.utils.showDialog(bind, 'body', true);
