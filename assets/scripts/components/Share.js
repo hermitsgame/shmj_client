@@ -53,7 +53,7 @@ cc.Class({
     },
 
     onShareWc: function() {
-        this.onShare(false);
+        this.onShare();
     },
 
     onShareTl: function() {

@@ -65,7 +65,7 @@ cc.Class({
     },
 
     share: function(title, desc, data, timeline) {
-        let tl = timeline != null;
+        let tl = timeline != null ? timeline : false;
 
         this._isTimeline = tl;
 
@@ -81,6 +81,7 @@ cc.Class({
             url += '?' + add.join('&');
 
         console.log('share url=' + url);
+        console.log('timeline=' + tl);
 
         if (cc.sys.os == cc.sys.OS_ANDROID) {
             jsb.reflection.callStaticMethod(this.ANDROID_API,
@@ -470,8 +471,6 @@ cc.Class({
             return info;
         }
     },
-});
-
     
     onInvite: function(query) {
         console.log('onInvite: ' + query);
@@ -480,11 +479,9 @@ cc.Class({
         if (!query || query.length == 0)
             return;
 
-        let que = cc.vv.anysdkMgr.getQuery();
-        console.log(que);
-
         let params = utils.queryParse(query);
-        let roomid = params.roomid;
+        let roomid = params.room;
+        let clubid = params.club;
 
         console.log('roomid=' + roomid);
 
@@ -512,6 +509,8 @@ cc.Class({
                     }
                 });
             }
+        } else if (clubid != null) {
+            //cc.vv.pclient.requst_apis('', );
         }
     },
     

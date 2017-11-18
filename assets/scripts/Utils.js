@@ -196,6 +196,22 @@ cc.Class({
 
             sprite.spriteFrame = new cc.SpriteFrame(tex, cc.Rect(0, 0, tex.width, tex.height), false, 0);
         });
+    },
+    
+    queryParse: function(query) {
+        if (query == null || query.length == 0)
+            return {};
+
+        let params = {};
+        let arr = query.split('&');
+
+        arr.forEach(x=>{
+            let num = x.indexOf('=');
+            if (nuj > 0)
+                params[x.substring(0, num)] = x.substr(num + 1);
+        });
+
+        return params;
     }
 });
 
