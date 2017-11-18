@@ -3,7 +3,7 @@
   "_name": "ting",
   "_objFlags": 0,
   "_rawFiles": null,
-  "_duration": 3,
+  "_duration": 3.05,
   "sample": 20,
   "speed": 1,
   "wrapMode": 1,
@@ -50,6 +50,10 @@
                 "value": {
                   "__uuid__": "4767c157-9fd2-442d-b7e0-f75d5db95816"
                 }
+              },
+              {
+                "frame": 3,
+                "value": null
               }
             ]
           }

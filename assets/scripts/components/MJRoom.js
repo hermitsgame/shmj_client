@@ -231,9 +231,8 @@ cc.Class({
             var idx = net.getSeatIndexByID(data.sender);
             var localIdx = net.getLocalIndex(idx);
             console.log(data);
-            //self._seats[localIdx].emoji(data.content + 1);
-
-            self.emoji(idx, data.content + 1);
+            self._seats[localIdx].emoji(data.content + 1);
+            //self.emoji(idx, data.content + 1);
         });
 
         node.on('demoji_push', data=>{
@@ -360,8 +359,15 @@ cc.Class({
     },
 
     onBtnWeichatClicked: function() {
-        var title = "<麻友圈>";
-        cc.vv.anysdkMgr.share(title, "房号:" + cc.vv.gameNetMgr.roomId + " 玩法:" + cc.vv.gameNetMgr.getWanfa());
+        let title = "<雀达麻友圈>";
+        let game = cc.vv.gameNetMgr;
+        let content = '房号:' + game.roomId + ' 玩法:' + net.getWanfa();
+
+        let data = {
+            room : game.roomId
+        };
+
+        cc.vv.anysdkMgr.share(title, content, data);
     },
 
     onBtnDissolveClicked: function() {

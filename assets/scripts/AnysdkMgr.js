@@ -19,7 +19,9 @@ cc.Class({
         _pickNotify: null,
         _receiptPath: null,
         
-        _isBuying : false
+        _isBuying : false,
+
+        _iapInited: false
     },
 
     // use this for initialization
@@ -62,17 +64,29 @@ cc.Class({
         }
     },
 
-    share: function(title, desc, timeline) {
-        var tl = timeline != null;
+    share: function(title, desc, data, timeline) {
+        let tl = timeline != null;
 
         this._isTimeline = tl;
 
-        if (cc.sys.os == cc.sys.OS_ANDROID) {
+        let url = '' + cc.vv.SI.appweb;
+        let add = [];
 
+        if (data != null) {
+            for (let key in data)
+                add.push(key + '=' + data[key]);
+        }
+
+        if (add.length > 0)
+            url += '?' + add.join('&');
+
+        console.log('share url=' + url);
+
+        if (cc.sys.os == cc.sys.OS_ANDROID) {
             jsb.reflection.callStaticMethod(this.ANDROID_API,
                                             "Share",
                                             "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V",
-                                            cc.vv.SI.appweb,
+                                            url,
                                             title,
                                             desc,
                                             tl);
@@ -80,7 +94,7 @@ cc.Class({
         else if(cc.sys.os == cc.sys.OS_IOS){
             jsb.reflection.callStaticMethod(this.IOS_API,
                                             "share:shareTitle:shareDesc:timeLine:",
-                                            cc.vv.SI.appweb,
+                                            url,
                                             title,
                                             desc,
                                             tl);
@@ -152,7 +166,9 @@ cc.Class({
         setTimeout(fn,50);
     },
 
-	pay: function(token, id) {
+	pay: function(token, info) {
+        let id = info.id;
+    
 		if (cc.sys.os == cc.sys.OS_ANDROID) {
 			jsb.reflection.callStaticMethod(this.ANDROID_API, "Pay", "(Ljava/lang/String;I)V", token, id);
 		} else if (cc.sys.os == cc.sys.OS_IOS) {
@@ -162,7 +178,12 @@ cc.Class({
 		    }
 
 		    this._isBuying = true;
-		    jsb.reflection.callStaticMethod(this.IOS_API, "buyProduct:", 'gem6');
+
+            let product = info.product;
+
+            console.log('buyProduct:' + product);
+
+		    jsb.reflection.callStaticMethod(this.IOS_API, "buyProduct:", product);
 		}
     },
 
@@ -197,13 +218,15 @@ cc.Class({
 		});
     },
 
-	initIAP: function(identifiers) {
-		if (!identifiers || identifiers.length == 0) {
-			return false;
-		}
+    initIAP: function(identifiers) {
+        if (!identifiers || identifiers.length == 0)
+            return false;
 
-		var args = identifiers.join(',');
-        var receipts = jsb.fileUtils.getWritablePath() + "receipts/";
+        if (this._iapInited)
+            return true;
+
+        let args = identifiers.join(',');
+        let receipts = jsb.fileUtils.getWritablePath() + "receipts/";
 
         this._receiptPath = receipts;
 
@@ -211,64 +234,69 @@ cc.Class({
             jsb.fileUtils.createDirectory(receipts);
 
         jsb.reflection.callStaticMethod(this.IOS_API, "initIAP:receipts:", args, receipts);
-		
-		return true;
+
+        this._iapInited = true;
+        return true;
     },
 
-	buyIAP: function(identifier) {
-		if (cc.sys.os != cc.sys.OS_IOS) {
-			return false;
-		}
+    buyIAP: function(identifier) {
+        if (cc.sys.os != cc.sys.OS_IOS) {
+            return false;
+        }
 
-		jsb.reflection.callStaticMethod(this.IOS_API, "buyProduct", identifier);
-		return true;
+        jsb.reflection.callStaticMethod(this.IOS_API, "buyProduct", identifier);
+        return true;
 	},
 
-    onBuyIAPResp: function(ret, receipt) {
-        console.log('onBuyIAPResp');
+	onBuyIAPResp: function(ret, receipt) {
+		console.log('onBuyIAPResp');
 
         cc.vv.anysdkMgr._isBuying = false;
 
-        if (ret != 0) {
-            cc.vv.alert.show('购买失败');
-            return true;
-        }
-
-        console.log('receipt: ' + receipt);
-
-        var path = jsb.fileUtils.getWritablePath() + "receipts/" + receipt;
-
-        if (!jsb.fileUtils.isFileExist(path)) {
-            console.log('receipt not exist !!!');
-            return true;
-        }
+		if (ret != 0) {
+		    cc.vv.wc.hide();
+		    cc.vv.alert.show('购买失败');
+		    return true;
+		}
 		
-        var content = jsb.fileUtils.getStringFromFile(path);
+		console.log('receipt: ' + receipt);
+		
+		var path = jsb.fileUtils.getWritablePath() + "receipts/" + receipt;
+		
+		if (!jsb.fileUtils.isFileExist(path)) {
+		    console.log('receipt not exist !!!');
+		    cc.vv.wc.hide();
+		    return true;
+		}
+		
+		var content = jsb.fileUtils.getStringFromFile(path);
+		
+		console.log('the path: ' + path);
 
-        console.log('the path: ' + path);
+		var args = {
+		    token : cc.vv.userMgr.sign,
+		    receipt : content
+		};
+		
+		cc.vv.http.post('/pay_iap/query_order', args, ret=>{
+		    console.log('ret from pay_iap');
+		    let errcode = ret.errcode;
+		    
+		    cc.vv.wc.hide();
+			if (errcode == cc.vv.global.const_code.ORDER.ORDER_SUCCESS) {
+				var data = {
+					currency : ret.currency,
+					amount : ret.quantity
+				};
 
-        var args = {
-            token : cc.vv.userMgr.sign,
-            receipt : content
-        };
+				cc.vv.gg.show(data);
+				
+				jsb.fileUtils.removeFile(path);
+			}
+		});
 
-        cc.vv.http.post('/pay_iap/query_order', args, ret=>{
-            console.log('ret from pay_iap');
-            var errcode = ret.errcode;
-            if (errcode == cc.vv.global.const_code.ORDER.ORDER_SUCCESS) {
-                var data = {
-                    currency : ret.currency,
-                    amount : ret.quantity
-                };
-
-                cc.vv.gg.show(data);
-
-                jsb.fileUtils.removeFile(path);
-            }
-        });
-
-        return true;
-    },
+		return true;
+	},
 
     onLoginResp: function(code) {
     	console.log('onLoginResp');
@@ -444,3 +472,75 @@ cc.Class({
     },
 });
 
+    
+    onInvite: function(query) {
+        console.log('onInvite: ' + query);
+        let utils = cc.vv.utils;
+
+        if (!query || query.length == 0)
+            return;
+
+        let que = cc.vv.anysdkMgr.getQuery();
+        console.log(que);
+
+        let params = utils.queryParse(query);
+        let roomid = params.roomid;
+
+        console.log('roomid=' + roomid);
+
+        if (roomid != null) {
+            let scene = cc.director.getScene().name;
+            if (scene == 'mjgame') {
+                // TODO
+            } else if (scene == 'hall') {
+                setTimeout(()=>{
+                    cc.vv.anysdkMgr.clearQuery();
+                }, 1000);
+
+                cc.vv.userMgr.enterRoom(roomid, ret=>{
+                    let code = ret.errcode;
+                    if (code != 0) {
+                        let content = "房间["+ roomid +"]不存在";
+                        
+                        if (code == 2224) {
+                            content = "房间["+ roomid + "]已满!";
+                        } else if (code == 2222) {
+                            content = '钻石不足';
+                        }
+        
+                        cc.vv.alert.show(content);
+                    }
+                });
+            }
+        }
+    },
+    
+    getQuery: function() {
+        if (!cc.sys.isNative)
+            return null;
+
+        if (cc.sys.os == cc.sys.OS_ANDROID)
+            return null;  // TODO
+
+        console.log('getQuery');
+
+        let ret = jsb.reflection.callStaticMethod(this.IOS_API, 'getQuery');
+        
+        console.log('get query: ' + ret);
+        return ret;
+    },
+    
+    clearQuery: function() {
+        if (!cc.sys.isNative)
+            return;
+
+        if (cc.sys.os == cc.sys.OS_ANDROID)
+            return; // TODO
+
+        console.log('clear query');
+
+        jsb.reflection.callStaticMethod(this.IOS_API, 'clearQuery');
+
+        return;
+    }
+});

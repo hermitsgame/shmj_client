@@ -360,7 +360,7 @@ cc.Class({
             this._lastChatTime -= dt;
             if (this._lastChatTime < 0) {
                 this._chat.active = false;
-		if (this._emoji != null)
+                if (this._emoji != null)
                     this._emoji.active = false;
             }
         }

@@ -3,7 +3,7 @@
   "_name": "peng",
   "_objFlags": 0,
   "_rawFiles": null,
-  "_duration": 3,
+  "_duration": 3.05,
   "sample": 20,
   "speed": 1,
   "wrapMode": 1,
@@ -50,6 +50,10 @@
                 "value": {
                   "__uuid__": "36c5e894-7b69-44da-8c08-ee16de0271ab"
                 }
+              },
+              {
+                "frame": 3,
+                "value": null
               }
             ]
           }

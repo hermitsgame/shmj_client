@@ -166,7 +166,7 @@ cc.Class({
 
         mjnode.opacity = 0;
         mjnode.active = true;
-        mj.setFocus(false);
+        mj.setFocus(true);
         mj.setMJID(pai);
         var oldx = mj.oldx;
         var oldy = mj.oldy;
@@ -176,10 +176,9 @@ cc.Class({
         }, this, mjnode);
 
         var fnFinished = cc.callFunc(function(target, data) {
-            data.showFocus(true);
+            data.showFocus();
             data.node.x = data.oldx;
             data.node.y = data.oldy;
-            data.setFocus(true);
         }, this, mj);
 
         var actions = cc.sequence(cc.hide(),
@@ -191,7 +190,6 @@ cc.Class({
 
         mjnode.runAction(actions);
 
-        mj.setFocus(true);
         this._lastMJ = mj;
     },
 

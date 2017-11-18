@@ -38,7 +38,7 @@ cc.Class({
         cc.vv.audioMgr.playButtonClicked();
 
         setTimeout(()=>{
-            cc.vv.anysdkMgr.share("雀达麻友圈", "雀达麻友圈，包含了上海敲麻等多种流行麻将玩法。", timeLine);
+            cc.vv.anysdkMgr.share("雀达麻友圈", "雀达麻友圈，包含了上海敲麻等多种流行麻将玩法。", null, timeLine);
         }, 100);
     },
 

@@ -158,7 +158,7 @@ cc.Class({
     },
     
     showMenu: function() {
-        var show = this._popuproot.active && this._menu.active;
+        let show = this._popuproot.active && this._menu.active;
 
         this.closeAll();
         
@@ -166,9 +166,14 @@ cc.Class({
             this._popuproot.active = true;
             this._menu.active = true;
 
-			var isReplay = cc.vv.replayMgr.isReplay();
-			var btnDissolve = cc.find('Canvas/popups/menu/btnDissolve');
-			btnDissolve.getComponent(cc.Button).interactable = !isReplay;
+            let isReplay = cc.vv.replayMgr.isReplay();
+            let btnDissolve = cc.find('Canvas/popups/menu/btnDissolve');
+            let spmgr = btnDissolve.getComponent('SpriteMgr');
+
+            btnDissolve.getComponent(cc.Button).interactable = !isReplay;
+
+            if (!isReplay)
+                spmgr.setIndex(cc.vv.gameNetMgr.numOfGames == 0 ? 1 : 0);
         }
     },
     

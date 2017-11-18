@@ -11,8 +11,6 @@ cc.Class({
         let item = content.children[0];
         let addEvent = cc.vv.utils.addClickEvent;
 
-        addEvent(item, this.node, 'ClubMessage', 'onBtnApproveClicked');
-
         this._temp = item;
         content.removeChild(item, false);
 
@@ -28,12 +26,11 @@ cc.Class({
         this.node.active = false;
     },
 
-    onBtnApproveClicked: function(event) {
+    sign: function(id, status) {
         let self = this;
-        let item = event.target.parent;
         let data = {
-            id : item.msg_id,
-            sign : 'approved',
+            id : id,
+            sign : status,
             score : 0,
             limit : 0
         };
@@ -44,6 +41,18 @@ cc.Class({
 
             self.refresh();
         });
+    },
+
+    onBtnApproveClicked: function(event) {
+        let item = event.target.parent;
+
+        this.sign(item.msg_id, 'approved');
+    },
+
+    onBtnRejectClicked: function(event) {
+        let item = event.target.parent;
+
+        this.sign(item.msg_id, 'rejected');
     },
 
     refresh: function() {
@@ -106,6 +115,7 @@ cc.Class({
             let message = item.getChildByName('message').getComponent(cc.Label);
             let head = cc.find('icon/head', item).getComponent('ImageLoader');
             let btn_approve = item.getChildByName('btn_approve');
+            let btn_reject = item.getChildByName('btn_reject');
             let approved = item.getChildByName('approved');
 
             name.string = new Buffer(msg.name, 'base64').toString().slice(0, 5);
@@ -117,7 +127,7 @@ cc.Class({
             let status = '';
 
             let msgs = {
-                join : '加入了俱乐部',
+                join : '申请加入俱乐部',
                 leave : '离开了俱乐部',
                 apply : '申请加入俱乐部'
             };
@@ -125,7 +135,8 @@ cc.Class({
             message.string = msgs[type];
 
             btn_approve.active = (type == 'apply') && (sign == 'wait');
-            approved.active = (type == 'apply') && (sign != 'wait');
+            btn_reject.active = (type == 'apply') && (sign == 'wait');
+            approved.active = (type == 'apply' || type == 'join');
             if (sign == 'approved')
                 status = '已通过';
             else if (sign == 'rejected')

@@ -10,36 +10,39 @@ cc.Class({
     },
 
     onLoad: function() {
-		var content = cc.find('rooms/view/content', this.node);
-		var item = content.children[0];
-		var addClickEvent = cc.vv.utils.addClickEvent;
-		var btn_prepare = item.getChildByName('btn_prepare');
-		var btn_leave = item.getChildByName('btn_leave');
-		var seats = item.getChildByName('table');
+		let content = cc.find('rooms/view/content', this.node);
+		let item = content.children[0];
+		let addEvent = cc.vv.utils.addClickEvent;
+		let btn_prepare = item.getChildByName('btn_prepare');
+		let btn_leave = item.getChildByName('btn_leave');
+		let seats = item.getChildByName('table');
 
-		for (var i = 0; i < seats.childrenCount; i++) {
-			var seat = seats.children[i];
+		for (let i = 0; i < seats.childrenCount; i++) {
+			let seat = seats.children[i];
 
-			addClickEvent(seat, this.node, 'Lobby', 'onBtnSeatClicked');
+			addEvent(seat, this.node, 'Lobby', 'onBtnSeatClicked');
 		}
 
-		addClickEvent(btn_prepare, this.node, 'Lobby', 'onBtnPrepareClicked');
-		addClickEvent(btn_leave, this.node, 'Lobby', 'onBtnLeaveClicked');
+		addEvent(btn_prepare, this.node, 'Lobby', 'onBtnPrepareClicked');
+		addEvent(btn_leave, this.node, 'Lobby', 'onBtnLeaveClicked');
 
 		this._tempRoom = item;
 		content.removeChild(item, false);
 
-		var btnClose = cc.find('top/btn_back', this.node);
-		cc.vv.utils.addClickEvent(btnClose, this.node, 'Lobby', 'onBtnClose');
+		let btnClose = cc.find('top/btn_back', this.node);
+		addEvent(btnClose, this.node, 'Lobby', 'onBtnClose');
 
-		var btnRank = cc.find('entrys/btn_rank', this.node);
-		cc.vv.utils.addClickEvent(btnRank, this.node, 'Lobby', 'onBtnRankClicked');
+		let btnRank = cc.find('entrys/btn_rank', this.node);
+		addEvent(btnRank, this.node, 'Lobby', 'onBtnRankClicked');
 
-		var btnCard = cc.find('entrys/btn_card', this.node);
-		cc.vv.utils.addClickEvent(btnCard, this.node, 'Lobby', 'onBtnCardClicked');
+        let btnHistory = cc.find('entrys/btn_history', this.node);
+        addEvent(btnHistory, this.node, 'Lobby', 'onBtnHistoryClicked');
 
-		var btnInvite = cc.find('entrys/btn_invite', this.node);
-		cc.vv.utils.addClickEvent(btnInvite, this.node, 'Lobby', 'onBtnInviteClicked');
+		let btnCard = cc.find('entrys/btn_card', this.node);
+		addEvent(btnCard, this.node, 'Lobby', 'onBtnCardClicked');
+
+		let btnInvite = cc.find('entrys/btn_invite', this.node);
+		addEvent(btnInvite, this.node, 'Lobby', 'onBtnInviteClicked');
 
 		this.initEventHandler();
     },
@@ -240,6 +243,16 @@ cc.Class({
 
 		rank.club_id = this.node.club_id;
 		rank.active = true;
+    },
+
+    onBtnHistoryClicked: function() {
+		let history = cc.find('Canvas/club_history');
+
+		cc.vv.historyParam = {
+			club_id : this.node.club_id
+		};
+
+		history.active = true;
     },
 
 	onBtnCardClicked: function() {

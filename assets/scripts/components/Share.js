@@ -45,7 +45,11 @@ cc.Class({
 
         let content = club.name + '俱乐部(ID:' + club.id + ')邀请您加入' + '\n' + club.desc;
 
-        cc.vv.anysdkMgr.share(title, content, timeline);
+        let data = {
+            club : club.id
+        };
+
+        cc.vv.anysdkMgr.share(title, content, data, timeline);
     },
 
     onShareWc: function() {

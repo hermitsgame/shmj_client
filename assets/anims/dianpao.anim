@@ -59,6 +59,13 @@
           "value": 0
         }
       ]
+    },
+    "paths": {
+      "child": {
+        "comps": {
+          "cc.Sprite": {}
+        }
+      }
     }
   },
   "events": []

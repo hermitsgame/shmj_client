@@ -3,7 +3,7 @@
   "_name": "hu",
   "_objFlags": 0,
   "_rawFiles": null,
-  "_duration": 3,
+  "_duration": 3.05,
   "sample": 20,
   "speed": 1,
   "wrapMode": 1,
@@ -50,6 +50,10 @@
                 "value": {
                   "__uuid__": "322d57ae-255c-4fdf-a025-65efdc4fc6c9"
                 }
+              },
+              {
+                "frame": 3,
+                "value": null
               }
             ]
           }

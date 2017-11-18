@@ -41,6 +41,8 @@ cc.Class({
 
 		var btnClose = cc.find('top/btn_back', this.node);
 		cc.vv.utils.addClickEvent(btnClose, this.node, 'CreateRoom', 'onBtnClose');
+
+        this._flowers = 1;
 	},
 
     onEnable: function() {
@@ -90,11 +92,9 @@ cc.Class({
                 return;
 
             if (ret.errcode != 0) {
-                cc.vv.alert.show(errmsg);
+                cc.vv.alert.show(ret.errmsg);
                 return;
             }
-
-            //cc.vv.alert.show('create success');
 
             self.node.active = false;
         });
@@ -122,6 +122,7 @@ cc.Class({
         }
 
 		var flowers = this._flowers;
+
 		var maima = this._maima.getComponent('CheckBox').checked;
 		var allpairs = this._allpairs.getComponent('CheckBox').checked;
 

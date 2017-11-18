@@ -236,6 +236,14 @@ cc.Class({
 
     onBtnEditClicked: function(event) {
         console.log('onBtnEditClicked');
+
+        let edit = cc.find('Canvas/edit_room');
+        let room = event.target.parent.room;
+
+        edit.club_id = this.node.club_id;
+        edit.room = room;
+        edit.parent_page = this;
+        edit.active = true;
     },
 
     doDestroy: function(item) {
@@ -410,7 +418,7 @@ cc.Class({
 
 		btn_play.getComponent('SpriteMgr').setIndex(idle ? 0 : 1);
 		status.string = idle ? '开始' : '游戏中';
-		//btn_edit.active = idle; // TODO
+		btn_edit.active = idle && nplayer == 0;
 		btn_destroy.active = idle && nplayer == 0;
     },
 
