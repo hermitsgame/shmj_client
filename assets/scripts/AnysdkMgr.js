@@ -484,33 +484,14 @@ cc.Class({
         let clubid = params.club;
 
         console.log('roomid=' + roomid);
+        console.log('clubid=' + clubid);
 
-        if (roomid != null) {
-            let scene = cc.director.getScene().name;
-            if (scene == 'mjgame') {
-                // TODO
-            } else if (scene == 'hall') {
-                setTimeout(()=>{
-                    cc.vv.anysdkMgr.clearQuery();
-                }, 1000);
-
-                cc.vv.userMgr.enterRoom(roomid, ret=>{
-                    let code = ret.errcode;
-                    if (code != 0) {
-                        let content = "房间["+ roomid +"]不存在";
-                        
-                        if (code == 2224) {
-                            content = "房间["+ roomid + "]已满!";
-                        } else if (code == 2222) {
-                            content = '钻石不足';
-                        }
-        
-                        cc.vv.alert.show(content);
-                    }
-                });
-            }
-        } else if (clubid != null) {
-            //cc.vv.pclient.requst_apis('', );
+        let scene = cc.director.getScene().name;
+        if (scene == 'hall') {
+            let hall = cc.find('Canvas').getComponent('Hall');
+            hall.checkQuery();
+        } else if (scene == 'mjgame') {
+            // TODO
         }
     },
     

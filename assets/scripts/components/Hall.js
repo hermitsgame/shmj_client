@@ -38,7 +38,10 @@ cc.Class({
         cc.vv.audioMgr.playButtonClicked();
 
         setTimeout(()=>{
-            cc.vv.anysdkMgr.share("雀达麻友圈", "雀达麻友圈，包含了上海敲麻等多种流行麻将玩法。", null, timeLine);
+            cc.vv.anysdkMgr.share("雀达麻友圈",
+                "雀达麻友圈，包含了上海敲麻等多种流行麻将玩法。",
+                null,
+                timeLine);
         }, 100);
     },
 
@@ -106,50 +109,140 @@ cc.Class({
     },
 
     start: function() {
-		if (!cc.vv) {
-			return;
-		}
+        if (!cc.vv)
+            return;
 
-        var roomId = cc.vv.userMgr.oldRoomId;
+        let userMgr = cc.vv.userMgr;
+
+        let roomId = userMgr.oldRoomId;
         if (roomId != null) {
-            cc.vv.userMgr.oldRoomId = null;
-            cc.vv.userMgr.enterRoom(roomId);
+            userMgr.oldRoomId = null;
+            userMgr.enterRoom(roomId);
+        } else if(userMgr.roomData != null) {
+            userMgr.enterRoom(userMgr.roomData);
+            userMgr.roomData = null;
+        } else {
+            this.checkQuery();
         }
     },
 
-	showTab: function(id) {
-		var body = this.node.getChildByName('body');
-		var tabs = [ 'discover', 'club', 'history', 'mine' ];
+    checkQuery: function() {
+        let self = this;
+        let utils = cc.vv.utils;
+        let userMgr = cc.vv.userMgr;
+        let anysdk = cc.vv.anysdkMgr;
+        let query = anysdk.getQuery();
+        let pc = cc.vv.pclient;
+            
+        if (query == null || query.length == 0)
+            return;
 
-		for (var i = 0; i < tabs.length; i++) {
-			var tab = body.getChildByName(tabs[i]);
+        let params = utils.queryParse(query);
+        let roomid = params.room;
+        let clubid = params.club;
+    
+        console.log('roomid=' + roomid);
+        console.log('clubid=' + clubid);
 
-			tab.active = i == id;
-		}
+        setTimeout(()=>{
+            anysdk.clearQuery();
+        }, 100);
+
+        if (roomid != null) {
+            userMgr.enterRoom(roomid, ret=>{
+                let code = ret.errcode;
+                if (code != 0) {
+                    let content = "房间["+ roomid +"]不存在";
+
+                    if (code == 2224) {
+                        content = "房间["+ roomid + "]已满!";
+                    } else if (code == 2222) {
+                        content = '钻石不足';
+                    } else if (code == 2251) {
+                        content = '您不是俱乐部普通成员，无法加入俱乐部房间';
+                    }
+
+                    cc.vv.alert.show(content);
+                }
+            });
+        } else if (clubid != null) {
+            /* 通过俱乐部名片进入
+                1) 检查是否俱乐部会员
+                2) 如果是普通会员，进入lobby界面；member
+                3) 如果是管理员，进入admin界面;            admin
+                4) 如果不是俱乐部成员，发送申请，并给提示已申请 ; outsider
+            */
+            pc.request_apis('get_club_role', { club_id : clubid }, ret=>{
+                if (ret.errcode != 0) {
+                    console.log('get_club_role ret=' + ret.errcode);
+                    return;
+                }
+
+                let role = ret.data.role;
+                if (role == 'member') {
+                    self.showTab(2);
+                    let next = cc.find('Canvas/lobby');
+
+                    userMgr.club_id = clubid;
+                    userMgr.is_admin = false;
+                    next.club_id = clubid;
+                    next.active = true;
+                } else if (role == 'admin') {
+                    self.showTab(2);
+
+                    let next = cc.find('Canvas/admin');
+
+                    userMgr.club_id = clubid;
+                    userMgr.is_admin = true;
+                    next.club_id = clubid;
+                    next.active = true;
+                } else if (role == 'outsider') {
+                    pc.request_apis('apply_join_club', { club_id: clubid }, ret2=>{
+                        if (ret2.errcode != 0) {
+                            cc.vv.alert.show(ret2.errmsg);
+                            return;
+                        }
+
+                        cc.vv.alert.show('已成功申请加入俱乐部' + clubid + '，请等待管理员审核');
+                    });
+                }
+            });    
+        }
+    },
+
+    showTab: function(id) {
+        let body = this.node.getChildByName('body');
+        let tabs = [ 'discover', 'club', 'history', 'mine' ];
+
+        for (var i = 0; i < tabs.length; i++) {
+            let tab = body.getChildByName(tabs[i]);
+
+            tab.active = i == id;
+        }
     },
 
     refreshCoins: function() {
-		var self = this;
+        let self = this;
 
-		cc.vv.userMgr.simpleRequstWithResult('get_coins', {}, function(ret) {
-			if (!ret || ret.errcode != 0)
-				return;
+        cc.vv.userMgr.simpleRequstWithResult('get_coins', {}, ret=>{
+            if (!ret || ret.errcode != 0)
+                return;
 
-			self.lblGems.string = ret.gems;
-			self.lblLottery.string = ret.lottery;
-			self.lblGolds.string = ret.golds;
-		});
+             self.lblGems.string = ret.gems;
+             self.lblLottery.string = ret.lottery;
+             self.lblGolds.string = ret.golds;
+        });
     },
 
     refreshNotice: function() {
-        var self = this;
+        let self = this;
 
-        cc.vv.userMgr.simpleRequstWithResult('get_message', { type: 'notice' }, function(ret) {
-			if (!ret || ret.errcode != 0)
-				return;
+        cc.vv.userMgr.simpleRequstWithResult('get_message', { type: 'notice' }, ret=>{
+            if (!ret || ret.errcode != 0)
+				        return;
 
-			self.lblNotice.string = ret.msg;
-		});
+            self.lblNotice.string = ret.msg;
+        });
     },
 
     initButtonHandler: function(path) {
@@ -158,9 +251,11 @@ cc.Class({
     },
 
     initLabels: function() {
-        this.lblName.string = cc.vv.userMgr.userName;
-        this.lblGems.string = cc.vv.userMgr.gems;
-        this.lblID.string = 'ID:' + cc.vv.userMgr.userId;
+        let usermgr = cc.vv.userMgr;
+
+        this.lblName.string = usermgr.userName.slice(0, 8);
+        this.lblGems.string = usermgr.gems;
+        this.lblID.string = 'ID:' + usermgr.userId;
     },
 
 	onSettingsClose: function() {
@@ -170,34 +265,35 @@ cc.Class({
     onBtnClicked: function(event) {
         cc.vv.audioMgr.playButtonClicked();
 
-		var name = event.target.name;
-		var node = this.node;
+        let name = event.target.name;
+        let node = this.node;
+        let utils = cc.vv.utils;
 
         if (name == "btnSetting") {
-			var setWin = node.getChildByName('audioSet');
+            var setWin = node.getChildByName('audioSet');
 
-			cc.vv.utils.showDialog(setWin, 'body', true);
+            utils.showDialog(setWin, 'body', true);
         } else if (name == "btnHelp") {
-			cc.vv.utils.showFrame(this.helpWin, 'head', 'body', true);
+            utils.showFrame(this.helpWin, 'head', 'body', true);
         } else if (name == 'btnFeedback') {
-			var fb = node.getChildByName('feedback');
+            var fb = node.getChildByName('feedback');
 
-			cc.vv.utils.showDialog(fb, 'body', true);
+            utils.showDialog(fb, 'body', true);
         } else if (name == 'btnInvest') {
-			var invest = node.getChildByName('invest');
+            var invest = node.getChildByName('invest');
 
-			cc.vv.utils.showDialog(invest, 'body', true);
+            utils.showDialog(invest, 'body', true);
         } else if (name == 'btnBind') {
-			var bind = this.node.getChildByName('bind');
+            var bind = this.node.getChildByName('bind');
 
-			cc.vv.utils.showDialog(bind, 'body', true);
+            utils.showDialog(bind, 'body', true);
         }
     },
 
     onJoinGameClicked: function() {
         cc.vv.audioMgr.playButtonClicked();
-		//cc.vv.utils.showDialog(this.joinGameWin, 'panel', true);
-		this.joinGameWin.active = true;
+        //cc.vv.utils.showDialog(this.joinGameWin, 'panel', true);
+        this.joinGameWin.active = true;
     },
 
     onCreateRoomClicked:function(){
@@ -208,10 +304,10 @@ cc.Class({
             return;
         }
 
-		//cc.vv.utils.showDialog(this.createRoomWin, 'body', true);
+        //cc.vv.utils.showDialog(this.createRoomWin, 'body', true);
 
         this.createRoomWin.club_id = null;
-		this.createRoomWin.active = true;
+        this.createRoomWin.active = true;
     },
 
     update: function (dt) {
@@ -223,11 +319,12 @@ cc.Class({
         }
 
         this.lblNotice.node.x = x;
-*/
+
         if(cc.vv && cc.vv.userMgr.roomData != null){
             cc.vv.userMgr.enterRoom(cc.vv.userMgr.roomData);
             cc.vv.userMgr.roomData = null;
         }
     },
+*/
 });
 
