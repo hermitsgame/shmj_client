@@ -480,6 +480,7 @@ cc.Class({
             return;
 
         let params = utils.queryParse(query);
+        
         let roomid = params.room;
         let clubid = params.club;
 
@@ -489,9 +490,11 @@ cc.Class({
         let scene = cc.director.getScene().name;
         if (scene == 'hall') {
             let hall = cc.find('Canvas').getComponent('Hall');
-            hall.checkQuery();
+            if (hall != null)
+                hall.checkQuery();
+
         } else if (scene == 'mjgame') {
-            // TODO
+            cc.vv.anysdkMgr.clearQuery();
         }
     },
     

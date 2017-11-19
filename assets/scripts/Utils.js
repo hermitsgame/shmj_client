@@ -207,7 +207,7 @@ cc.Class({
 
         arr.forEach(x=>{
             let num = x.indexOf('=');
-            if (nuj > 0)
+            if (num > 0)
                 params[x.substring(0, num)] = x.substr(num + 1);
         });
 

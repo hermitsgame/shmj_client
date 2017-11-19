@@ -361,7 +361,7 @@ cc.Class({
     onBtnWeichatClicked: function() {
         let title = "<雀达麻友圈>";
         let game = cc.vv.gameNetMgr;
-        let content = '房号:' + game.roomId + ' 玩法:' + net.getWanfa();
+        let content = '房号:' + game.roomId + ' 玩法:' + game.getWanfa();
 
         let data = {
             room : game.roomId

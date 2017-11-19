@@ -134,7 +134,9 @@ cc.Class({
         let anysdk = cc.vv.anysdkMgr;
         let query = anysdk.getQuery();
         let pc = cc.vv.pclient;
-            
+
+        console.log('hall checkQuery');
+
         if (query == null || query.length == 0)
             return;
 
@@ -341,7 +343,7 @@ cc.Class({
             cc.vv.userMgr.enterRoom(cc.vv.userMgr.roomData);
             cc.vv.userMgr.roomData = null;
         }
-    },
 */
+    },
 });
 

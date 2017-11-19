@@ -70,6 +70,14 @@ cc.Class({
         member.active = true;
     },
 
+    onBtnShare: function() {
+        let club_id = this.node.club_id;
+        let share = cc.find('Canvas/share');
+
+        share.club_id = club_id;
+        share.active = true;
+    },
+
     afterExit: function() {
         let club_list = cc.find('Canvas/club_list').getComponent('ClubList');
 
