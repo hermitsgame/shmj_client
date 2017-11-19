@@ -31,7 +31,20 @@ cc.Class({
 	},
 
 	onBtnShareClicked: function(event) {
+        let id = this.node.roomInfo.id;
+        let game = event.target.parent.game;
 
+        id = id * 100 + game.game_index;
+
+        let title = '<雀达麻友圈>';
+        let content = '比赛记录分享';
+        let data = {
+            game : id
+        };
+
+        console.log('share game: ' + id);
+
+        cc.vv.anysdkMgr.share(title, content, data);
     },
 
 	onBtnReplayClicked: function(event) {

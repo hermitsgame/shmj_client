@@ -130,6 +130,7 @@ cc.Class({
         let self = this;
         let utils = cc.vv.utils;
         let userMgr = cc.vv.userMgr;
+        let net = cc.vv.gameNetMgr;
         let anysdk = cc.vv.anysdkMgr;
         let query = anysdk.getQuery();
         let pc = cc.vv.pclient;
@@ -140,9 +141,11 @@ cc.Class({
         let params = utils.queryParse(query);
         let roomid = params.room;
         let clubid = params.club;
+        let gameid = params.game;
     
         console.log('roomid=' + roomid);
         console.log('clubid=' + clubid);
+        console.log('gameid=' + gameid);
 
         setTimeout(()=>{
             anysdk.clearQuery();
@@ -207,6 +210,20 @@ cc.Class({
                     });
                 }
             });    
+        } else if (gameid != null) {
+            pc.request_apis('get_game_detail', { id : gameid }, ret=>{
+                if (ret.errcode != 0)
+                    return;
+
+                let data = ret.data;
+
+                data.base_info = JSON.parse(data.base_info);
+                data.action_records = JSON.parse(data.action_records);
+
+                net.prepareReplay(data, data);
+                cc.vv.replayMgr.init(data, data);
+                cc.director.loadScene("mjgame");
+            });
         }
     },
 
