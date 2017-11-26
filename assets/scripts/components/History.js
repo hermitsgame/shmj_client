@@ -125,7 +125,7 @@ cc.Class({
 
 			roomid.string = '房间号：' + room.room_tag;
 			desc.string = info.huafen + '/' + info.huafen + (info.maima ? '带苍蝇' : '不带苍蝇') + info.maxGames + '局';
-			club.string = room.club_name + '';
+			club.string = '俱乐部：' + room.club_name;
 			score.string = room.score;
 			cc.vv.utils.loadImage(room.club_logo, head);
 

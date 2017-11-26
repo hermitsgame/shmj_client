@@ -3,7 +3,7 @@
   "_name": "maima1",
   "_objFlags": 0,
   "_rawFiles": null,
-  "_duration": 1.6333333333333333,
+  "_duration": 0.36666666666666664,
   "sample": 30,
   "speed": 1,
   "wrapMode": 1,
@@ -14,37 +14,37 @@
           {
             "frame": 0,
             "value": {
-              "__uuid__": "47b80b95-9660-4046-965b-1cc1f8049b5f"
+              "__uuid__": "d2225fc0-664b-4c2f-b101-5bdb9349e3ff"
             }
           },
           {
-            "frame": 1.4666666666666666,
+            "frame": 0.06666666666666667,
             "value": {
-              "__uuid__": "606ab31f-2572-41f2-9faf-e1d971fa2b8e"
+              "__uuid__": "be5efd72-8491-4046-b0a9-7622aa080cc7"
             }
           },
           {
-            "frame": 1.5,
+            "frame": 0.13333333333333333,
             "value": {
-              "__uuid__": "6f609650-7599-4f64-8ba7-2969d7d6bdc0"
+              "__uuid__": "534a97a7-b5a3-4db1-b657-a95db314324d"
             }
           },
           {
-            "frame": 1.5333333333333334,
+            "frame": 0.2,
             "value": {
-              "__uuid__": "2edd0ee9-dc2a-4085-bedf-7cf28e2cdd8b"
+              "__uuid__": "1716bee4-0366-4109-90dc-b3db23a3fcd4"
             }
           },
           {
-            "frame": 1.5666666666666667,
+            "frame": 0.26666666666666666,
             "value": {
-              "__uuid__": "3f86c33e-9d5d-4fd7-932d-4eef65b73594"
+              "__uuid__": "7f118355-354a-4676-a78e-a6967c09d18d"
             }
           },
           {
-            "frame": 1.6,
+            "frame": 0.3333333333333333,
             "value": {
-              "__uuid__": "4ec661fb-c67a-4776-b03a-eebccf155a7c"
+              "__uuid__": "12036e23-a8d0-4830-a6ea-02a5b682d7c2"
             }
           }
         ]

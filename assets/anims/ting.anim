@@ -3,7 +3,7 @@
   "_name": "ting",
   "_objFlags": 0,
   "_rawFiles": null,
-  "_duration": 3.05,
+  "_duration": 1.1,
   "sample": 20,
   "speed": 1,
   "wrapMode": 1,
@@ -27,15 +27,15 @@
           "value": 50
         },
         {
-          "frame": 0.35,
+          "frame": 0.25,
           "value": 255
         },
         {
-          "frame": 2.5,
+          "frame": 1,
           "value": 255
         },
         {
-          "frame": 3,
+          "frame": 1.1,
           "value": 0
         }
       ]
@@ -50,10 +50,6 @@
                 "value": {
                   "__uuid__": "4767c157-9fd2-442d-b7e0-f75d5db95816"
                 }
-              },
-              {
-                "frame": 3,
-                "value": null
               }
             ]
           }
@@ -65,11 +61,7 @@
               "value": 0.2
             },
             {
-              "frame": 0.85,
-              "value": 1.2
-            },
-            {
-              "frame": 1,
+              "frame": 0.5,
               "value": 1
             }
           ],
@@ -79,11 +71,7 @@
               "value": 0.2
             },
             {
-              "frame": 0.85,
-              "value": 1.2
-            },
-            {
-              "frame": 1,
+              "frame": 0.5,
               "value": 1
             }
           ]

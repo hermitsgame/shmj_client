@@ -87,8 +87,8 @@ cc.Class({
     },
 
     isPlaying: function() {
-        var state = this.gamestate;
-        var states = [ 'begin', 'playing' ];
+        let state = this.gamestate;
+        let states = [ 'begin', 'playing', 'maima' ];
 
         return states.indexOf(state) >= 0;
     },
@@ -390,6 +390,18 @@ cc.Class({
             self.dispatchEvent('user_state_changed',seat);
         });
 
+        net.addHandler('game_wait_maima_push', data=>{
+            console.log('game_wait_maima_push');
+            self.maima = data;
+            self.dispatchEvent('game_wait_maima', data);
+        });
+
+        net.addHandler('game_maima_push', data=>{
+            console.log('game_maima_push');
+            self.maima = data;
+            self.dispatchEvent('game_maima', data);
+        });
+
         net.addHandler("user_ready_push", function(data) {
             var userId = data.userid;
             var seat = self.getSeatByID(userId);
@@ -494,6 +506,7 @@ cc.Class({
             self.button = data.value;
             self.turn = self.button;
             self.gamestate = "begin";
+            self.maima = null;
 
 			for (var i = 0; i < self.seats.length; i++) {
                 var s = self.seats[i];
@@ -553,6 +566,7 @@ cc.Class({
             self.button = data.button;
             self.chupai = data.chuPai;
             self.numOfSeats = data.numOfSeats;
+            self.maima = data.maima;
             for (var i = 0; i < self.numOfSeats; ++i) {
                 var seat = self.seats[i];
                 var sd = data.seats[i];
@@ -646,23 +660,39 @@ cc.Class({
             self.doChupai(si,pai);
         });
 
-        net.addHandler("game_mopai_push",function(data){
+        net.addHandler("game_mopai_push", data=>{
             console.log('game_mopai_push');
             console.log(data);
-            var userId = data.userId;
-            var pai = data.pai;
-            var flowers = data.flowers;
-            var si = self.getSeatIndexByID(userId);
-            self.doMopai(si, pai);
+            let userId = data.userId;
+            let pai = data.pai;
+            let flowers = data.flowers;
+            let si = self.getSeatIndexByID(userId);
 
             if (flowers != null) {
-                var sd = self.seats[si];
+                let sd = self.seats[si];
 
-                sd.flowers = sd.flowers.concat(flowers);
-                self.dispatchEvent('user_state_changed', sd);
+                let old = sd.flowers.slice(0);
+
+                flowers.forEach(x=>{
+                    sd.flowers.push(x);
+                });
 
                 console.log('send user_hf_updated');
-                self.dispatchEvent('user_hf_updated', self.seats[si]);
+
+                let detail = {
+                    seat : sd,
+                    old : old,
+                    add : flowers,
+                    pai : pai
+                };
+
+                let holds = sd.holds;
+                if (holds != null && holds.length > 0 && pai >= 0)
+                    holds.push(pai);
+
+                self.dispatchEvent('user_hf_updated', detail);
+            } else {
+                self.doMopai(si, pai);
             }
         });
 
@@ -813,17 +843,15 @@ cc.Class({
     },
 
     doMopai:function(seatIndex, pai, skip) {
-        var seatData = this.seats[seatIndex];
-        var holds = seatData.holds;
-        if (holds != null && holds.length > 0 && pai >= 0) {
+        let sd = this.seats[seatIndex];
+        let holds = sd.holds;
+        if (holds != null && holds.length > 0 && pai >= 0)
             holds.push(pai);
-        }
 
-        if (skip) {
+        if (skip)
             return;
-        }
 
-        this.dispatchEvent('game_mopai',{seatIndex:seatIndex, pai:pai});
+        this.dispatchEvent('game_mopai', { seatIndex:seatIndex, pai:pai });
     },
 
     doChupai: function(seatIndex, pai, skip) {

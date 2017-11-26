@@ -11,10 +11,10 @@ cc.Class({
         let item = content.children[0];
         let btn_edit = item.getChildByName('btn_edit');
         let btn_history = item.getChildByName('btn_history');
-        let addClickEvent = cc.vv.utils.addClickEvent;
+        let addEvent = cc.vv.utils.addClickEvent;
 
-        addClickEvent(btn_edit, this.node, 'SetMember', 'onBtnEditClicked');
-        addClickEvent(btn_history, this.node, 'SetMember', 'onBtnHistoryClicked');
+        addEvent(btn_edit, this.node, 'SetMember', 'onBtnEditClicked');
+        addEvent(btn_history, this.node, 'SetMember', 'onBtnHistoryClicked');
 
         this._temp = item;
         content.removeChild(item, false);
@@ -24,14 +24,18 @@ cc.Class({
         let btn_climit = edit.getChildByName('btn_climit');
         let btn_close = edit.getChildByName('btn_close');
         let btn_ok = edit.getChildByName('btn_ok');
+        let btn_del = edit.getChildByName('btn_del');
+        let btn_admin = edit.getChildByName('btn_admin');
 
-        addClickEvent(btn_cscore, this.node, 'SetMember', 'onBtnEditWinClicked');
-        addClickEvent(btn_climit, this.node, 'SetMember', 'onBtnEditWinClicked');
-        addClickEvent(btn_close, this.node, 'SetMember', 'onBtnEditWinClicked');
-        addClickEvent(btn_ok, this.node, 'SetMember', 'onBtnEditWinClicked');
+        addEvent(btn_cscore, this.node, 'SetMember', 'onBtnEditWinClicked');
+        addEvent(btn_climit, this.node, 'SetMember', 'onBtnEditWinClicked');
+        addEvent(btn_close, this.node, 'SetMember', 'onBtnEditWinClicked');
+        addEvent(btn_ok, this.node, 'SetMember', 'onBtnEditWinClicked');
+        addEvent(btn_del, this.node, 'SetMember', 'onBtnDel');
+        addEvent(btn_admin, this.node, 'SetMember', 'onBtnAdmin');
 
         let btnClose = cc.find('top/btn_back', this.node);
-        addClickEvent(btnClose, this.node, 'SetMember', 'onBtnClose');
+        addEvent(btnClose, this.node, 'SetMember', 'onBtnClose');
     },
 
     onEnable: function() {
@@ -42,15 +46,57 @@ cc.Class({
         this.node.active = false;
     },
 
+    onBtnDel: function(event) {
+        let self = this;
+        let edit = event.target.parent;
+        let member = edit.member;
+        let data = {
+            club_id : this.node.club_id,
+            user_id : member.id,
+        };
+
+        cc.vv.pclient.request_apis('leave_club', data, ret=>{
+            if (!ret || ret.errcode != 0)
+                return;
+
+            edit.active = false;
+            self.refresh();
+        });
+    },
+
+    onBtnAdmin: function(event) {
+        let self = this;
+        let edit = event.target.parent;
+        let btn_admin = edit.getChildByName('btn_admin');
+        let member = edit.member;
+
+        let data = {
+            club_id : this.node.club_id,
+            user_id : member.id,
+            admin : true
+        };
+
+        cc.vv.pclient.request_apis('prompt_club_member', data, ret=>{
+            if (!ret || ret.errcode != 0)
+                return;
+
+            btn_admin.active = false;
+            self.refresh();
+            cc.vv.alert.show('已设置' + member.name + '为管理员');
+        });
+    },
+
     onBtnEditClicked: function(event) {
         let member = event.target.parent.member;
         let edit = this.node.getChildByName('edit');
         let edt_score = edit.getChildByName('edt_score').getComponent(cc.EditBox);
         let edt_limit = edit.getChildByName('edt_limit').getComponent(cc.EditBox);
+        let btn_admin = edit.getChildByName('btn_admin');
 
         edit.member = member;
         edt_score.string = member.score;
         edt_limit.string = '' + (0 - member.limit);
+        btn_admin.active = !member.admin;
         edit.active = true;
     },
 
@@ -72,7 +118,7 @@ cc.Class({
             let self = this;
 
             if (limit == null || limit < 0) {
-                cc.vv.alert.show('额度必须小于或者等于0');
+                cc.vv.alert.show('活力值必须小于或者等于0');
                 edt_limit.string = '0';
                 return;
             }

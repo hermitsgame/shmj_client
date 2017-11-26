@@ -37,7 +37,7 @@ cc.Class({
         _gangState: -1,
 
         _bgMgr: null,
-        _maima: null,
+        //_maima: null,
 
         _acting: 0,
         _gameover: null,
@@ -76,6 +76,7 @@ cc.Class({
         this.addComponent("Voice");
         //this.addComponent('Dice');
         this.addComponent('wildcard');
+        this.addComponent('Maima');
 
         this.initView();
         this.initEventHandlers();
@@ -168,10 +169,10 @@ cc.Class({
 
         bgMgr.setIndex(mgr.getBGStyle());
         this._bgMgr = bgMgr;
-
+/*
         this._maima = gameChild.getChildByName('maima');
         this.hideMaiMa();
-
+*/
         var prompts = gameChild.getChildByName("prompts");
         this._tempPrompt = prompts.children[0];
         prompts.removeAllChildren();
@@ -217,18 +218,18 @@ cc.Class({
             hu.string = ting.pattern;
         }
     },
-
+/*
     hideMaiMa: function() {
         this._maima.active = false;
     },
 
-    showMaiMa: function(pai, fan, cb) {
+    showMaiMa: function(pai, score, cb) {
         let maima = this._maima;
         let ma = maima.getChildByName('ma').getComponent('Majiang');
-        let score = maima.getChildByName('score').getComponent(cc.Label);
+        let fan = maima.getChildByName('score').getComponent(cc.Label);
 
         ma.setMJID(pai);
-        score.string = '/' + fan;
+        fan.string = '/' + score;
         maima.active = true;
 
         setTimeout(()=>{
@@ -236,98 +237,140 @@ cc.Class({
             if (cb) cb();
         }, 3000);
     },
-    
+*/    
     hideChupai:function() {
         for (var i = 0; i < this._chupais.length; ++i) {
             this._chupais[i].active = false;
         }
     },
 
-	updateFlowers: function(sd) {
-		var net = cc.vv.gameNetMgr;
-		var seats = sd ? [ sd ] : net.seats;
-		var gameChild = this.node.getChildByName("game");
-		var cards = [ 45, 46, 47, 51, 52, 53, 54, 55, 56, 57, 58 ];
-		var self = this;
+    addFlowers: function(data) {
+        let net = cc.vv.gameNetMgr;
+        let sd = data.seat;
+        let old = data.old;
+        let add = data.add;
+        let pai = data.pai;
+        let seatindex = sd.seatindex;
+        let local = net.getLocalIndex(seatindex);
 
-		var getFlower = function(flowers, localidx, id) {
-			var temp = self._tempFlowers[localidx];
+        // 1. 逐一显示补花动作
+        // 1) 摸花
+        // 2) 补花动画
 
-			if (flowers.childrenCount > id) {
-				return flowers.children[id];
+        let index = 0;
+        let total = add.length;
+        let self = this;
+
+        console.log('addFlowers');
+
+        self.hideChupai();
+
+        let showFlower = function(cb) {
+            if (index >= total) {
+                console.log('showFlower done');
+                cb();
+                return;
+            }
+
+            let flower = add[index];
+
+            self.showMopai(seatindex, flower);
+
+            setTimeout(()=>{
+                old.push(flower);
+                self.hideMopai(seatindex);
+                self.showChupai(flower);
+                console.log('play flower');
+                self.playEfx(local, 'flower', ()=>{
+                    index++;
+                    showFlower(cb);
+                });
+
+                self.updateSeatFlowers(sd, old);
+            }, 500);
+        };
+
+        showFlower(()=>{
+            self.showMopai(seatindex, pai);
+
+            if (0 == local)
+                self.checkChuPai(true);
+        });
+    },
+
+    updateSeatFlowers: function(seat, flowers) {
+        let net = cc.vv.gameNetMgr;
+		let gameChild = this.node.getChildByName("game");
+		let cards = [ 45, 46, 47, 51, 52, 53, 54, 55, 56, 57, 58 ];
+		let self = this;
+
+        let getFlower = function(fls, localidx, id) {
+            let temp = self._tempFlowers[localidx];
+
+            if (fls.childrenCount > id)
+                return fls.children[id];
+
+            let _fl = cc.instantiate(temp);
+            fls.addChild(_fl);
+
+            return _fl;
+        };
+
+        let seatindex = net.getSeatIndexByID(seat.userid);
+		let local = net.getLocalIndex(seatindex);
+		let side = net.getSide(local);
+		let _flowers = cc.find(side + '/flowers', gameChild);
+		let index = 0;
+
+		console.log('seat ' + i + ' flowers ' + flowers.length);
+		_flowers.active = flowers.length > 0;
+		if (flowers.length == 0)
+			return;
+
+		let fls = {};
+        flowers.forEach(x=>{
+            if (fls[x] == null)
+                fls[x] = 0;
+
+            fls[x] += 1;
+        });
+
+		for (let key in fls) {
+			let pai = parseInt(key);
+			let off = cards.indexOf(pai);
+			if (off == -1) {
+				console.log('card not found ' + pai);
+				continue;
 			}
 
-			var _fl = cc.instantiate(temp);
-			flowers.addChild(_fl);
+			let item = getFlower(_flowers, local, index);
+			let tile = item.getChildByName('tile').getComponent('SpriteMgr');
+			let num = item.getChildByName('num').getComponent('SpriteMgr');
 
-			return _fl;
-		};
+            console.log('set tile off: ' + off);
+			tile.setIndex(off);
+			num.setIndex(fls[key] - 1);
 
-		console.log('updateFlowers');
-
-        if (sd != null) {
-            let seatindex = net.getSeatIndexByID(seat.userid);
-			let local = net.getLocalIndex(seatindex);
-
-            this.playEfx(local, 'flower');
+			index++;
         }
 
-		for (var i = 0; i < seats.length; i++) {
-			var seat = seats[i];
-			if (!seat || seat.flowers == null)
-				continue;
-
-			var seatindex = net.getSeatIndexByID(seat.userid);
-			var local = net.getLocalIndex(seatindex);
-			var side = net.getSide(local);
-			var flowers = cc.find(side + '/flowers', gameChild);
-			var index = 0;
-
-			console.log('seat ' + i + ' flowers ' + seat.flowers.length);
-			flowers.active = seat.flowers.length > 0;
-			if (seat.flowers.length == 0)
-				continue;
-
-			var fls = {};
-			for (var j = 0; j < seat.flowers.length; j++) {
-				var fl = seat.flowers[j];
-
-				if (fls[fl] == null) {
-					fls[fl] = 1;
-				} else {
-					fls[fl] += 1;
-				}
-			}
-
-			console.log(fls);
-
-			for (var key in fls) {
-				var pai = parseInt(key);
-				var off = cards.indexOf(pai);
-				if (off == -1) {
-					console.log('card not found ' + pai);
-					continue;
-				}
-
-				var item = getFlower(flowers, local, index);
-				var tile = item.getChildByName('tile').getComponent('SpriteMgr');
-				var num = item.getChildByName('num').getComponent('SpriteMgr');
-
-                console.log('set tile off: ' + off);
-				tile.setIndex(off);
-				num.setIndex(fls[key] - 1);
-
-				index++;
-			}
-
-			while (flowers.childrenCount > index) {
-				var child = flowers.children[index];
-				flowers.removeChild(child);
-			}
-
-            let number = cc.find(side + '/flower/num', gameChild).getComponent(cc.Label);
-            number.string = seat.flowers.length;
+        while (_flowers.childrenCount > index) {
+            let child = _flowers.children[index];
+			_flowers.removeChild(child);
 		}
+
+        let number = cc.find(side + '/flower/num', gameChild).getComponent(cc.Label);
+        number.string = seat.flowers.length;
+    },
+
+	updateFlowers: function() {
+		let net = cc.vv.gameNetMgr;
+		let seats = net.seats;
+        let self = this;
+
+        seats.forEach(x=>{
+            self.updateSeatFlowers(x, x.flowers);
+        });
     },
 
     showTingOpt: function(enable) {
@@ -394,7 +437,13 @@ cc.Class({
 
         node.on('user_hf_updated', data=>{
             console.log('user_hf_updated');
-            self.updateFlowers(data.detail);
+
+            let detail = data.detail;
+
+            if (detail == null)
+                self.updateFlowers();
+            else
+                self.addFlowers(detail);
         });
 
         node.on('hupai', data=>{
@@ -597,7 +646,7 @@ cc.Class({
         node.on('refresh_bg', data=>{
             self._bgMgr.setIndex(data.detail);
         });
-
+        
         var fnTouchStart = function(event) {
             var target = event.target;
             var mj = target.getComponent('SmartMJ');
@@ -705,7 +754,7 @@ cc.Class({
     playHuAction: function(data, cb) {
         var results = data;
         var done = 0;
-        var maima = null;
+        //var maima = null;
         var self = this;
         var net = cc.vv.gameNetMgr;
         var nSeats = net.numOfSeats;
@@ -716,13 +765,16 @@ cc.Class({
             done += 1;
 
             if (done == nSeats) {
+/*
                 if (maima) {
-                    self.showMaiMa(maima.pai, maima.fan, ()=>{
+                    self.showMaiMa(maima.pai, maima.score, ()=>{
                         if (cb) cb();
                     });
                 } else {
                     if (cb) cb();
                 }
+*/
+                if (cb) cb();
             }
         };
 
@@ -762,6 +814,7 @@ cc.Class({
              }
         };
 
+/*
         for (var i = 0; i < results.length; i++) {
             var result = results[i];
 
@@ -770,6 +823,7 @@ cc.Class({
                 break;
              }
         }
+*/
 
         for (var i = 0; i < results.length; i++) {
             var localIndex = cc.vv.gameNetMgr.getLocalIndex(i);
@@ -862,17 +916,18 @@ cc.Class({
 		this._tempPrompt.getChildByName('south_hand').getComponent('Majiang').refresh();
     },
 
-    showChupai: function() {
-        var pai = cc.vv.gameNetMgr.chupai;
+    showChupai: function(out) {
+        let net = cc.vv.gameNetMgr;
+        let pai = out != null ? out : net.chupai;
         if( pai >= 0 ) {
-            var localIndex = this.getLocalIndex(cc.vv.gameNetMgr.turn);
-            var chupai = this._chupais[localIndex];
-			var mj = chupai.getChildByName('south_meld').getComponent('Majiang');
+            let localIndex = this.getLocalIndex(net.turn);
+            let chupai = this._chupais[localIndex];
+			let mj = chupai.getChildByName('south_meld').getComponent('Majiang');
 
             mj.setMJID(pai);
             chupai.active = true;
 
-			var self = this;
+			let self = this;
 
 			setTimeout(function() {
 				chupai.active = false;
@@ -1648,6 +1703,26 @@ cc.Class({
             holds.push(mopai);
 
         return holds;
+    },
+
+    hideMopai: function(seatindex) {
+        let net = cc.vv.gameNetMgr;
+        let localIndex = net.getLocalIndex(seatindex);
+        let side = net.getSide(localIndex);
+        let sideHolds = cc.find('game/' + side + '/layout/holds', this.node);
+        let mjcnt = sideHolds.childrenCount;
+        let swap = (side == 'east');
+        let moid = swap ? 0 : mjcnt - 1;
+        let mopaiNode = sideHolds.children[moid];
+
+        if (mopaiNode == undefined) {
+            console.log(mjcnt, moid);
+            console.log("xiong undefined");
+        }
+
+        cc.vv.audioMgr.playSFX('Sound/OUT_CARD0.mp3');
+
+        this.putMJItem(sideHolds, localIndex, mopaiNode);
     },
 
     doChupai: function(seatData, pai) {
