@@ -48,6 +48,8 @@ cc.Class({
         _tempFlowers: [],
 
         _chipeng: false,
+
+        _isChuPaiActing : false
     },
 
     onLoad: function() {
@@ -63,6 +65,11 @@ cc.Class({
             cc.director.loadScene("loading");
             return;
         }
+
+        console.log('MJGame onLoad');
+
+        this.gameRoot.active = false;
+        this.prepareRoot.active = true;
 
         this.addComponent("GameOver");
         this.addComponent("PengGangs");
@@ -81,8 +88,8 @@ cc.Class({
         this.initView();
         this.initEventHandlers();
 
-        this.gameRoot.active = false;
-        this.prepareRoot.active = true;
+        //this.gameRoot.active = false;
+        //this.prepareRoot.active = true;
         this.initWanfaLabel();
         this.onGameBegin();
 
@@ -169,10 +176,6 @@ cc.Class({
 
         bgMgr.setIndex(mgr.getBGStyle());
         this._bgMgr = bgMgr;
-/*
-        this._maima = gameChild.getChildByName('maima');
-        this.hideMaiMa();
-*/
         var prompts = gameChild.getChildByName("prompts");
         this._tempPrompt = prompts.children[0];
         prompts.removeAllChildren();
@@ -227,26 +230,7 @@ cc.Class({
             hu.string = ting.pattern;
         }
     },
-/*
-    hideMaiMa: function() {
-        this._maima.active = false;
-    },
-
-    showMaiMa: function(pai, score, cb) {
-        let maima = this._maima;
-        let ma = maima.getChildByName('ma').getComponent('Majiang');
-        let fan = maima.getChildByName('score').getComponent(cc.Label);
-
-        ma.setMJID(pai);
-        fan.string = '/' + score;
-        maima.active = true;
-
-        setTimeout(()=>{
-            maima.active = false;
-            if (cb) cb();
-        }, 3000);
-    },
-*/    
+  
     hideChupai:function() {
         for (var i = 0; i < this._chupais.length; ++i) {
             this._chupais[i].active = false;
@@ -506,7 +490,7 @@ cc.Class({
 
             self.playHuAction(go_data.results, ()=>{
                 setTimeout(()=>{
-    				self.doGameOver(go_data);
+                    self.doGameOver(go_data);
                 }, 3000);
             });
         });
@@ -516,12 +500,17 @@ cc.Class({
             var seatData = data.detail.seatData;
             var pai = data.detail.pai;
 
+            self._isChuPaiActing = true;
+
+            var cbDone = function() {
+                self._isChuPaiActing = false;
+            };
             if (seatData.seatindex == net.seatIndex) {
-                self.doChupai(seatData, pai);
+                self.doChupai(seatData, pai, cbDone);
                 self.checkChuPai(false);
                 self.showTingPrompts();
             } else {
-                self.doChupai(seatData, pai);
+                self.doChupai(seatData, pai, cbDone);
             }
 
             self.showChupai();
@@ -1213,16 +1202,20 @@ cc.Class({
                     this.onMJChoosed(mj);
                     return;
                 } else {
-                    if (target == this._selectedMJ) {
+                    let old = this._selectedMJ;
+                    
+                    if (target == old) {
                         this.shoot(target);
-                        this._selectedMJ.y = 0;
+                        old.x = old.oldx;
+                        old.y = old.oldy;
                         this._selectedMJ = null;
-						this.showTingPrompts();
+                        this.showTingPrompts();
                         return;
                     }
 
-                    if (this._selectedMJ != null) {
-                        this._selectedMJ.y = 0;
+                    if (old != null) {
+                        old.x = old.oldx;
+                        old.y = old.oldy;
                     }
 
                     target.oldx = target.x;
