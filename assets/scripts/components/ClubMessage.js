@@ -16,6 +16,18 @@ cc.Class({
 
         let btnClose = cc.find('top/btn_back', this.node);
         addEvent(btnClose, this.node, 'ClubMessage', 'onBtnClose');
+        
+        let self = this;
+        let node = this.node;
+        let root = cc.find('Canvas');
+
+        root.on('club_message_notify', data=>{
+            let detail = data.detail;
+            
+            console.log('club_message_notify got');
+            if (node.active && (detail.club_id == node.club_id))
+                self.refresh();
+        });
     },
 
     onEnable: function() {

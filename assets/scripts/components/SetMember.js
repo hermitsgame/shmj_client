@@ -68,21 +68,25 @@ cc.Class({
         let self = this;
         let edit = event.target.parent;
         let btn_admin = edit.getChildByName('btn_admin');
+        let tile = btn_admin.getChildByName('tile').getComponent(cc.Label);
         let member = edit.member;
+        let admin = !member.admin;
 
         let data = {
             club_id : this.node.club_id,
             user_id : member.id,
-            admin : true
+            admin : admin
         };
 
         cc.vv.pclient.request_apis('prompt_club_member', data, ret=>{
             if (!ret || ret.errcode != 0)
                 return;
 
-            btn_admin.active = false;
+            edit.active = false;
             self.refresh();
-            cc.vv.alert.show('已设置' + member.name + '为管理员');
+            
+            let msg = (admin ? '已设置' : '已取消' + member.name + '管理员权限');
+            cc.vv.alert.show(msg);
         });
     },
 
@@ -96,7 +100,11 @@ cc.Class({
         edit.member = member;
         edt_score.string = member.score;
         edt_limit.string = '' + (0 - member.limit);
-        btn_admin.active = !member.admin;
+        
+        let tile = btn_admin.getChildByName('tile').getComponent(cc.Label);
+        
+        tile.string = member.admin ? '取消管理员' : '设为管理员';
+        
         edit.active = true;
     },
 

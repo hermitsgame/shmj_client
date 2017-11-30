@@ -26,6 +26,14 @@ cc.Class({
 
         cc.vv.utils.addClickEvent(btn_join, this.node, 'Clubs', 'onBtnJoin');
         cc.vv.utils.addClickEvent(btn_create, this.node, 'Clubs', 'onBtnCreate');
+        
+        let root = cc.find('Canvas');
+        let self = this;
+        root.on('sys_message_updated', data=>{
+            console.log('got sys_message_updated');
+            if (self.node.active)
+                self.refresh();
+        });
     },
 
 	onEnable: function() {
@@ -114,11 +122,15 @@ cc.Class({
 			var head = cc.find('icon/head', item);
 			var desc = item.getChildByName('desc').getComponent(cc.Label);
 			var headcount = item.getChildByName('headcount').getComponent(cc.Label);
+			let admin = item.getChildByName('admin');
 
 			name.string = club.name;
             id.string = 'ID:' + club.id;
 			desc.string = club.desc;
 			headcount.string = club.member_num + ' / ' + club.max_member_num;
+            admin.active = club.is_admin;
+
+            item.color = club.is_admin ? new cc.Color(66, 66, 66, 255) : new cc.Color(14, 15, 17, 255);
 
 			cc.vv.utils.loadImage(club.logo, head);
 

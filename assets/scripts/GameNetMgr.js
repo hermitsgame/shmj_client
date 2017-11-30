@@ -828,6 +828,18 @@ cc.Class({
 
             self.dispatchEvent('club_room_removed', data);
         });
+        
+        net.addHandler('club_message_notify', data=>{
+            console.log('club_message_notify');
+            
+            self.dispatchEvent('club_message_notify', data);
+        });
+        
+        net.addHandler('sys_message_updated', data=>{
+            console.log('sys_message_updated');
+            
+            self.dispatchEvent('sys_message_updated', data);
+        });
     },
 
     doGuo:function(seatIndex, pai, skip) {

@@ -27,7 +27,7 @@ cc.Class({
         node.on('game_wait_maima', data=>{
             console.log('showWait');
             console.log(data.detail);
-            self.showWait(data);
+            self.showWait(data.detail);
         });
 
         node.on('game_maima', data=>{

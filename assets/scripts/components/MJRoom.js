@@ -14,6 +14,9 @@ cc.Class({
         _playingSeat:null,
         _lastPlayTime:null,
 
+        _lastMinute: 0,
+        _timeLabel: null,
+
         _emoji : null,
 
         _demoji : [],
@@ -23,9 +26,8 @@ cc.Class({
     },
 
     onLoad: function () {
-        if(cc.vv == null){
+        if(cc.vv == null)
             return;
-        }
 
         this.initView();
         this.initSeats();
@@ -69,6 +71,8 @@ cc.Class({
 
         this._emoji = emoji;
         this.node.removeChild(emoji);
+        
+        this._timeLabel = cc.find('devinfo/time', this.node).getComponent(cc.Label);
     },
 
     onBtnReady : function() {
@@ -257,8 +261,6 @@ cc.Class({
         sseat.addChild(semoji);
         dseat.addChild(demoji);
 
-        console.log('d1');
-
         var anims = [ 'fanqie' ];
         var anim = anims[id];
 
@@ -268,12 +270,9 @@ cc.Class({
         var fnPlay = cc.callFunc(()=>{
             var dnode = demoji.getComponent(cc.Animation);
 
-            console.log('d4');
-
             dnode.on('finished', ()=>{
                 dseat.removeChild(demoji);
                 sseat.removeChild(semoji);
-                console.log('d5');
             });
 
             dnode.play(anim);
@@ -281,15 +280,11 @@ cc.Class({
 
         semoji.getComponent('SpriteMgr').setIndex(id);
 
-        console.log('d2');
-
         var acts = cc.sequence(cc.moveBy(0.3, dpos.x - spos.x, dpos.y - spos.y),
                                 cc.hide(),
                                 fnPlay);
 
         semoji.runAction(acts);
-
-        console.log('d3');
     },
 
     emoji: function(seatindex, emoji_id) {
@@ -359,7 +354,7 @@ cc.Class({
     },
 
     onBtnWeichatClicked: function() {
-        let title = "<雀达麻友圈>";
+        let title = "<雀达麻友圈> - 房间分享";
         let game = cc.vv.gameNetMgr;
         let content = '房号:' + game.roomId + ' 玩法:' + game.getWanfa();
 
@@ -399,19 +394,18 @@ cc.Class({
     },
 
     update: function (dt) {
-/*
-        var minutes = Math.floor(Date.now()/1000/60);
-        if(this._lastMinute != minutes){
+        let minutes = Math.floor(Date.now()/1000/60);
+        if (this._lastMinute != minutes) {
             this._lastMinute = minutes;
-            var date = new Date();
-            var h = date.getHours();
-            h = h < 10? "0"+h:h;
+            let date = new Date();
+            let h = date.getHours();
+            h = h < 10 ? '0' + h : h;
 
-            var m = date.getMinutes();
-            m = m < 10? "0"+m:m;
-            this._timeLabel.string = "" + h + ":" + m;
+            let m = date.getMinutes();
+            m = m < 10 ? '0'+ m : m;
+            this._timeLabel.string =  h + ':' + m;
         }
-*/
+
         let now = Date.now();
 
         if (this._lastPlayTime != null) {

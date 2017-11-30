@@ -105,7 +105,7 @@ cc.Class({
 		var gk = stats.getChildByName('gk').getComponent(cc.Label);
 		var dp = stats.getChildByName('dp').getComponent(cc.Label);
 
-		balance.string = history.balance;
+		balance.string = '总盈亏: ' + history.balance;
 		game.string = history.game_num;
 		zimo.string = history.zimo;
 		dp.string = history.dp;

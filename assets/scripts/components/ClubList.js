@@ -91,11 +91,15 @@ cc.Class({
             let head = cc.find('icon/head', item);
 		    let desc = item.getChildByName('desc').getComponent(cc.Label);
             let headcount = item.getChildByName('headcount').getComponent(cc.Label);
+            let admin = item.getChildByName('admin');
 
             name.string = club.name;
             id.string = 'ID:' + club.id;
             desc.string = club.desc;
             headcount.string = club.member_num + ' / ' + club.max_member_num;
+            admin.active = club.is_admin;
+
+            item.color = club.is_admin ? new cc.Color(66, 66, 66, 255) : new cc.Color(14, 15, 17, 255);
 
             console.log('showClubs: ' + club.logo);
             cc.vv.utils.loadImage(club.logo, head);

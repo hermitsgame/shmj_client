@@ -66,6 +66,13 @@ cc.Class({
         }
     },
     
+    stopBGM: function() {
+        if (this.bgmAudioID >= 0) {
+            cc.audioEngine.stop(this.bgmAudioID);
+            this.bgmAudioID = -1;
+        }
+    },
+    
     playSFX: function(url, cb) {
         var audioUrl = this.getUrl(url);
         var audioId = cc.audioEngine.play(audioUrl, false, this.sfxVolume);
@@ -169,7 +176,8 @@ cc.Class({
         this.playBGM(path);
     },
 
-	playButtonClicked: function() {
+	playButtonClicked: function() {
+
 		this.playSFX('Sound/Button_Click.mp3');
     },
 

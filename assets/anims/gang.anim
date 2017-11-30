@@ -14,7 +14,7 @@
           {
             "frame": 0,
             "value": {
-              "__uuid__": "9f277652-b96b-422e-8cb3-595e5c030c7a"
+              "__uuid__": "c576c203-d8dd-4fbb-a68e-152c3bce1ed9"
             }
           }
         ]
@@ -22,14 +22,6 @@
     },
     "props": {
       "opacity": [
-        {
-          "frame": 0,
-          "value": 50
-        },
-        {
-          "frame": 0.25,
-          "value": 255
-        },
         {
           "frame": 1,
           "value": 255
@@ -40,44 +32,7 @@
         }
       ]
     },
-    "paths": {
-      "child": {
-        "comps": {
-          "cc.Sprite": {
-            "spriteFrame": [
-              {
-                "frame": 0.25,
-                "value": {
-                  "__uuid__": "0d5b941c-8733-4dcd-92fc-2543dad0a1e3"
-                }
-              }
-            ]
-          }
-        },
-        "props": {
-          "scaleX": [
-            {
-              "frame": 0.25,
-              "value": 0.2
-            },
-            {
-              "frame": 0.5,
-              "value": 1
-            }
-          ],
-          "scaleY": [
-            {
-              "frame": 0.25,
-              "value": 0.2
-            },
-            {
-              "frame": 0.5,
-              "value": 1
-            }
-          ]
-        }
-      }
-    }
+    "paths": {}
   },
   "events": []
 }

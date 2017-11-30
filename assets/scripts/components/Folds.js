@@ -130,7 +130,7 @@ cc.Class({
     
     getRealIndex: function(localIndex, idx) {
         var row = 3;
-        var column = 10;
+        var column = 8;
 
         if (0 == localIndex || 3 == localIndex) {
             return idx;

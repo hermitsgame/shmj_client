@@ -1,0 +1,38 @@
+{
+  "__type__": "cc.AnimationClip",
+  "_name": "gangkai",
+  "_objFlags": 0,
+  "_rawFiles": null,
+  "_duration": 2,
+  "sample": 20,
+  "speed": 1,
+  "wrapMode": 1,
+  "curveData": {
+    "comps": {
+      "cc.Sprite": {
+        "spriteFrame": [
+          {
+            "frame": 0,
+            "value": {
+              "__uuid__": "a4a5f661-4fd2-4b77-b36f-57dcfd32a5c3"
+            }
+          }
+        ]
+      }
+    },
+    "props": {
+      "opacity": [
+        {
+          "frame": 1.9,
+          "value": 255
+        },
+        {
+          "frame": 2,
+          "value": 0
+        }
+      ]
+    },
+    "paths": {}
+  },
+  "events": []
+}

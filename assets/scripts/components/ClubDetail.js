@@ -29,11 +29,46 @@ cc.Class({
         let btn_exit = cc.find('bottom/btn_exit', this.node);
 
         addClickEvent(btn_exit, this.node, 'ClubDetail', 'onBtnExit');
+        
+        let self = this;
+        let node = this.node;
+        let root = cc.find('Canvas');
+        root.on('club_message_notify', data=>{
+            let detail = data.detail;
+            
+            if (node.active && node.club_id == detail.club_id)
+                self.updateMessageCnt();
+        });
     },
 
     onEnable: function() {
         this.setButton();
         this.refresh();
+    },
+    
+    updateMessageCnt: function() {
+        let msg_num = cc.find('club/btn_mail/msg_num', this.node);
+        let tile = msg_num.getChildByName('tile').getComponent(cc.Label);
+        let self = this;
+        
+        if (!this.node.active)
+            return;
+        
+        let data = {
+            club_id : this.node.club_id
+        }
+
+        cc.vv.pclient.request_apis('get_club_message_cnt', data, ret=>{
+            if (ret.errcode != 0) {
+                console.log('get_club_message_cnt ret=' + ret.errcode);
+                return;
+            }
+            
+            let cnt = ret.data.cnt;
+
+            msg_num.active = cnt > 0;
+            tile.string = cnt;
+        });
     },
 
     onBtnClose: function() {
@@ -169,6 +204,8 @@ cc.Class({
 
             self.show(ret.data);
         });
+        
+        self.updateMessageCnt();
     },
 });
 

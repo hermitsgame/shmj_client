@@ -3,7 +3,7 @@
   "_name": "dianpao",
   "_objFlags": 0,
   "_rawFiles": null,
-  "_duration": 2.25,
+  "_duration": 2,
   "sample": 20,
   "speed": 1,
   "wrapMode": 1,
@@ -21,52 +21,18 @@
       }
     },
     "props": {
-      "scaleX": [
-        {
-          "frame": 0,
-          "value": 2
-        },
-        {
-          "frame": 0.2,
-          "value": 2
-        },
-        {
-          "frame": 0.7,
-          "value": 1
-        }
-      ],
-      "scaleY": [
-        {
-          "frame": 0,
-          "value": 2
-        },
-        {
-          "frame": 0.2,
-          "value": 2
-        },
-        {
-          "frame": 0.7,
-          "value": 1
-        }
-      ],
       "opacity": [
         {
-          "frame": 2,
+          "frame": 1.9,
           "value": 255
         },
         {
-          "frame": 2.25,
+          "frame": 2,
           "value": 0
         }
       ]
     },
-    "paths": {
-      "child": {
-        "comps": {
-          "cc.Sprite": {}
-        }
-      }
-    }
+    "paths": {}
   },
   "events": []
 }

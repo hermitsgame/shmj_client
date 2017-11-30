@@ -43,6 +43,8 @@ cc.Class({
         addEvent(btn_create, this.node, 'Admin', 'onBtnCreate');
 
 		this.initEventHandler();
+		
+		this.updateMessageCnt();
     },
 
     initEventHandler: function() {
@@ -66,6 +68,42 @@ cc.Class({
                 return;
 
             self.room_removed(room);
+        });
+        
+        let root = cc.find('Canvas');
+        
+        root.on('club_message_notify', data=>{
+            let detail = data.detail;
+            
+            console.log('club_message_notify admin got');
+            
+            if (detail.club_id == self.node.club_id)
+                self.updateMessageCnt();
+        });
+    },
+
+    updateMessageCnt: function() {
+        let msg_num = cc.find('entrys/btn_message/msg_num', this.node);
+        let tile = msg_num.getChildByName('tile').getComponent(cc.Label);
+        let self = this
+        
+        if (!this.node.active)
+            return;
+        
+        let data = {
+            club_id : this.node.club_id
+        };
+
+        cc.vv.pclient.request_apis('get_club_message_cnt', data, ret=>{
+            if (ret.errcode != 0) {
+                console.log('get_club_message_cnt ret=' + ret.errcode);
+                return;
+            }
+            
+            let cnt = ret.data.cnt;
+
+            msg_num.active = cnt > 0;
+            tile.string = cnt;
         });
     },
 
@@ -172,7 +210,6 @@ cc.Class({
                 return;
 
             set_club.clubInfo = ret.data;
-            set_club.parent_page = self;
             set_club.active = true;
         });
     },
@@ -200,6 +237,7 @@ cc.Class({
 		var message = cc.find('Canvas/club_message');
 
 		message.club_id = this.node.club_id;
+		message.parent_page = this;
 		message.active = true;
     },
 
@@ -407,9 +445,9 @@ cc.Class({
 			head.getComponent('ImageLoader').setUserID(p.id);
 		}
 
-        var info = data.base_info;
+        let info = data.base_info;
 
-        desc.string = info.huafen + '/' + info.huafen + (info.maima ? '带苍蝇' : '不带苍蝇') + info.maxGames + '局';
+        desc.string = info.huafen + '/' + info.huafen + ' ' + (info.maima ? '带苍蝇' : '') + (info.qidui ? '七对' : '') + info.maxGames + '局';
 		progress.string = data.num_of_turns + ' / ' + info.maxGames;
 		roomid.string = 'ID:' + data.id;
 

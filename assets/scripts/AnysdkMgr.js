@@ -351,7 +351,7 @@ cc.Class({
 
         view.setFrameSize(width, height);
         console.log('set width=' + width + ' height=' + height);
-        view.setDesignResolutionSize(720, 1280, cc.ResolutionPolicy.FIXED_HEIGHT);
+        view.setDesignResolutionSize(720, 1280, cc.ResolutionPolicy.FIXED_HEIGHT); 
     },
 
     setLandscape: function() {
@@ -371,7 +371,6 @@ cc.Class({
         cc.view.setFrameSize(width, height);
         console.log('set width=' + width + ' height=' + height);
         cc.view.setDesignResolutionSize(1280, 720, cc.ResolutionPolicy.FIXED_WIDTH);
-
     },
 
     pick: function(notify) {

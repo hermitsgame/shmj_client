@@ -38,5 +38,11 @@ cc.Class({
 
         setting.active = true;
     },
+    
+    onAchieve: function() {
+        let achieve = cc.find('Canvas/achieve');
+        
+        achieve.active = true;
+    },
 });
 

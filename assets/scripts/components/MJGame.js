@@ -96,7 +96,7 @@ cc.Class({
         this._mjcount = cc.find("mj_count/mj_count", gameChild).getComponent(cc.Label);
         this._mjcount.string = net.numOfMJ;
         this._gamecount = cc.find("Canvas/roominfo/game_count").getComponent(cc.Label);
-        this._gamecount.string = "" + net.numOfGames + " / " + net.maxNumOfGames;
+        this._gamecount.string = "第" + net.numOfGames + "局 (" + net.maxNumOfGames + ")";
 
         var south = gameChild.getChildByName("south");
         var layout = south.getChildByName("layout");
@@ -180,6 +180,15 @@ cc.Class({
     },
 
     showTingPrompts: function(tings) {
+        let sd = cc.vv.gameNetMgr.getSelfData();
+        
+        if (sd.hastingpai)
+            return;
+
+        let ts = tings != null ? tings.map(x=>x.pai) : null;
+        this.updateTingpai(0, ts);
+        return;
+        
         var prompts = cc.find('game/prompts', this.node);
 
         if (!tings || tings.length == 0) {
@@ -489,7 +498,7 @@ cc.Class({
         });
 
         node.on('game_num', data=>{
-            self._gamecount.string = "" + net.numOfGames + " / " + net.maxNumOfGames;
+            self._gamecount.string = "第" + net.numOfGames + "局 (" + net.maxNumOfGames + ")";
         });
 
         node.on('game_over', data=>{
@@ -1010,6 +1019,12 @@ cc.Class({
 
     updateTingpai: function(localIndex, tings) {
         var huPrompt = this._huPrompts[localIndex];
+        
+        if (tings == null || tings.length == 0) {
+            huPrompt.active = false;
+            return;
+        }
+        
         var huTemplate = this._huTemplates[localIndex];
         var wc = cc.vv.wildcard;
 
@@ -1065,7 +1080,7 @@ cc.Class({
         this.prepareRoot.active = false;
 
         this._mjcount.string = net.numOfMJ;
-        this._gamecount.string = "" + net.numOfGames + " / " + net.maxNumOfGames;
+        this._gamecount.string = "第" + net.numOfGames + "局 (" + net.maxNumOfGames + ")";
 
         this.initMahjongs('reset');
         var seats = net.seats;

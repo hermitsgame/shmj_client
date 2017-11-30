@@ -18,6 +18,12 @@ cc.Class({
         var btn_fb = cc.find('top/btn_fb', this.node);
 
         cc.vv.utils.addClickEvent(btn_fb, this.node, 'Discover', 'onBtnFB');
+        
+        let root = cc.find('Canvas');
+        let self = this;
+        root.on('sys_message_updated', data=>{
+            self.updateSysMessageCnt();
+        });
     },
 
     onBtnItem: function(event) {
@@ -39,6 +45,25 @@ cc.Class({
 		this.refresh();
     },
 
+    updateSysMessageCnt: function() {
+        let self = this;
+        let msg_num = cc.find('top/btn_mail/msg_num', this.node);
+        let tile = msg_num.getChildByName('tile').getComponent(cc.Label);
+        
+        if (!this.node.active)
+            return;
+        
+        cc.vv.pclient.request_apis('get_my_message_cnt', {}, ret=>{
+            if (ret.errcode != 0)
+                return;
+                
+            let cnt = ret.data.cnt;
+
+            msg_num.active = cnt > 0;
+            tile.string = cnt;
+        })
+    },
+
 	refresh: function() {
 		var self = this;
 
@@ -52,6 +77,8 @@ cc.Class({
 			console.log(ret.data);
 			self.showItems(ret.data);
 		});
+		
+		self.updateSysMessageCnt();
     },
 
 	getItem: function(index) {
@@ -91,6 +118,8 @@ cc.Class({
 			club.string = room.club_name + '俱乐部';
 			desc.string = info.huafen + '/' + info.huafen + (info.maima ? '带苍蝇' : '不带苍蝇') + info.maxGames + '局';
 			roomid.string = '房间号' + room.room_tag;
+			
+			headcount.string = room.cnt + ' / ' + info.numOfSeats;
 
 			cc.vv.utils.loadImage(room.club_logo, head);
 

@@ -96,7 +96,7 @@ cc.Class({
         this.refreshCoins();
         this.refreshNotice();
 */
-        cc.vv.audioMgr.playBackGround();
+        cc.vv.audioMgr.stopBGM();
 
 		var self = this;
 
@@ -106,6 +106,10 @@ cc.Class({
         });
 
 		cc.vv.gameNetMgr.dataEventHandler = this.node;
+		
+		this.node.on('club_message_notify', data=>{
+		    self.updateMessageCnt();
+		});
     },
 
     start: function() {
@@ -124,6 +128,26 @@ cc.Class({
         } else {
             this.checkQuery();
         }
+        
+        this.updateMessageCnt();
+    },
+
+    updateMessageCnt: function() {
+        let msg_num = cc.find('bottom/club/msg_num', this.node);
+        let tile = msg_num.getChildByName('tile').getComponent(cc.Label);
+        let self = this;
+        
+        cc.vv.pclient.request_apis('get_club_message_cnt', {}, ret=>{
+            if (ret.errcode != 0) {
+                console.log('get_club_message_cnt ret=' + ret.errcode);
+                return;
+            }
+            
+            let cnt = ret.data.cnt;
+
+            msg_num.active = cnt > 0;
+            tile.string = cnt;
+        });
     },
 
     checkQuery: function() {
