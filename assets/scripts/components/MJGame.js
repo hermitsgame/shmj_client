@@ -1285,10 +1285,16 @@ cc.Class({
         var holds = cc.find("game/south/layout/holds", this.node);
         var mjcnt = holds.childrenCount;
 
-        if (cc.vv.replayMgr.isReplay())
-            return;
+        if (cc.vv.replayMgr.isReplay()) {
+            for (let i = 0; i < mjcnt; ++i) {
+                let mjnode = holds.children[i];
+                let mj = mjnode.getComponent('SmartMJ');
 
-        console.log('checkChuPai');
+                mj.setInteractable(false);
+            }
+
+            return;
+        }
 
         if (check) {
             if (hastingpai) {
