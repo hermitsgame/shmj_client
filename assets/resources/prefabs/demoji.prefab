@@ -22,13 +22,10 @@
       },
       {
         "__id__": 3
-      },
-      {
-        "__id__": 4
       }
     ],
     "_prefab": {
-      "__id__": 5
+      "__id__": 4
     },
     "_id": "",
     "_opacity": 255,
@@ -52,12 +49,12 @@
     },
     "_rotationX": 0,
     "_rotationY": 0,
-    "_scaleX": 2,
-    "_scaleY": 2,
+    "_scaleX": 1,
+    "_scaleY": 1,
     "_position": {
       "__type__": "cc.Vec2",
-      "x": 200,
-      "y": -7.105427357601002e-15
+      "x": 0.17878145506250576,
+      "y": 3.0000000247942467
     },
     "_skewX": 0,
     "_skewY": 0,
@@ -102,35 +99,33 @@
     "_clips": [
       {
         "__uuid__": "b5ec035c-c556-45c5-9565-cf95aeba22cc"
+      },
+      {
+        "__uuid__": "659efa62-0c23-43d1-9ef7-aa417df44a04"
+      },
+      {
+        "__uuid__": "942bbeb7-5739-4292-a572-a57ae780d784"
+      },
+      {
+        "__uuid__": "4916f98f-bf3c-4f1b-b87b-45d4697c7381"
+      },
+      {
+        "__uuid__": "1c84bd75-0410-468e-a592-f476ae43d664"
+      },
+      {
+        "__uuid__": "72d9043e-064e-4a78-a828-fb797777992d"
+      },
+      {
+        "__uuid__": "dfcf6e16-59c1-43ee-8b9b-70d1cbd05ab7"
+      },
+      {
+        "__uuid__": "cf10c3a5-b8a9-44f3-8577-52c00b651780"
+      },
+      {
+        "__uuid__": "f265ed1e-b045-4fe5-8b34-7cbbfd70f4a6"
       }
     ],
     "playOnLoad": false
-  },
-  {
-    "__type__": "cc.Widget",
-    "_name": "",
-    "_objFlags": 0,
-    "node": {
-      "__id__": 1
-    },
-    "_enabled": true,
-    "isAlignOnce": true,
-    "_target": null,
-    "_alignFlags": 1,
-    "_left": 0,
-    "_right": 0,
-    "_top": 4.400000000000006,
-    "_bottom": 0,
-    "_verticalCenter": 0,
-    "_horizontalCenter": 0,
-    "_isAbsLeft": true,
-    "_isAbsRight": true,
-    "_isAbsTop": true,
-    "_isAbsBottom": true,
-    "_isAbsHorizontalCenter": true,
-    "_isAbsVerticalCenter": true,
-    "_originalWidth": 0,
-    "_originalHeight": 0
   },
   {
     "__type__": "cc.PrefabInfo",
@@ -138,7 +133,7 @@
       "__id__": 1
     },
     "asset": {
-      "__id__": 0
+      "__uuid__": "9665e227-b3f7-46f0-ad41-7b1140a9bd52"
     },
     "fileId": "4332cjt0a5N+p0euSs+RwGS",
     "sync": false

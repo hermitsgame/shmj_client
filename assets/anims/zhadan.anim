@@ -1,0 +1,151 @@
+{
+  "__type__": "cc.AnimationClip",
+  "_name": "zhadan",
+  "_objFlags": 0,
+  "_rawFiles": null,
+  "_duration": 3,
+  "sample": 10,
+  "speed": 1,
+  "wrapMode": 1,
+  "curveData": {
+    "comps": {
+      "cc.Sprite": {
+        "spriteFrame": [
+          {
+            "frame": 0,
+            "value": {
+              "__uuid__": "e19144c6-7d67-44be-8fbe-2c58e455f759"
+            }
+          },
+          {
+            "frame": 0.1,
+            "value": {
+              "__uuid__": "833d47c2-2d80-4aed-9181-96e9c996017b"
+            }
+          },
+          {
+            "frame": 0.2,
+            "value": {
+              "__uuid__": "282feeeb-f15d-4aeb-85f1-0bd561387d03"
+            }
+          },
+          {
+            "frame": 0.3,
+            "value": {
+              "__uuid__": "f29534df-355d-48be-9e6e-33b3f6098ff3"
+            }
+          },
+          {
+            "frame": 0.4,
+            "value": {
+              "__uuid__": "8ec194f2-40a6-4f8e-9923-c7359432b2e8"
+            }
+          },
+          {
+            "frame": 0.5,
+            "value": {
+              "__uuid__": "34a6918e-ef57-462d-8986-280238bd2c6a"
+            }
+          },
+          {
+            "frame": 0.6,
+            "value": {
+              "__uuid__": "d0e97f59-c778-4369-8e93-c41bdfc0c769"
+            }
+          },
+          {
+            "frame": 0.7,
+            "value": {
+              "__uuid__": "bc98b7f3-9aa6-4a3b-8ef8-19a7e7a43914"
+            }
+          },
+          {
+            "frame": 0.8,
+            "value": {
+              "__uuid__": "f501d7f2-3414-4626-b1b2-614b577a89f8"
+            }
+          },
+          {
+            "frame": 0.9,
+            "value": {
+              "__uuid__": "aa3e4a0d-e180-4178-8319-00116558ebb5"
+            }
+          },
+          {
+            "frame": 1,
+            "value": {
+              "__uuid__": "34a6918e-ef57-462d-8986-280238bd2c6a"
+            }
+          },
+          {
+            "frame": 1.1,
+            "value": {
+              "__uuid__": "d0e97f59-c778-4369-8e93-c41bdfc0c769"
+            }
+          },
+          {
+            "frame": 1.2,
+            "value": {
+              "__uuid__": "bc98b7f3-9aa6-4a3b-8ef8-19a7e7a43914"
+            }
+          },
+          {
+            "frame": 1.3,
+            "value": {
+              "__uuid__": "f501d7f2-3414-4626-b1b2-614b577a89f8"
+            }
+          },
+          {
+            "frame": 1.4,
+            "value": {
+              "__uuid__": "aa3e4a0d-e180-4178-8319-00116558ebb5"
+            }
+          },
+          {
+            "frame": 1.5,
+            "value": {
+              "__uuid__": "34a6918e-ef57-462d-8986-280238bd2c6a"
+            }
+          },
+          {
+            "frame": 1.6,
+            "value": {
+              "__uuid__": "d0e97f59-c778-4369-8e93-c41bdfc0c769"
+            }
+          },
+          {
+            "frame": 1.7,
+            "value": {
+              "__uuid__": "bc98b7f3-9aa6-4a3b-8ef8-19a7e7a43914"
+            }
+          },
+          {
+            "frame": 1.8,
+            "value": {
+              "__uuid__": "f501d7f2-3414-4626-b1b2-614b577a89f8"
+            }
+          },
+          {
+            "frame": 1.9,
+            "value": {
+              "__uuid__": "aa3e4a0d-e180-4178-8319-00116558ebb5"
+            }
+          }
+        ]
+      }
+    },
+    "props": {
+      "opacity": [
+        {
+          "frame": 2.8,
+          "value": 255
+        },
+        {
+          "frame": 3,
+          "value": 0
+        }
+      ]
+    }
+  },
+  "events": []
+}

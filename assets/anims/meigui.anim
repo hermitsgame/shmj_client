@@ -1,0 +1,85 @@
+{
+  "__type__": "cc.AnimationClip",
+  "_name": "meigui",
+  "_objFlags": 0,
+  "_rawFiles": null,
+  "_duration": 2.6666666666666665,
+  "sample": 9,
+  "speed": 1,
+  "wrapMode": 1,
+  "curveData": {
+    "comps": {
+      "cc.Sprite": {
+        "spriteFrame": [
+          {
+            "frame": 0,
+            "value": {
+              "__uuid__": "4f24763a-37d5-41bf-b43a-e7c28dd27154"
+            }
+          },
+          {
+            "frame": 0.1111111111111111,
+            "value": {
+              "__uuid__": "37144661-0dec-40c2-be17-dfb7e11addc0"
+            }
+          },
+          {
+            "frame": 0.2222222222222222,
+            "value": {
+              "__uuid__": "80046646-e23a-4a9d-aa44-09a4764352f7"
+            }
+          },
+          {
+            "frame": 0.3333333333333333,
+            "value": {
+              "__uuid__": "a007e16e-80b4-451c-91bf-442a8e0fb1ed"
+            }
+          },
+          {
+            "frame": 0.4444444444444444,
+            "value": {
+              "__uuid__": "6ea1d955-4343-414e-8b32-0c3f3df0622a"
+            }
+          },
+          {
+            "frame": 0.5555555555555556,
+            "value": {
+              "__uuid__": "e9bac8a0-5413-4d59-9ba3-66c722f8f8d8"
+            }
+          },
+          {
+            "frame": 0.6666666666666666,
+            "value": {
+              "__uuid__": "d6d0f900-9ceb-4e21-b33b-56130ad320c6"
+            }
+          },
+          {
+            "frame": 0.7777777777777778,
+            "value": {
+              "__uuid__": "5fe54b15-4374-4dcc-9e65-7bab505adaba"
+            }
+          },
+          {
+            "frame": 0.8888888888888888,
+            "value": {
+              "__uuid__": "b173e2d7-7588-4020-a368-c75e88added0"
+            }
+          }
+        ]
+      }
+    },
+    "props": {
+      "opacity": [
+        {
+          "frame": 2.4444444444444446,
+          "value": 255
+        },
+        {
+          "frame": 2.6666666666666665,
+          "value": 0
+        }
+      ]
+    }
+  },
+  "events": []
+}

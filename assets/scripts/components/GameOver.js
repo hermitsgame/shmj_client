@@ -102,6 +102,7 @@ cc.Class({
 	
         if (data.length == 0) {
             this._gameresult.active = true;
+            console.log('resul []');
             return;
         }
 

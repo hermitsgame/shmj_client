@@ -3,7 +3,7 @@
   "_name": "ting",
   "_objFlags": 0,
   "_rawFiles": null,
-  "_duration": 1.1,
+  "_duration": 2,
   "sample": 20,
   "speed": 1,
   "wrapMode": 1,
@@ -23,11 +23,11 @@
     "props": {
       "opacity": [
         {
-          "frame": 1,
+          "frame": 1.9,
           "value": 255
         },
         {
-          "frame": 1.1,
+          "frame": 2,
           "value": 0
         }
       ]

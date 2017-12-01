@@ -1,0 +1,79 @@
+{
+  "__type__": "cc.AnimationClip",
+  "_name": "beer",
+  "_objFlags": 0,
+  "_rawFiles": null,
+  "_duration": 3,
+  "sample": 5,
+  "speed": 1,
+  "wrapMode": 1,
+  "curveData": {
+    "comps": {
+      "cc.Sprite": {
+        "spriteFrame": [
+          {
+            "frame": 0,
+            "value": {
+              "__uuid__": "b67ea3b7-71bc-4665-8e86-438e18e4db5f"
+            }
+          },
+          {
+            "frame": 0.2,
+            "value": {
+              "__uuid__": "dc884133-21bb-41ac-abaa-76b31298aa39"
+            }
+          },
+          {
+            "frame": 0.4,
+            "value": {
+              "__uuid__": "801b6868-1512-4ab6-a170-ab0e42d6c890"
+            }
+          },
+          {
+            "frame": 0.6,
+            "value": {
+              "__uuid__": "7205c610-c026-4a3e-9cee-fa8662ff26de"
+            }
+          },
+          {
+            "frame": 0.8,
+            "value": {
+              "__uuid__": "052e08dd-01d2-40c9-8767-7cea8fd39014"
+            }
+          },
+          {
+            "frame": 1,
+            "value": {
+              "__uuid__": "14851e89-6ece-4775-8339-416e69ae9b16"
+            }
+          },
+          {
+            "frame": 1.2,
+            "value": {
+              "__uuid__": "8bde432b-37ee-4872-b3e6-f2f07a89ce8b"
+            }
+          },
+          {
+            "frame": 1.4,
+            "value": {
+              "__uuid__": "b28388d9-07de-4395-aec0-b96cb06a9867"
+            }
+          }
+        ]
+      }
+    },
+    "props": {
+      "opacity": [
+        {
+          "frame": 2.6,
+          "value": 255
+        },
+        {
+          "frame": 3,
+          "value": 0
+        }
+      ]
+    }
+  },
+  "events": []
+}

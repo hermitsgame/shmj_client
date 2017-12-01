@@ -1,0 +1,49 @@
+{
+  "__type__": "cc.AnimationClip",
+  "_name": "banzhuan",
+  "_objFlags": 0,
+  "_rawFiles": null,
+  "_duration": 1,
+  "sample": 5,
+  "speed": 1,
+  "wrapMode": 1,
+  "curveData": {
+    "comps": {
+      "cc.Sprite": {
+        "spriteFrame": [
+          {
+            "frame": 0,
+            "value": {
+              "__uuid__": "9214c971-aa8e-4d6c-a738-d92933e1fa9a"
+            }
+          },
+          {
+            "frame": 0.2,
+            "value": {
+              "__uuid__": "b242f2b5-d472-4e85-86c6-0431a80dca4b"
+            }
+          },
+          {
+            "frame": 0.4,
+            "value": {
+              "__uuid__": "8dac7754-493b-4ee8-9ca4-aa827caec1f8"
+            }
+          },
+          {
+            "frame": 0.6,
+            "value": {
+              "__uuid__": "d3de0bff-e34c-4f0a-b944-e13aa4c2261c"
+            }
+          },
+          {
+            "frame": 0.8,
+            "value": {
+              "__uuid__": "f1b20490-a3eb-4013-a882-4592506dfd40"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "events": []
+}

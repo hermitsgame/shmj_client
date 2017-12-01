@@ -62,16 +62,18 @@ cc.Class({
     },
 
     showWait: function(data) {
+        console.log('showWait');
+        
         let game = cc.vv.gameNetMgr;
         let seatindex = game.seatIndex;
         let act = seatindex == data.seatindex;
         let num = data.mas.length;
         let maima = cc.find('game/maima', this.node);
         let mas = maima.getChildByName('mas');
-        let title = maima.getChildByName('title').getComponent(cc.Label);
+        let title = maima.getChildByName('title').getComponent('SpriteMgr');
         let score = maima.getChildByName('score');
 
-        title.string = act ? '请选择飞苍蝇' : '请等待飞苍蝇';
+        title.setIndex(act ? 0 : 1);
         score.active = false;
 
         for (let i = 0; i < mas.childrenCount && i < num; i++) {
@@ -92,10 +94,17 @@ cc.Class({
             board.active = false;
         }
 
+        maima.opacity = 100;
+        maima.scaleX = 0.2;
+        maima.scaleY = 0.2;
         maima.active = true;
+
+        maima.runAction(cc.spawn(cc.scaleTo(0.2, 1.0), cc.fadeTo(0.2, 255)));
     },
 
-    showResult: function(data) {
+    showResult: function(data, cb) {
+        console.log('showResult');
+        
         let game = cc.vv.gameNetMgr;
         let seatindex = game.seatIndex;
         let act = false;
@@ -103,10 +112,13 @@ cc.Class({
         let num = data.mas.length;
         let maima = cc.find('game/maima', this.node);
         let mas = maima.getChildByName('mas');
+        let title = maima.getChildByName('title').getComponent('SpriteMgr');
         let score = maima.getChildByName('score');
 
         let mjid = data.mas[id];
         let add = data.scores[id];
+        
+        title.setIndex(act ? 0 : 1);
 
         for (let i = 0; i < mas.childrenCount && i < num; i++) {
             let board = mas.children[i];
@@ -141,6 +153,7 @@ cc.Class({
         
             setTimeout(()=>{
                 maima.active = false;
+                if (cb) cb();
             }, 3000);
         });
 

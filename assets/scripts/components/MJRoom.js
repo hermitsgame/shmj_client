@@ -40,20 +40,24 @@ cc.Class({
         var seats = this.node.getChildByName("seats");
         var valids = net.getValidLocalIDs();
         var nSeats = net.numOfSeats;
+        let addEvent = cc.vv.utils.addClickEvent;
 
-        for (var i = 0; i < seats.children.length; ++i) {
-            var child = seats.children[i];
+        for (let i = 0; i < seats.children.length; ++i) {
+            let child = seats.children[i];
 
             this._seats.push(child.getComponent("Seat"));
             child.active = (valids.indexOf(i) >= 0);
 
-            var demoji = child.getChildByName('demoji');
-            var semoji = child.getChildByName('semoji');
+            let demoji = child.getChildByName('demoji');
+            let semoji = child.getChildByName('semoji');
 
             this._demoji.push(demoji);
             this._semoji.push(semoji);
             child.removeChild(demoji);
             child.removeChild(semoji);
+
+            let mask = cc.find('info/mask', child);
+            addEvent(mask, this.node, 'MJRoom', 'onBtnMask');
         }
 
         this.refreshBtns();
@@ -73,6 +77,12 @@ cc.Class({
         this.node.removeChild(emoji);
         
         this._timeLabel = cc.find('devinfo/time', this.node).getComponent(cc.Label);
+    },
+
+    onBtnMask: function(event) {
+        let info = event.target.parent;
+        
+        info.active = false;
     },
 
     onBtnReady : function() {
@@ -261,7 +271,7 @@ cc.Class({
         sseat.addChild(semoji);
         dseat.addChild(demoji);
 
-        var anims = [ 'fanqie' ];
+        var anims = [ 'fanqie', 'egg', 'fozu', 'beer', 'bianbian', 'qinwen', 'liwu', 'meigui', 'zhadan' ];
         var anim = anims[id];
 
         var spos = sseat.convertToWorldSpace(semoji.getPosition());

@@ -659,41 +659,35 @@ cc.Class({
             var si = self.getSeatIndexByID(userId);
             self.doChupai(si,pai);
         });
+        
+        net.addHandler('game_af_push', data=>{
+            let userId = data.userId;
+            let pai = data.pai;
+            let si = self.getSeatIndexByID(userId);
+            
+            let sd = self.seats[si];
+            
+            let old = sd.flowers.slice(0);
+            
+            sd.flowers.push(pai);
+            
+            let detail = {
+                seat : sd,
+                old : old,
+                add : pai
+            };
+            
+            self.dispatchEvent('user_hf_updated', detail);
+        });
 
         net.addHandler("game_mopai_push", data=>{
             console.log('game_mopai_push');
             console.log(data);
             let userId = data.userId;
             let pai = data.pai;
-            let flowers = data.flowers;
             let si = self.getSeatIndexByID(userId);
 
-            if (flowers != null) {
-                let sd = self.seats[si];
-
-                let old = sd.flowers.slice(0);
-
-                flowers.forEach(x=>{
-                    sd.flowers.push(x);
-                });
-
-                console.log('send user_hf_updated');
-
-                let detail = {
-                    seat : sd,
-                    old : old,
-                    add : flowers,
-                    pai : pai
-                };
-
-                let holds = sd.holds;
-                if (holds != null && holds.length > 0 && pai >= 0)
-                    holds.push(pai);
-
-                self.dispatchEvent('user_hf_updated', detail);
-            } else {
-                self.doMopai(si, pai);
-            }
+            self.doMopai(si, pai);
         });
 
         net.addHandler("guo_notify_push",function(data){

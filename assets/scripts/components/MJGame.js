@@ -49,7 +49,7 @@ cc.Class({
 
         _chipeng: false,
 
-        _isChuPaiActing : false
+        _isChuPaiActing : false,
     },
 
     onLoad: function() {
@@ -101,7 +101,7 @@ cc.Class({
         var gameChild = this.node.getChildByName("game");
 
         this._mjcount = cc.find("mj_count/mj_count", gameChild).getComponent(cc.Label);
-        this._mjcount.string = net.numOfMJ;
+        this._mjcount.string = net.numOfMJ + '张';
         this._gamecount = cc.find("Canvas/roominfo/game_count").getComponent(cc.Label);
         this._gamecount.string = "第" + net.numOfGames + "局 (" + net.maxNumOfGames + ")";
 
@@ -237,12 +237,11 @@ cc.Class({
         }
     },
 
-    addFlowers: function(data) {
+    addFlower: function(data) {
         let net = cc.vv.gameNetMgr;
         let sd = data.seat;
         let old = data.old;
         let add = data.add;
-        let pai = data.pai;
         let seatindex = sd.seatindex;
         let local = net.getLocalIndex(seatindex);
 
@@ -250,45 +249,29 @@ cc.Class({
         // 1) 摸花
         // 2) 补花动画
 
-        let index = 0;
-        let total = add.length;
         let self = this;
 
-        console.log('addFlowers');
+        console.log('addFlower');
 
         self.hideChupai();
 
         let showFlower = function(cb) {
-            if (index >= total) {
-                console.log('showFlower done');
-                cb();
-                return;
-            }
-
-            let flower = add[index];
-
-            self.showMopai(seatindex, flower);
+            self.showMopai(seatindex, add);
 
             setTimeout(()=>{
-                old.push(flower);
+                old.push(add);
                 self.hideMopai(seatindex);
-                self.showChupai(flower);
+                self.showChupai(add);
                 console.log('play flower');
                 self.playEfx(local, 'flower', ()=>{
-                    index++;
-                    showFlower(cb);
+                    if (cb) cb();
                 });
 
                 self.updateSeatFlowers(sd, old);
             }, 500);
         };
 
-        showFlower(()=>{
-            self.showMopai(seatindex, pai);
-
-            if (0 == local)
-                self.checkChuPai(true);
-        });
+        showFlower();
     },
 
     updateSeatFlowers: function(seat, flowers) {
@@ -436,49 +419,65 @@ cc.Class({
             if (detail == null)
                 self.updateFlowers();
             else
-                self.addFlowers(detail);
+                self.addFlower(detail);
         });
 
-        node.on('hupai', data=>{
-            var data = data.detail;
-            var seatIndex = data.seatindex;
-            var localIndex = net.getLocalIndex(seatIndex);
-            var hupai = self._hupaiTips[localIndex];
-            var iszimo = data.iszimo;
+        node.on('hupai', hdata=>{
+            let data = hdata.detail;
+            let seatIndex = data.seatindex;
+            let localIndex = net.getLocalIndex(seatIndex);
+            let iszimo = data.iszimo;
+            let action = data.action; // qiangganghu, ganghua, zimo, hu, gangpaohu  ->  qianggang, gangkai, zimo, hu
+            let target = data.target;
 
-            hupai.active = true;
-
-            if (localIndex == 0) {
+            if (localIndex == 0)
                 self.hideOptions();
-            }
 
-            var seatData = net.seats[seatIndex];
+            let seatData = net.seats[seatIndex];
             seatData.hued = true;
-            var type = net.conf.type;
-
-            hupai.getChildByName("sprHu").active = true;
 
             if (data.holds) {
                 seatData.holds = data.holds;
                 seatData.holds.push(data.hupai);
             }
 
-            if (seatData.seatindex == net.seatIndex) {
+            if (localIndex == 0) {
                 self.initMahjongs();
             } else {
                 self.initOtherMahjongs(seatData);
             }
 
+            let audio_action = data.iszimo ? 'zimo' : 'hu';
+            let efx = 'hu';
+            
+            if (action == 'qiangganghu')
+                efx = 'qianggang';
+            else if (action == 'ganghua')
+                efx = 'gangkai';
+            else if (action == 'gangpaohu')
+                efx = 'hu';
+            else
+                efx = action;
+            
+            cc.vv.audioMgr.playDialect(audio_action, seatData.userid);
+            self.playEfx(localIndex, efx);
+
+            if (target != null) {
+                let fp = net.getLocalIndex(target);
+                self.playEfx(fp, 'dianpao');
+            }
+/*
             if (cc.vv.replayMgr.isReplay()) {
                 var action = data.iszimo ? 'zimo' : 'hu';
 
                 self.playEfx(localIndex, action);
                 cc.vv.audioMgr.playDialect('hu', seatData.userid);
-            }
+           }
+*/
         });
 
         node.on('mj_count', data=>{
-            self._mjcount.string = net.numOfMJ;
+            self._mjcount.string = net.numOfMJ + '张';
         });
 
         node.on('game_num', data=>{
@@ -486,13 +485,19 @@ cc.Class({
         });
 
         node.on('game_over', data=>{
-            var go_data = data.detail;
-
-            self.playHuAction(go_data.results, ()=>{
+            let odata = data.detail;
+            let info = odata.info;
+            let maima = self.node.getComponent('Maima');
+            
+            if (info.maima) {
+                maima.showResult(info.maima, ()=>{
+                    self.doGameOver(odata);
+                });
+            } else {
                 setTimeout(()=>{
-                    self.doGameOver(go_data);
+                    self.doGameOver(odata);
                 }, 3000);
-            });
+            }
         });
 
         node.on('game_chupai_notify', data=>{
@@ -745,6 +750,8 @@ cc.Class({
 
         this.hideAllHolds();
 
+        console.log('doGameOver');
+
         var gameover = this.node.getComponent('GameOver');
         gameover.onGameOver(data);
     },
@@ -757,6 +764,11 @@ cc.Class({
         var net = cc.vv.gameNetMgr;
         var nSeats = net.numOfSeats;
         var seats = net.seats;
+
+        if (results.length == 0) {
+            if (cb) cb();
+            return;
+        }
 
         var fnCB = function() {
             console.log('fbCB');
@@ -929,7 +941,7 @@ cc.Class({
 
 			setTimeout(function() {
 				chupai.active = false;
-			}, 800);
+			}, 1800);
         }
     },
 
@@ -1068,7 +1080,7 @@ cc.Class({
         this.gameRoot.active = true;
         this.prepareRoot.active = false;
 
-        this._mjcount.string = net.numOfMJ;
+        this._mjcount.string = net.numOfMJ + '张';
         this._gamecount.string = "第" + net.numOfGames + "局 (" + net.maxNumOfGames + ")";
 
         this.initMahjongs('reset');
@@ -1098,6 +1110,8 @@ cc.Class({
         if (net.seatIndex == net.turn) {
             this.checkChuPai(true);
         }
+        
+        this._pendingChupais = [];
     },
 
     onGameBegin: function() {
@@ -1174,6 +1188,8 @@ cc.Class({
         if (net.seatIndex == net.turn) {
             this.checkChuPai(true);
         }
+        
+        this._pendingChupais = [];
     },
 
     onMJClicked: function(event) {
