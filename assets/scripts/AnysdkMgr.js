@@ -411,9 +411,6 @@ cc.Class({
             state: 'full'   // unplugged: 1, charging: 2, full: 3
         };
         
-        // TODO
-        return info;
-        
         if (!cc.sys.isNative)
             return info;
 
@@ -443,9 +440,6 @@ cc.Class({
             type: 'wifi',
             strength: 4
         }
-        
-        // TODO
-        return info;
         
         if (!cc.sys.isNative)
             return info;

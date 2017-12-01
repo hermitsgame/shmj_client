@@ -132,6 +132,8 @@ cc.Class({
 			club_id : club_id
 		};
 		
+		console.log('join club channel');
+		
 		cc.vv.pclient.request_apis('join_club_channel', data, ret=>{
 			if (ret.errcode != 0) {
 				cc.vv.alert.show(errmsg);
@@ -142,13 +144,15 @@ cc.Class({
 		});
     },
 
-	onDisable: function() {
+	exit: function() {
 		this._timer = -1;
 
 		let club_id = this.node.club_id;
 		let data = {
 			club_id : club_id
 		};
+
+        console.log('leave club channel');
 
 		cc.vv.pclient.request_apis('leave_club_channel', data, ret=>{
 			if (ret.errcode != 0) {
@@ -231,6 +235,7 @@ cc.Class({
 
 	onBtnClose: function() {
 		this.node.active = false;
+		this.exit();
     },
 
 	onBtnRankClicked: function() {

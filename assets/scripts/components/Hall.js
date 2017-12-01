@@ -133,6 +133,8 @@ cc.Class({
     },
 
     resumeClub: function() {
+        let pc = cc.vv.pclient;
+        let self = this;
         let club_id = cc.vv.club_channel;
         if (club_id == null)
             return;
@@ -144,18 +146,23 @@ cc.Class({
             }
 
             let role = ret.data.role;
+            
+            console.log('role=' + role);
+            
             if (role == 'member') {
-                self.showTab(2);
+                self.showTab(1);
+                self.showTag(1);
                 let next = cc.find('Canvas/lobby');
 
-                next.club_id = clubid;
+                next.club_id = club_id;
                 next.active = true;
             } else if (role == 'admin') {
-                self.showTab(2);
+                self.showTab(1);
+                self.showTag(1);
 
                 let next = cc.find('Canvas/admin');
 
-                next.club_id = clubid;
+                next.club_id = club_id;
                 next.active = true;
             }
         });
@@ -236,13 +243,15 @@ cc.Class({
 
                 let role = ret.data.role;
                 if (role == 'member') {
-                    self.showTab(2);
+                    self.showTab(1);
+                    self.showTag(1);
                     let next = cc.find('Canvas/lobby');
 
                     next.club_id = clubid;
                     next.active = true;
                 } else if (role == 'admin') {
-                    self.showTab(2);
+                    self.showTab(1);
+                    self.showTag(1);
 
                     let next = cc.find('Canvas/admin');
 
@@ -282,11 +291,18 @@ cc.Class({
         let body = this.node.getChildByName('body');
         let tabs = [ 'discover', 'club', 'history', 'mine' ];
 
-        for (var i = 0; i < tabs.length; i++) {
+        for (let i = 0; i < tabs.length; i++) {
             let tab = body.getChildByName(tabs[i]);
 
             tab.active = i == id;
         }
+    },
+
+    showTag: function(id) {
+        let bottom = this.node.getChildByName('bottom');
+        let radio = bottom.children[id].getComponent('RadioButton');
+
+        radio.setChecked();
     },
 
     refreshCoins: function() {

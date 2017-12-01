@@ -80,6 +80,10 @@ cc.Class({
         }
     },
 
+    setChecked: function() {
+        cc.vv.radiogroupmgr.check(this);
+    },
+
     // called every frame, uncomment this function to activate update callback
     // update: function (dt) {
 

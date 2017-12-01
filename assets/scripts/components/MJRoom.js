@@ -338,9 +338,11 @@ cc.Class({
         var ready = (net.gamestate == '') ? seat.ready : false;
         if (!seat.userid) {
             this._seats[index].reset();
+            this._seats[index].node.active = false;
             return;
         }
 
+        this._seats[index].node.active = true;
         this._seats[index].setInfo(seat.name.slice(0, 5), seat.score);
         this._seats[index].setOffline(isOffline);
         this._seats[index].setID(seat.userid);
