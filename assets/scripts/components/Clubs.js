@@ -65,11 +65,7 @@ cc.Class({
 
 	onBtnClubClicked: function(event) {
 		var item = event.target;
-		var userMgr = cc.vv.userMgr;
 		var is_admin = item.is_admin;
-
-		userMgr.club_id = item.club_id;
-		userMgr.is_admin = is_admin;
 
 		var lobby = is_admin ? 'admin' : 'lobby';
 		var next = cc.find('Canvas/' + lobby);

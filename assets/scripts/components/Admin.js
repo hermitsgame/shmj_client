@@ -154,47 +154,42 @@ cc.Class({
     onEnable: function() {
         this.refresh();
 
-        var self = this;
-        var data = {
-            club_id : this.node.club_id
-        };
+		let self = this;
+		let club_id = this.node.club_id;
+		let data = {
+			club_id : club_id
+		};
 		
-        cc.vv.pclient.request_apis('join_club_channel', data, function(ret) {
-            if (!ret)
-                return;
+		cc.vv.pclient.request_apis('join_club_channel', data, ret=>{
+			if (ret.errcode != 0) {
+				cc.vv.alert.show(errmsg);
+				return;
+			}
 
-            if (ret.errcode != 0) {
-                cc.vv.alert.show(errmsg);
-                return;
-            }
-        });
+			cc.vv.club_channel = club_id;
+		});
     },
 
 	onDisable: function() {
 		this._timer = -1;
 
-		var data = {
-			club_id : this.node.club_id
+		let club_id = this.node.club_id;
+		let data = {
+			club_id : club_id
 		};
 
-		cc.vv.pclient.request_apis('leave_club_channel', data, function(ret) {
-			if (!ret)
-				return;
-
+		cc.vv.pclient.request_apis('leave_club_channel', data, ret=>{
 			if (ret.errcode != 0) {
 				cc.vv.alert.show(errmsg);
 				return;
 			}
+
+			cc.vv.club_channel = null;
 		});
     },
 
 	onBtnClose: function() {
         this.node.active = false;
-
-        let userMgr = cc.vv.userMgr;
-
-        userMgr.club_id = null;
-        userMgr.is_admin = null;
     },
 
     onBtnEdit: function() {

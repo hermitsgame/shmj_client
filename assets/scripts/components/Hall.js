@@ -125,11 +125,40 @@ cc.Class({
         } else if(userMgr.roomData != null) {
             userMgr.enterRoom(userMgr.roomData);
             userMgr.roomData = null;
-        } else {
-            this.checkQuery();
+        } else if (!this.checkQuery()) {
+            this.resumeClub();
         }
         
         this.updateMessageCnt();
+    },
+
+    resumeClub: function() {
+        let club_id = cc.vv.club_channel;
+        if (club_id == null)
+            return;
+
+        pc.request_apis('get_club_role', { club_id : club_id }, ret=>{
+            if (ret.errcode != 0) {
+                console.log('get_club_role ret=' + ret.errcode);
+                return;
+            }
+
+            let role = ret.data.role;
+            if (role == 'member') {
+                self.showTab(2);
+                let next = cc.find('Canvas/lobby');
+
+                next.club_id = clubid;
+                next.active = true;
+            } else if (role == 'admin') {
+                self.showTab(2);
+
+                let next = cc.find('Canvas/admin');
+
+                next.club_id = clubid;
+                next.active = true;
+            }
+        });
     },
 
     updateMessageCnt: function() {
@@ -159,10 +188,8 @@ cc.Class({
         let query = anysdk.getQuery();
         let pc = cc.vv.pclient;
 
-        console.log('hall checkQuery');
-
         if (query == null || query.length == 0)
-            return;
+            return false;
 
         let params = utils.queryParse(query);
         let roomid = params.room;
@@ -212,8 +239,6 @@ cc.Class({
                     self.showTab(2);
                     let next = cc.find('Canvas/lobby');
 
-                    userMgr.club_id = clubid;
-                    userMgr.is_admin = false;
                     next.club_id = clubid;
                     next.active = true;
                 } else if (role == 'admin') {
@@ -221,8 +246,6 @@ cc.Class({
 
                     let next = cc.find('Canvas/admin');
 
-                    userMgr.club_id = clubid;
-                    userMgr.is_admin = true;
                     next.club_id = clubid;
                     next.active = true;
                 } else if (role == 'outsider') {
@@ -235,7 +258,7 @@ cc.Class({
                         cc.vv.alert.show('已成功申请加入俱乐部' + clubid + '，请等待管理员审核');
                     });
                 }
-            });    
+            });
         } else if (gameid != null) {
             pc.request_apis('get_game_detail', { id : gameid }, ret=>{
                 if (ret.errcode != 0)
@@ -251,6 +274,8 @@ cc.Class({
                 cc.director.loadScene("mjgame");
             });
         }
+
+		return true;
     },
 
     showTab: function(id) {
