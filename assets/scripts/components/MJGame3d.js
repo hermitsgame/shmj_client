@@ -37,7 +37,6 @@ cc.Class({
         _gangState: -1,
 
         _bgMgr: null,
-        _maima: null,
 
         _acting: 0,
         _gameover: null,
@@ -46,6 +45,8 @@ cc.Class({
         _tempPrompt: null,
 
         _chipeng: false,
+
+        _isChuPaiActing : false,
     },
 
     onLoad: function() {
@@ -62,6 +63,11 @@ cc.Class({
             return;
         }
 
+        console.log('MJGame onLoad');
+
+        this.gameRoot.active = false;
+        this.prepareRoot.active = true;
+
         this.addComponent("GameOver");
         this.addComponent("PengGangs3d");
         this.addComponent("MJRoom");
@@ -75,12 +81,11 @@ cc.Class({
         this.addComponent("Voice");
         //this.addComponent('Dice');
         this.addComponent('wildcard');
+        this.addComponent('Maima');
 
         this.initView();
         this.initEventHandlers();
 
-        this.gameRoot.active = false;
-        this.prepareRoot.active = true;
         this.initWanfaLabel();
         this.onGameBegin();
 
@@ -92,9 +97,9 @@ cc.Class({
         var gameChild = this.node.getChildByName("game");
 
         this._mjcount = cc.find("mj_count/mj_count", gameChild).getComponent(cc.Label);
-        this._mjcount.string = net.numOfMJ;
-        this._gamecount = cc.find("Canvas/infobar/room/game_count").getComponent(cc.Label);
-        this._gamecount.string = "" + net.numOfGames + " / " + net.maxNumOfGames;
+        this._mjcount.string = net.numOfMJ + '张';
+        this._gamecount = cc.find("Canvas/roominfo/game_count").getComponent(cc.Label);
+        this._gamecount.string = "第" + net.numOfGames + "局 (" + net.maxNumOfGames + ")";
 
         var south = gameChild.getChildByName("south");
         var layout = south.getChildByName("layout");
@@ -111,7 +116,6 @@ cc.Class({
             var side = sides[i];
 
             var sideChild = gameChild.getChildByName(side);
-            
             this._hupaiTips.push(sideChild.getChildByName("hupai"));
             this._tingFlags.push(sideChild.getChildByName('ting'));
 
@@ -163,8 +167,6 @@ cc.Class({
         bgMgr.setIndex(mgr.getBGStyle());
         this._bgMgr = bgMgr;
 */
-        this._maima = cc.find('Canvas/maima');
-        this.hideMaiMa();
 
         var prompts = gameChild.getChildByName("prompts");
         this._tempPrompt = prompts.children[0];
@@ -173,6 +175,15 @@ cc.Class({
     },
 
     showTingPrompts: function(tings) {
+        let sd = cc.vv.gameNetMgr.getSelfData();
+        
+        if (sd.hastingpai)
+            return;
+
+        let ts = tings != null ? tings.map(x=>x.pai) : null;
+        this.updateTingpai(0, ts);
+        return;
+        
         var prompts = cc.find('game/prompts', this.node);
 
         if (!tings || tings.length == 0) {
@@ -211,58 +222,123 @@ cc.Class({
             hu.string = ting.pattern;
         }
     },
-
-    hideMaiMa: function() {
-        this._maima.active = false;
+  
+    hideChupai:function() {	
+        this._chupais.forEach(x=>{
+            x.active = false;
+        });
     },
 
-    showMaiMa: function(ma, fan, cb) {
-        cb();
-        return;
-/*
-        var maima = this._maima;
-        var board = maima.getChildByName('board');
-        var tile = board.getChildByName('tile').getComponent('SpriteMgr');
-        var layout = maima.getChildByName('layout');
-        var num = layout.getChildByName('num').getComponent(cc.Label);
-        var anim = board.getComponent(cc.Animation);
-        var style = cc.vv.mahjongmgr.getMJStyle();
+    addFlower: function(data) {
+        let net = cc.vv.gameNetMgr;
+        let sd = data.seat;
+        let old = data.old;
+        let add = data.add;
+        let seatindex = sd.seatindex;
+        let local = net.getLocalIndex(seatindex);
 
-        maima.active = true;
-        tile.setIndex(-1);
-        layout.active = false;
+        // 1. 逐一显示补花动作
+        // 1) 摸花
+        // 2) 补花动画
 
-        var self = this;
+        let self = this;
 
-        var fn = function() {
-            layout.active = true;
-            num.string = fan;
-            
-            var mj = ma < 18 ? ma : ma - 9;
-            tile.setIndex(mj);
+        console.log('addFlower');
 
-            setTimeout(function() {
-                maima.active = false;
-                if (cb) {
-                    cb();
-                }
-            }, 2000);
-            
-            anim.off('finished', fn);
+        self.hideChupai();
+
+        let showFlower = function(cb) {
+            self.showMopai(seatindex, add);
+
+            setTimeout(()=>{
+                old.push(add);
+                self.hideMopai(seatindex);
+                self.showChupai(add);
+                console.log('play flower');
+                self.playEfx(local, 'flower', ()=>{
+                    if (cb) cb();
+                });
+
+                self.updateSeatFlowers(sd, old);
+            }, 500);
         };
 
-        anim.on('finished', fn);
-
-        console.log('showMaiMa');
-
-        anim.play('maima1');    // TODO
-*/
+        showFlower();
     },
-    
-    hideChupai:function() {
-        for (var i = 0; i < this._chupais.length; ++i) {
-            this._chupais[i].active = false;
+
+    updateSeatFlowers: function(seat, flowers) {
+        let net = cc.vv.gameNetMgr;
+        let gameChild = this.node.getChildByName("game");
+        let cards = [ 45, 46, 47, 51, 52, 53, 54, 55, 56, 57, 58 ];
+        let self = this;
+
+        let getFlower = function(fls, localidx, id) {
+            let temp = self._tempFlowers[localidx];
+
+            if (fls.childrenCount > id)
+                return fls.children[id];
+
+            let _fl = cc.instantiate(temp);
+            fls.addChild(_fl);
+
+            return _fl;
+        };
+
+        let seatindex = net.getSeatIndexByID(seat.userid);
+        let local = net.getLocalIndex(seatindex);
+        let side = net.getSide(local);
+        let _flowers = cc.find(side + '/flowers', gameChild);
+        let index = 0;
+
+        console.log('seat ' + i + ' flowers ' + flowers.length);
+        _flowers.active = flowers.length > 0;
+        if (flowers.length == 0)
+            return;
+
+        let fls = {};
+        flowers.forEach(x=>{
+            if (fls[x] == null)
+                fls[x] = 0;
+
+            fls[x] += 1;
+        });
+
+        for (let key in fls) {
+            let pai = parseInt(key);
+            let off = cards.indexOf(pai);
+            if (off == -1) {
+                console.log('card not found ' + pai);
+                continue;
+            }
+
+            let item = getFlower(_flowers, local, index);
+            let tile = item.getChildByName('tile').getComponent('SpriteMgr');
+            let num = item.getChildByName('num').getComponent('SpriteMgr');
+
+            console.log('set tile off: ' + off);
+            tile.setIndex(off);
+            num.setIndex(fls[key] - 1);
+
+            index++;
         }
+
+        while (_flowers.childrenCount > index) {
+            let child = _flowers.children[index];
+            _flowers.removeChild(child);
+        }
+
+        let number = cc.find(side + '/flower/num', gameChild).getComponent(cc.Label);
+        number.string = seat.flowers.length;
+    },
+
+    updateFlowers: function() {
+        let net = cc.vv.gameNetMgr;
+        let seats = net.seats;
+        let self = this;
+
+        seats.forEach(x=>{
+            self.updateSeatFlowers(x, x.flowers);
+        });
     },
 
     showTingOpt: function(enable) {
@@ -274,129 +350,163 @@ cc.Class({
     },
 
     initEventHandlers: function() {
-        var node = this.node;
-        var self = this;
-        var net = cc.vv.gameNetMgr;
+        let node = this.node;
+        let self = this;
+        let net = cc.vv.gameNetMgr;
 
         net.dataEventHandler = node;		
 
-        node.on('game_holds', function(data) {
+        node.on('game_holds', data=>{
            self.initMahjongs();
         });
 
-        node.on('game_holds_update', function(data) {
+        node.on('game_holds_update', data=>{
             self.updateHolds();
         });
 
-        node.on('game_holds_len', function(data) {
+        node.on('game_holds_len', data=>{
             self.updateOtherHolds(data.detail);
         });
 
-        node.on('game_holds_updated', function(data) {
+        node.on('game_holds_updated', data=>{
             self.holdsUpdated();
         });
 
-        node.on('game_begin', function(data) {
+        node.on('game_begin', data=>{
             cc.vv.audioMgr.playSFX('Sound/GAME_START0.mp3');
             self.onGameBegin();
         });
 
-        node.on('game_sync', function(data) {
+        node.on('game_sync', data=>{
             console.log('game sync');
-            if (cc.vv.gameNetMgr.isPlaying()) {
+            if (net.isPlaying())
                 self.onGameSync();
-            }
         });
 
-        node.on('game_chupai', function(data) {
+        node.on('game_chupai', data=>{
             self.hideChupai();
         });
 
-        node.on('game_mopai',function(data) {
-            var detail = data.detail;
+        node.on('game_mopai', data=>{
+            let detail = data.detail;
             self.hideChupai();
             self.showMopai(detail.seatIndex, detail.pai);
 
-            var localIndex = cc.vv.gameNetMgr.getLocalIndex(detail.seatIndex);
+            let localIndex = net.getLocalIndex(detail.seatIndex);
             if (0 == localIndex) {
                 self.checkChuPai(true);
-                self.checkTingPai(true);
-                self.showTings(true);
             }
         });
 
-        node.on('game_action', function(data) {
+        node.on('game_action', data=>{
             self.showAction(data.detail);
         });
 
-        node.on('hupai',function(data) {
-            var data = data.detail;
-            var net = cc.vv.gameNetMgr;
-            var seatIndex = data.seatindex;
-            var localIndex = net.getLocalIndex(seatIndex);
-            var hupai = self._hupaiTips[localIndex];
-            var iszimo = data.iszimo;
+        node.on('user_hf_updated', data=>{
+            console.log('user_hf_updated');
 
-            hupai.active = true;
+            let detail = data.detail;
 
-            if (localIndex == 0) {
+            if (detail == null)
+                self.updateFlowers();
+            else
+                self.addFlower(detail);
+        });
+
+        node.on('hupai', hdata=>{
+            let data = hdata.detail;
+            let seatIndex = data.seatindex;
+            let localIndex = net.getLocalIndex(seatIndex);
+            let iszimo = data.iszimo;
+            let action = data.action; // qiangganghu, ganghua, zimo, hu, gangpaohu  ->  qianggang, gangkai, zimo, hu
+            let target = data.target;
+
+            if (localIndex == 0)
                 self.hideOptions();
-            }
 
-            var seatData = net.seats[seatIndex];
+            let seatData = net.seats[seatIndex];
             seatData.hued = true;
-            var type = net.conf.type;
-
-            hupai.getChildByName("sprHu").active = true;
 
             if (data.holds) {
                 seatData.holds = data.holds;
                 seatData.holds.push(data.hupai);
             }
 
-            if (seatData.seatindex == net.seatIndex) {
+            if (localIndex == 0) {
                 self.initMahjongs();
             } else {
                 self.initOtherMahjongs(seatData);
             }
 
+            let audio_action = data.iszimo ? 'zimo' : 'hu';
+            let efx = 'hu';
+            
+            if (action == 'qiangganghu')
+                efx = 'qianggang';
+            else if (action == 'ganghua')
+                efx = 'gangkai';
+            else if (action == 'gangpaohu')
+                efx = 'hu';
+            else
+                efx = action;
+            
+            cc.vv.audioMgr.playDialect(audio_action, seatData.userid);
+            self.playEfx(localIndex, efx);
+
+            if (target != null) {
+                let fp = net.getLocalIndex(target);
+                self.playEfx(fp, 'dianpao');
+            }
+/*
             if (cc.vv.replayMgr.isReplay()) {
                 var action = data.iszimo ? 'zimo' : 'hu';
 
                 self.playEfx(localIndex, action);
                 cc.vv.audioMgr.playDialect('hu', seatData.userid);
+           }
+*/
+        });
+
+        node.on('mj_count', data=>{
+            self._mjcount.string = net.numOfMJ + '张';
+        });
+
+        node.on('game_num', data=>{
+            self._gamecount.string = "第" + net.numOfGames + "局 (" + net.maxNumOfGames + ")";
+        });
+
+        node.on('game_over', data=>{
+            let odata = data.detail;
+            let info = odata.info;
+            let maima = self.node.getComponent('Maima');
+            
+            if (info.maima) {
+                maima.showResult(info.maima, ()=>{
+                    self.doGameOver(odata);
+                });
+            } else {
+                setTimeout(()=>{
+                    self.doGameOver(odata);
+                }, 3000);
             }
         });
 
-        node.on('mj_count',function(data) {
-            self._mjcount.string = cc.vv.gameNetMgr.numOfMJ;
-        });
-
-        node.on('game_num', function(data) {
-            self._gamecount.string = "" + cc.vv.gameNetMgr.numOfGames + " / " + cc.vv.gameNetMgr.maxNumOfGames;
-        });
-
-        node.on('game_over', function(data) {
-            var go_data = data.detail;
-
-            self.playHuAction(go_data.results, ()=>{
-                setTimeout(()=>{
-    				self.doGameOver(go_data);
-                }, 3000);
-            });
-        });
-
-        node.on('game_chupai_notify', function(data) {
+        node.on('game_chupai_notify', data=>{
             self.hideChupai();
-            var seatData = data.detail.seatData;
-            var pai = data.detail.pai;
+            let seatData = data.detail.seatData;
+            let pai = data.detail.pai;
 
-            if (seatData.seatindex == cc.vv.gameNetMgr.seatIndex) {
-                self.doChupai(seatData, pai);
+            self._isChuPaiActing = true;
+
+            let cbDone = function() {
+                self._isChuPaiActing = false;
+            };
+            if (seatData.seatindex == net.seatIndex) {
+                self.doChupai(seatData, pai, cbDone);
                 self.checkChuPai(false);
                 self.showTingPrompts();
             } else {
-                self.doChupai(seatData, pai);
+                self.doChupai(seatData, pai, cbDone);
             }
 
             self.showChupai();
@@ -404,26 +514,24 @@ cc.Class({
             cc.vv.audioMgr.playDialect(content, seatData.userid);
         });
 
-        node.on('guo_notify',function(data){
+        node.on('guo_notify', data=>{
             self.hideChupai();
             self.hideOptions();
             var seatData = data.detail;
         });
 
-        node.on('guo_result',function(data) {
+        node.on('guo_result', data=>{
             self.hideOptions();
         });
 
-        node.on('peng_notify', function(data) {
+        node.on('peng_notify', data=>{
             self.hideChupai();
 
             var seatData = data.detail.seatData;
             self._chipeng = true;
-            if (seatData.seatindex == cc.vv.gameNetMgr.seatIndex) {
+            if (seatData.seatindex == net.seatIndex) {
                 self.initMahjongs();
                 self.checkChuPai(true);
-                self.checkTingPai();
-                self.showTings(true);
             } else {
                 self.initOtherMahjongs(seatData, '', true);
             }
@@ -437,13 +545,13 @@ cc.Class({
             self.hideOptions();
         });
 
-        node.on('ting_notify', function(data) {
-            var seatData = data.detail;
-            var localIndex = self.getLocalIndex(seatData.seatindex);
-            var ting = self._tingFlags[localIndex];
+        node.on('ting_notify', data=>{
+            let seatData = data.detail;
+            let localIndex = self.getLocalIndex(seatData.seatindex);
+            let ting = self._tingFlags[localIndex];
 
             ting.active = true;
-            if(seatData.seatindex == cc.vv.gameNetMgr.seatIndex) {
+            if (seatData.seatindex == net.seatIndex) {
                 //self.initMahjongs();
                 self.updateTingpai(localIndex, seatData.tings);
                 self.checkChuPai(true);
@@ -455,22 +563,18 @@ cc.Class({
             //cc.vv.audioMgr.playAction('ming');
         });
 
-        node.on('chi_notify', function(data) {
+        node.on('chi_notify', data=>{
             self.hideChupai();
 
             var seatData = data.detail.seatData;
             var pai = data.detail.pai;
             self._chipeng = true;
-            if (seatData.seatindex == cc.vv.gameNetMgr.seatIndex) {
+            if (seatData.seatindex == net.seatIndex) {
                 self.initMahjongs();
                 self.checkChuPai(true);
-                self.checkTingPai();
-                self.showTings(true);
-            }
-            else {
+            } else {
                 self.initOtherMahjongs(seatData, '', true);
 
-                var net = cc.vv.gameNetMgr;
                 var sd = net.getSelfData();
 
                 if (sd.hastingpai) {
@@ -499,7 +603,7 @@ cc.Class({
             self.hideOptions();
         });
 
-        node.on('gang_notify',function(info) {
+        node.on('gang_notify', info=>{
             self.hideChupai();
             var data = info.detail;
             var seatData = data.seatData;
@@ -523,17 +627,17 @@ cc.Class({
             cc.vv.audioMgr.playDialect('gang', seatData.userid);
         });
 
-        node.on("hangang_notify",function(data){
+        node.on("hangang_notify", data=>{
             var data = data.detail;
             var localIndex = self.getLocalIndex(data);
             self.hideOptions();
         });
 
-        node.on('refresh_mj', function() {
+        node.on('refresh_mj', ()=>{
             self.refreshMJ();
         });
 
-        node.on('refresh_bg', function(data) {
+        node.on('refresh_bg', data=>{
             self._bgMgr.setIndex(data.detail);
         });
 
@@ -643,28 +747,22 @@ cc.Class({
     playHuAction: function(data, cb) {
         var results = data;
         var done = 0;
-        var maima = null;
         var self = this;
         var net = cc.vv.gameNetMgr;
         var nSeats = net.numOfSeats;
         var seats = net.seats;
+
+        if (results.length == 0) {
+            if (cb) cb();
+            return;
+        }
 
         var fnCB = function() {
             console.log('fbCB');
             done += 1;
 
             if (done == nSeats) {
-                if (maima) {
-                        self.showMaiMa(maima.pai, maima.fan, function() {
-                        if (cb) {
-                            cb();
-                        }
-                    });
-                } else {
-                    if (cb) {
-                        cb();
-                    }
-                }
+                if (cb) cb();
             }
         };
 
@@ -704,126 +802,116 @@ cc.Class({
              }
         };
 
-        for (var i = 0; i < results.length; i++) {
-            var result = results[i];
+        for (let i = 0; i < results.length; i++) {
+            let localIndex = cc.vv.gameNetMgr.getLocalIndex(i);
+            let result = results[i];
+            let hu = result.hu;
+            let actions = [];
 
-            if (result.maima) {
-                maima = result.maima;
-                break;
-             }
+            if (!hu) {
+                fnCB();
+                continue;
+            }
+
+            hu.index = localIndex;
+            hu.userid = seats[i].userid;
+
+            let act = hu.action;
+
+            if (hu.numDianPao > 1) {
+                actions.push('yipaoduoxiang');
+            } else if (act == 'fangpao') {
+                actions.push('dianpao');
+            } else if (act == 'huangzhuang') {
+                actions.push('huangzhuang');
+            } else if (hu.hued) {
+                if (hu.isDuiDuiHu) {
+                    actions.push('pengpeng');
+            	}
+
+                if (act == 'ganghua') {
+                    actions.push('gangkaihua');
+                } else if (act == 'qiangganghu') {
+                    actions.push('qianggang');
+                } else if (act == 'zimo') {
+                    actions.push('zimo');
+                } else if (act == 'hu') {
+                    actions.push('hu');
+                }
+            }
+
+            hu.actions = actions;
+            playActions(hu);
         }
-
-        for (var i = 0; i < results.length; i++) {
-            var localIndex = cc.vv.gameNetMgr.getLocalIndex(i);
-            var result = results[i];
-            var hu = result.hu;
-            var actions = [];
-
-			if (!hu) {
-				fnCB();
-				continue;
-			}
-
-			hu.index = localIndex;
-			hu.userid = seats[i].userid;
-
-			var act = hu.action;
-
-			if (hu.numDianPao > 1) {
-				actions.push('yipaoduoxiang');
-			} else if (act == 'fangpao') {
-				actions.push('dianpao');
-			} else if (act == 'huangzhuang') {
-				actions.push('huangzhuang');
-			} else if (hu.hued) {
-				if (hu.isDuiDuiHu) {
-					actions.push('pengpeng');
-				}
-
-				if (act == 'ganghua') {
-					actions.push('gangkaihua');
-				} else if (act == 'qiangganghu') {
-					actions.push('qianggang');
-				} else if (act == 'zimo') {
-					actions.push('zimo');
-				} else if (act == 'hu') {
-					actions.push('hu');
-				}
-			}
-
-			hu.actions = actions;
-			playActions(hu);
-		}
     },
 
     refreshMJ: function() {
-        if (!this.gameRoot.active) {
-                return;
-        }
+        if (!this.gameRoot.active)
+            return;
 
         this.initMahjongs('refresh');
         var seats = cc.vv.gameNetMgr.seats;
-        for (var i in seats) {
-            var seatData = seats[i];
-            var localIndex = cc.vv.gameNetMgr.getLocalIndex(i);
-            if(localIndex != 0) {
+        for (let i in seats) {
+            let seatData = seats[i];
+            let localIndex = cc.vv.gameNetMgr.getLocalIndex(i);
+            if(localIndex != 0)
                 this.initOtherMahjongs(seatData, 'refresh');
-            }
         }
 
-        for (var i = 0; i < this._huTemplates.length; i++) {
-            var temp = this._huTemplates[i];
-            var mj = temp.getComponent('Majiang');
+        for (let i = 0; i < this._huTemplates.length; i++) {
+            let temp = this._huTemplates[i];
+            let mj = temp.getComponent('Majiang');
             mj.refresh();
         }
 
-        for (var i = 0; i < this._huPrompts.length; i++) {
-            var prompt = this._huPrompts[i];
-            var hulist = cc.find("hupais/hulist", prompt);
+        for (let i = 0; i < this._huPrompts.length; i++) {
+            let prompt = this._huPrompts[i];
+            let hulist = cc.find("hupais/hulist", prompt);
 
-            for (var j = 0; j < hulist.childrenCount; j++) {
-                var pai = hulist.children[j];
-                var mj = pai.getComponent('Majiang');
+            for (let j = 0; j < hulist.childrenCount; j++) {
+                let pai = hulist.children[j];
+                let mj = pai.getComponent('Majiang');
                 mj.refresh();
             }
         }
 
-        for (var i = 0; i < this._chupais.length; i++) {
-            var chupai = this._chupais[i];
-            var mj = chupai.getChildByName('south_meld').getComponent('Majiang');
+        for (let i = 0; i < this._chupais.length; i++) {
+            let chupai = this._chupais[i];
+            let mj = chupai.getChildByName('south_meld').getComponent('Majiang');
             mj.refresh();
         }
 /*
-		var prompts = cc.find('game/prompts', this.node);
-		for (var i = 0; i < prompts.childrenCount; i++) {
-			var prompt = prompts.children[i];
-			var mj = prompt.getChildByName('south_hand').getComponent('Majiang');
+        let prompts = cc.find('game/prompts', this.node);
+        for (let i = 0; i < prompts.childrenCount; i++) {
+            let prompt = prompts.children[i];
+            let mj = prompt.getChildByName('south_hand').getComponent('Majiang');
             mj.refresh();
-		}
+        }
 */
-		this._tempPrompt.getChildByName('south_hand').getComponent('Majiang').refresh();
+        this._tempPrompt.getChildByName('south_hand').getComponent('Majiang').refresh();
     },
 
-    showChupai: function() {
-        var pai = cc.vv.gameNetMgr.chupai;
+    showChupai: function(out) {
+        let net = cc.vv.gameNetMgr;
+        let pai = out != null ? out : net.chupai;
         if( pai >= 0 ) {
-            var localIndex = this.getLocalIndex(cc.vv.gameNetMgr.turn);
-            var chupai = this._chupais[localIndex];
-			var mj = chupai.getChildByName('south_meld').getComponent('Majiang');
+            let localIndex = this.getLocalIndex(net.turn);
+            let chupai = this._chupais[localIndex];
+            let mj = chupai.getChildByName('south_meld').getComponent('Majiang');
 
             mj.setMJID(pai);
             chupai.active = true;
 
-			var self = this;
+            let self = this;
 
-			setTimeout(function() {
-				chupai.active = false;
-			}, 800);
+            setTimeout(()=>{
+                chupai.active = false;
+            }, 1800);
         }
     },
 
     addOption: function(name) {
-        let ops = [ 'guo', 'hu', 'ting', 'chi', 'peng', 'gang' ];
+        let ops = [ 'gang', 'peng', 'chi', 'hu', 'ting', 'guo' ];
 
         let id = ops.indexOf(name);
         if (id == -1) {
@@ -835,9 +923,8 @@ cc.Class({
         op.active = true;
     },
 
-    hideOptions:function(data) {
+    hideOptions: function(data) {
         let options = this._options;
-
         options.active = false;
         options.children.forEach(x=>{
             x.active = false;
@@ -849,13 +936,12 @@ cc.Class({
     },
 
     showAction: function(data) {
-        var options = this._options;
+        let options = this._options;
         this._optionsData = data;
-        var net = cc.vv.net;
+        let net = cc.vv.net;
 
-        if (options.active) {
+        if (options.active)
             this.hideOptions();
-        }
 
         if (!data)
             return;
@@ -889,23 +975,29 @@ cc.Class({
     },
 
     initWanfaLabel:function(){
-        var wanfa = cc.find("Canvas/infobar/wanfa").getComponent(cc.Label);
+        let wanfa = cc.find("Canvas/infobar/wanfa").getComponent(cc.Label);
         wanfa.string = cc.vv.gameNetMgr.getWanfa();
     },
 
     updateTingpai: function(localIndex, tings) {
-        var huPrompt = this._huPrompts[localIndex];
-        var huTemplate = this._huTemplates[localIndex];
-        var wc = cc.vv.wildcard;
+        let huPrompt = this._huPrompts[localIndex];
+        
+        if (tings == null || tings.length == 0) {
+            huPrompt.active = false;
+            return;
+        }
+        
+        let huTemplate = this._huTemplates[localIndex];
+        let wc = cc.vv.wildcard;
 
-        var hupais = huPrompt.getChildByName('hupais');
-        var hulist = hupais.getChildByName('hulist');
+        let hupais = huPrompt.getChildByName('hupais');
+        let hulist = hupais.getChildByName('hulist');
 
         hulist.removeAllChildren();
 
-        for (var i = 0; i < tings.length; i++) {
-            var hu = cc.instantiate(huTemplate);
-            var mj = hu.getComponent("Majiang");
+        for (let i = 0; i < tings.length; i++) {
+            let hu = cc.instantiate(huTemplate);
+            let mj = hu.getComponent("Majiang");
 
             mj.setMJID(tings[i]);
             mj.setContent('num', wc.getLeft(tings[i]));
@@ -949,8 +1041,8 @@ cc.Class({
         this.gameRoot.active = true;
         this.prepareRoot.active = false;
 
-        this._mjcount.string = net.numOfMJ;
-        this._gamecount.string = "" + net.numOfGames + " / " + net.maxNumOfGames;
+        this._mjcount.string = net.numOfMJ + '张';
+        this._gamecount.string = "第" + net.numOfGames + "局 (" + net.maxNumOfGames + ")";
 
         this.initMahjongs('reset');
         var seats = net.seats;
@@ -1067,12 +1159,12 @@ cc.Class({
             return;
         }
 
-        var target = event.target;
-        var holds = cc.find("game/south/layout/holds", this.node);
+        let target = event.target;
+        let holds = cc.find("game/south/layout/holds", this.node);
 
-        for (var i = 0; i < holds.childrenCount; i++) {
-            var mjnode = holds.children[i];
-            var mj = mjnode.getComponent('SmartMJ');
+        for (let i = 0; i < holds.childrenCount; i++) {
+            let mjnode = holds.children[i];
+            let mj = mjnode.getComponent('SmartMJ');
 
             if (target == mjnode) {
                 if (this._gangState == 0) {
@@ -1083,16 +1175,20 @@ cc.Class({
                     this.onMJChoosed(mj);
                     return;
                 } else {
-                    if (target == this._selectedMJ) {
+                    let old = this._selectedMJ;
+                    
+                    if (target == old) {
                         this.shoot(target);
-                        this._selectedMJ.y = 0;
+                        old.x = old.oldx;
+                        old.y = old.oldy;
                         this._selectedMJ = null;
-						this.showTingPrompts();
+                        this.showTingPrompts();
                         return;
                     }
 
-                    if (this._selectedMJ != null) {
-                        this._selectedMJ.y = 0;
+                    if (old != null) {
+                        old.x = old.oldx;
+                        old.y = old.oldy;
                     }
 
                     target.oldx = target.x;
@@ -1108,91 +1204,94 @@ cc.Class({
     },
 
     onMJChoosed: function(mj) {
-        var mjid = mj.mjid;
-        var options = this._optionsData;
-        var net = cc.vv.gameNetMgr;
-        var wc = cc.vv.wildcard;
-        var seats = net.seats;
-        var seatData = seats[net.seatIndex];
-        var holds = seatData.holds;
+        let mjid = mj.mjid;
+        let options = this._optionsData;
+        let net = cc.vv.gameNetMgr;
+        let wc = cc.vv.wildcard;
+        let seats = net.seats;
+        let seatData = seats[net.seatIndex];
+        let holds = seatData.holds;
 
         if (this._tingState == 0) {
-            var tings = wc.getTings(seatData, mjid);
+            let tings = wc.getTings(seatData, mjid);
             this.showTingPrompts(tings);
         } else if (this._gangState == 0) {
             this.enterGangState(1, mjid);
         } else {
             if (options) {
-                var tings = wc.getTings(seatData, mjid);
+                let tings = wc.getTings(seatData, mjid);
                 this.showTingPrompts(tings);
             }
         }
     },
 
     shoot: function(mjnode) {
-        if (mjnode == null) {
+        if (mjnode == null)
             return;
-        }
 
-        var net = cc.vv.net;
-        var mj = mjnode.getComponent('SmartMJ');
-        var mjid = mj.mjid;
+        let net = cc.vv.net;
+        let mj = mjnode.getComponent('SmartMJ');
+        let mjid = mj.mjid;
 
         this._lastChupai = mjnode;
 
         if (this._tingState == 0) {
             this.enterTingState(1, mjid);
         } else {
-        if (this.hasOptions()) {
-            net.send("guo");
-        }
+            if (this.hasOptions())
+                net.send("guo");
 
-        this.showTings(false);
+            this.showTings(false);
 
-        net.send('chupai', mjid);
+            net.send('chupai', mjid);
         }
 
         this._optionsData = null;
     },
 
     checkChuPai: function(check) {
-        var net = cc.vv.gameNetMgr;
-        var seatData = net.getSelfData();
-        var hastingpai = seatData.hastingpai;
+        let net = cc.vv.gameNetMgr;
+        let seatData = net.getSelfData();
+        let hastingpai = seatData.hastingpai;
 
-        var holds = cc.find("game/south/layout/holds", this.node);
-        var mjcnt = holds.childrenCount;
+        let holds = cc.find("game/south/layout/holds", this.node);
+        let mjcnt = holds.childrenCount;
 
-        if (cc.vv.replayMgr.isReplay())
+        if (cc.vv.replayMgr.isReplay()) {
+            for (let i = 0; i < mjcnt; ++i) {
+                let mjnode = holds.children[i];
+                let mj = mjnode.getComponent('SmartMJ');
+
+                mj.setInteractable(false);
+            }
+
             return;
-
-        console.log('checkChuPai');
+        }
 
         if (check) {
             if (hastingpai) {
-                for (var i = 0; i < mjcnt; ++i) {
-                    var mjnode = holds.children[i];
-                    var mj = mjnode.getComponent('SmartMJ');
+                for (let i = 0; i < mjcnt; ++i) {
+                    let mjnode = holds.children[i];
+                    let mj = mjnode.getComponent('SmartMJ');
 
-                    if (mjnode.active) {
+                    if (mjnode.active)
                         mj.setInteractable((i == mjcnt - 1) && (mjcnt % 3 == 2));
-                    }
                 }
             } else {
-                for (var i = 0; i < mjcnt; ++i) {
-                    var mjnode = holds.children[i];
-                    var mj = mjnode.getComponent('SmartMJ');
-                    var mjid = mj.mjid;
+                for (let i = 0; i < mjcnt; ++i) {
+                    let mjnode = holds.children[i];
+                    let mj = mjnode.getComponent('SmartMJ');
+                    let mjid = mj.mjid;
 
-                    var can = !(seatData.lastChiPai && seatData.lastChiPai == mjid);
-                    console.log('1290: setInteractable: ' + can);
+                    let can = !(seatData.lastChiPai && seatData.lastChiPai == mjid);
+
                     mj.setInteractable(can);
                 }
 	    }
         } else {
-            for (var i = 0; i < mjcnt; ++i) {
-                var mjnode = holds.children[i];
-                var mj = mjnode.getComponent('SmartMJ');
+            for (let i = 0; i < mjcnt; ++i) {
+                let mjnode = holds.children[i];
+                let mj = mjnode.getComponent('SmartMJ');
 
                 mj.setInteractable(false);
             }
@@ -1200,70 +1299,59 @@ cc.Class({
     },
 
     checkGangPai: function() {
-        var holds = cc.find("game/south/layout/holds", this.node);
-        var mjcnt = holds.childrenCount;
-        var options = this._optionsData;
-        var gp = options.gangpai;
+        let holds = cc.find("game/south/layout/holds", this.node);
+        let mjcnt = holds.childrenCount;
+        let options = this._optionsData;
+        let gp = options.gangpai;
 
-        for (var i = 0; i < mjcnt; i++) {
-            var mjnode = holds.children[i];
-            var mj = mjnode.getComponent('SmartMJ');
+        for (let i = 0; i < mjcnt; i++) {
+            let mjnode = holds.children[i];
+            let mj = mjnode.getComponent('SmartMJ');
 
-            if (!mjnode.active) {
+            if (!mjnode.active)
                 continue;
-            }
 
-            var mjid = mj.mjid;
-
-            var gang = (gp.indexOf(mjid) != -1);
+            let mjid = mj.mjid;
+            let gang = (gp.indexOf(mjid) != -1);
 
             mj.setInteractable(gang);
         }
     },
     
     checkTingPai: function() {
-        var option = this._optionsData;
-        if (!option)
-            return;
-    
-        var holds = cc.find("game/south/layout/holds", this.node);
-		var mjcnt = holds.childrenCount;
-        var tingouts = option.tingouts;
+        let holds = cc.find("game/south/layout/holds", this.node);
+        let mjcnt = holds.childrenCount;
+        let op = this._optionsData;
+        let tingouts = op ? op.tingouts : null;
         
-        for (var i = 0; i < mjcnt; i++) {
-            var mjnode = holds.children[i];
-			var mj = mjnode.getComponent('SmartMJ');
+        for (let i = 0; i < mjcnt; i++) {
+            let mjnode = holds.children[i];
+            let mj = mjnode.getComponent('SmartMJ');
 
-            if (!mjnode.active) {
+            if (!mjnode.active)
                 continue;
-            }
 
-            var mjid = mj.mjid;
-            var ting = (tingouts.indexOf(mjid) != -1);
+            let mjid = mj.mjid;
+            let ting = !tingouts || (tingouts.indexOf(mjid) != -1);
 
             mj.setInteractable(ting);
-            console.log('1342: setInteractable: ' + ting);
-            mj.setTing(ting);
         }
     },
 
     showTings: function(enable) {
-        var option = this._optionsData;
-        if (!option)
-            return;
+        let holds = cc.find("game/south/layout/holds", this.node);
+        let mjcnt = holds.childrenCount;
+        let op = this._optionsData;
+        let tingouts = op ? op.tingouts : null;
 
-        var holds = cc.find("game/south/layout/holds", this.node);
-		var mjcnt = holds.childrenCount;
+        for (let i = 0; i < mjcnt; i++) {
+            let mjnode = holds.children[i];
+            let mj = mjnode.getComponent('SmartMJ');
 
-        for (var i = 0; i < mjcnt; i++) {
-			var mjnode = holds.children[i];
-			var mj = mjnode.getComponent('SmartMJ');
-
-            if (!mjnode.active) {
+            if (!mjnode.active)
                 continue;
-            }
 
-            var ting = enable && (this._optionsData.tingouts.indexOf(mj.mjid) != -1);
+            let ting = enable && tingouts && tingouts.indexOf(mj.mjid) != -1;
 
             mj.setTing(ting);
         }
@@ -1349,8 +1437,8 @@ cc.Class({
             }
             case 3:
             {
-                var pai = data.pai;
-                var types = data.chitypes;
+                let pai = data.pai;
+                let types = data.chitypes;
 
                 if (types.length > 1) {
                     this.hideOptions();
@@ -1382,9 +1470,9 @@ cc.Class({
     enterGangState: function(state, pai) {
         this._gangState = state;
 
-        var options = this._optionsData;
-        var gp = options.gangpai;
-        var net = cc.vv.net;
+        let options = this._optionsData;
+        let gp = options.gangpai;
+        let net = cc.vv.net;
 
         switch (state) {
             case 0:
@@ -1409,15 +1497,14 @@ cc.Class({
         }
     },
 
-    // TODO
     doTing: function(seatData) {
-        var localIndex = cc.vv.gameNetMgr.getLocalIndex(seatData.seatindex);
-        var side = cc.vv.mahjongmgr.getSide(localIndex);
-        var sideHolds = cc.find('game/' + side + '/layout/holds', this.node);
+        let localIndex = cc.vv.gameNetMgr.getLocalIndex(seatData.seatindex);
+        let side = cc.vv.mahjongmgr.getSide(localIndex);
+        let sideHolds = cc.find('game/' + side + '/layout/holds', this.node);
 
-        for (var i = 0; i < sideHolds.childrenCount; i++) {
-            var child = sideHolds.children[i];
-            var mj = child.getComponent('SmartMJ');
+        for (let i = 0; i < sideHolds.childrenCount; i++) {
+            let child = sideHolds.children[i];
+            let mj = child.getComponent('SmartMJ');
 
             mj.setFunction(1);
         }
@@ -1426,11 +1513,11 @@ cc.Class({
     enterTingState: function(state, pai) {
         this._tingState = state;
 
-        var options = this._optionsData;
-        var net = cc.vv.net;
-        var mgr = cc.vv.mahjongmgr;
-        var seatData = cc.vv.gameNetMgr.getSelfData();
-        var holds = seatData.holds;
+        let options = this._optionsData;
+        let net = cc.vv.net;
+        let mgr = cc.vv.mahjongmgr;
+        let seatData = cc.vv.gameNetMgr.getSelfData();
+        let holds = seatData.holds;
 
         console.log("tingState " + state);
 
@@ -1444,8 +1531,8 @@ cc.Class({
             case 1:
             {
                 this.showTingOpt(false);
-				this.showTingPrompts();
-				//this.doTing(seatData);
+                this.showTingPrompts();
+                //this.doTing(seatData);
                 net.send("ting", { pai: pai });
                 this.enterTingState(-1);
                 break;
@@ -1498,15 +1585,15 @@ cc.Class({
 
         if (0 == localIndex) {
             startx = 42.5;
-            xoff = 83;
+            xoff = 85;
         } else if (localIndex == 1) {
             startx = 0;
             starty = -123.5;
             xoff = -7;
             yoff = 19;
         } else if (localIndex == 2) {
-            startx = -20.5;
-            xoff = -39;
+            startx = -21.8;
+            xoff = -43.6;
         } else if (localIndex == 3) {
             startx = 0;
             starty = 123.5;
@@ -1520,69 +1607,58 @@ cc.Class({
         return cc.p(x, y);
     },
 
-	setMJLocation: function(mjnode, localIndex, index, board, mopai) {
-		let startx = 0;
-		let starty = 0;
-		let xoff = 0;
-		let yoff = 0;
-		let barrierx = 0;
-		let barriery = 0;
-		let id = index;
+    setMJLocation: function(mjnode, localIndex, index, board, mopai) {
+        let startx = 0;
+        let starty = 0;
+        let xoff = 0;
+        let yoff = 0;
+        let barrierx = 0;
+        let barriery = 0;
+        let id = index;
 
-		if (localIndex == 0) {
-			startx = 42.5;
-			xoff = 83;
+        if (localIndex == 0) {
+            startx = 42.5;
+            xoff = 85;
 
-			if (mopai) {
-				barrierx = 20;
-			}
-		} else if (localIndex == 1) {
-			if (board) {
-			    startx = 0;
-				starty = -123.5;
-				xoff = -7.7;
-				yoff = 20;
-			} else {
-			    startx = 0;
-				starty = -123.5;
-				xoff = -7;
-				yoff = 19;
-			}
+            if (mopai)
+                barrierx = 20;
+        } else if (localIndex == 1) {
+            if (board) {
+                starty = -123.5;
+                xoff = -7.7;
+                yoff = 20;
+            } else {
+                starty = -123.5;
+                xoff = -7;
+                yoff = 19;
+            }
 
-			if (mopai) {
-			    barrierx = -7
-				barriery = 19;
-			}
-		} else if (localIndex == 2) {
-			if (board) {
-				startx = -20.5;
-				xoff = -39;
-			} else {
-				startx = -22;
-				xoff = -41;
-			}
+            if (mopai) {
+                barrierx = -7
+                barriery = 19;
+            }
+        } else if (localIndex == 2) {
+            startx = -21.8;
+            xoff = -43.6;
 
-			if (mopai) {
-				barrierx = -20;
-			}
-		} else if (localIndex == 3) {
-			if (board) {
-			    startx = 0;
-				starty = 123.5;
-				xoff = -8;
-				yoff = -19;
-			} else {
-			    startx = 0;
-				starty = 123.5;
-				xoff = -7;
-				yoff = -19;
-			}
+            if (mopai)
+                barrierx = -20;
+        } else if (localIndex == 3) {
+            if (board) {
+                starty = 123.5;
+                xoff = -8;
+                yoff = -19;
+            } else {
+                starty = 123.5;
+                xoff = -7;
+                yoff = -19;
+            }
 
-			if (mopai) {
-			    barrierx = -7;
-				barriery = -19;
-			}
-		}
+            if (mopai) {
+                barrierx = -7;
+                barriery = -19;
+            }
+        }
 
         let x = startx + xoff * id + barrierx;
         let y = starty + yoff * id + barriery;
@@ -1592,15 +1668,14 @@ cc.Class({
     },
 
     sortHolds: function(seatData) {
-        var holds = seatData.holds;
-        if (holds == null) {
+        let holds = seatData.holds;
+        if (holds == null)
             return null;
-        }
 
-        var mopai = null;
+        let mopai = null;
 
         if (!this._chipeng) {
-            var l = holds.length;
+            let l = holds.length;
             if (l % 3 == 2)
                 mopai = holds.pop();
         }
@@ -1613,41 +1688,60 @@ cc.Class({
         return holds;
     },
 
+    hideMopai: function(seatindex) {
+        let net = cc.vv.gameNetMgr;
+        let localIndex = net.getLocalIndex(seatindex);
+        let side = net.getSide(localIndex);
+        let sideHolds = cc.find('game/' + side + '/layout/holds', this.node);
+        let mjcnt = sideHolds.childrenCount;
+        let swap = (side == 'east');
+        let moid = swap ? 0 : mjcnt - 1;
+        let mopaiNode = sideHolds.children[moid];
+
+        if (mopaiNode == undefined) {
+            console.log(mjcnt, moid);
+            console.log("xiong undefined");
+        }
+
+        cc.vv.audioMgr.playSFX('Sound/OUT_CARD0.mp3');
+
+        this.putMJItem(sideHolds, localIndex, mopaiNode);
+    },
+
     doChupai: function(seatData, pai) {
-        var localIndex = cc.vv.gameNetMgr.getLocalIndex(seatData.seatindex);
-        var side = cc.vv.gameNetMgr.getSide(localIndex);
-        var sideHolds = cc.find('game/' + side + '/layout/holds', this.node);
+        let net = cc.vv.gameNetMgr;
+        let localIndex = net.getLocalIndex(seatData.seatindex);
+        let side = net.getSide(localIndex);
+        let sideHolds = cc.find('game/' + side + '/layout/holds', this.node);
+        let mjcnt = sideHolds.childrenCount;
+        let swap = (side == 'east');
+        let myself = (0 == localIndex);
 
-        var mjcnt = sideHolds.childrenCount;
-        var swap = (side == 'east');
-        var myself = (0 == localIndex);
+        let moid = swap ? 0 : mjcnt - 1;
+        let mopaiNode = sideHolds.children[moid];
 
-        var moid = swap ? 0 : mjcnt - 1;
-        var mopaiNode = sideHolds.children[moid];
-
-        if ( mopaiNode == undefined )
-        {
+        if (mopaiNode == undefined) {
             console.log(mjcnt, moid);
             console.log("falls undefined");
         }
 
-        var mopai = mopaiNode.getComponent('SmartMJ');
-        var mopaiId = mopai.mjid;
-        var folds = this.node.getComponent('Folds3d');
+        let mopai = mopaiNode.getComponent('SmartMJ');
+        let mopaiId = mopai.mjid;
+        let folds = this.node.getComponent('Folds3d');
 
-        var show = (myself || seatData.hued || cc.vv.replayMgr.isReplay());
+        let show = (myself || seatData.hued || cc.vv.replayMgr.isReplay());
 
         cc.vv.audioMgr.playSFX('Sound/OUT_CARD0.mp3');
 
         if (!show) {
-            var pos = mopaiNode.parent.convertToWorldSpaceAR(mopaiNode.position);
+            let pos = mopaiNode.parent.convertToWorldSpaceAR(mopaiNode.position);
 
             folds.doChupai(seatData, pai, pos);
             this.putMJItem(sideHolds, localIndex, mopaiNode);
             return;
         }
 
-        var mjnode = null;
+        let mjnode = null;
 
         if (myself) {
             mjnode = this._lastChupai;
@@ -1658,98 +1752,92 @@ cc.Class({
             mjnode = mopaiNode;
         }
 
-        for (var i = 0; i < mjcnt; i++) {
-            var node = sideHolds.children[i];
-            var mj = node.getComponent('SmartMJ');
+        for (let i = 0; i < mjcnt; i++) {
+            let node = sideHolds.children[i];
+            let mj = node.getComponent('SmartMJ');
 
             node.oldID = swap ? (mjcnt - 1 - i) : i;
 
-            if (mjnode == null && mj.mjid == pai) {
+            if (mjnode == null && mj.mjid == pai)
                 mjnode = node;
-            }
         }
 
-        if (!mjnode) {
+        if (!mjnode)
             console.log('mjnode not found!');
-        }
 
-        var pos = sideHolds.convertToWorldSpaceAR(mjnode.position);
+        let pos = sideHolds.convertToWorldSpaceAR(mjnode.position);
 
         this.putMJItem(sideHolds, localIndex, mjnode);
         folds.doChupai(seatData, pai, pos);
 
-        if (mopaiNode == mjnode) {
+        if (mopaiNode == mjnode)
             return;
-        }
 
-        var holds = [];
+        let holds = [];
 
         mjcnt = sideHolds.childrenCount;
 
-        for (var i = 0; i < mjcnt - 1; i++) {
-            var node = sideHolds.children[swap ? (mjcnt - 1 - i) : i];
+        for (let i = 0; i < mjcnt - 1; i++) {
+            let node = sideHolds.children[swap ? (mjcnt - 1 - i) : i];
 
             holds.push(node);
         }
 
-        var max = 0;
-        var _holds = [];
+        let max = 0;
+        let _holds = [];
 
-        for (var i = 0; i < holds.length; i++) {
-            var mj = holds[i].getComponent('SmartMJ');
+        for (let i = 0; i < holds.length; i++) {
+            let mj = holds[i].getComponent('SmartMJ');
 
             _holds.push(mj.mjid);
         }
 
         _holds.push(mopaiId);
-        cc.vv.gameNetMgr.sortMJ(_holds);
+        net.sortMJ(_holds);
 
-        for (var i = 0; i < _holds.length; i++) {
-            var pai = _holds[i];
+        for (let i = 0; i < _holds.length; i++) {
+            let pai = _holds[i];
 
-            if (pai == mopaiId) {
+            if (pai == mopaiId)
                 max = i;
-            }
         }
 
         holds.splice(max, 0, mopaiNode);
 
-        for (var i = 0; i < holds.length; i++) {
-            var node = holds[i];
-
-            var p0 = this.getMJPosition(localIndex, i);
+        for (let i = 0; i < holds.length; i++) {
+            let node = holds[i];
+            let p0 = this.getMJPosition(localIndex, i);
 
             node.setSiblingIndex(swap ? (mjcnt - 1 - i): i);
 
             if (node != mopaiNode) {
-                if (i != node.oldID) {
+                if (i != node.oldID)
                     node.runAction(cc.moveTo(0.3, p0));
-                }
             } else {
-                var oldx = node.x;
-                var oldy = node.y;
-                var p1 = null;
-                var p2 = null;
+                let oldx = node.x;
+                let oldy = node.y;
+                let p1 = null;
+                let p2 = null;
 
                 if (0 == localIndex) {
-                    var newy = oldy + node.height + 10;
+                    let newy = oldy + node.height + 10;
                     p1 = cc.p(oldx, newy);
                     p2 = cc.p(p0.x, newy);
                 } else if (1 == localIndex) {
-                    var newx = oldx - node.width - 10;
+                    let newx = oldx - node.width - 10;
                     p1 = cc.p(newx, oldy);
                     p2 = cc.p(newx, p0.y);
                 } else if (2 == localIndex) {
-                    var newy = oldy - node.height - 10;
+                    let newy = oldy - node.height - 10;
                     p1 = cc.p(oldx, newy);
                     p2 = cc.p(p0.x, newy);
                 } else if (3 == localIndex) {
-                    var newx = oldx + node.width + 10;
+                    let newx = oldx + node.width + 10;
                     p1 = cc.p(newx, oldy);
                     p2 = cc.p(newx, p0.y);
                 }
 
-                var acts = null;
+                let acts = null;
 
                 if (i == holds.length - 1) {
                     acts = cc.moveTo(0.3, p0);
@@ -1763,27 +1851,26 @@ cc.Class({
     },
 
     showMopai: function(seatIndex, pai) {
-        var netMgr = cc.vv.gameNetMgr;
-        var localIndex = netMgr.getLocalIndex(seatIndex);
-        var side = netMgr.getSide(localIndex);
-        var sideHolds = cc.find('game/' + side + '/layout/holds', this.node);
-        var mjcnt = sideHolds.childrenCount;
-        var swap = (side == 'east');
-        var myself = (0 == localIndex);
-        var seatData = netMgr.seats[seatIndex];
-        var showBoard = (pai >= 0) && (seatData.hued || cc.vv.replayMgr.isReplay());
-        var pgs = this.getPengGangsNum(seatData);
-        var pos = netMgr.numOfHolds - pgs;
-        var index = swap ? 0 : pos;
+        let net = cc.vv.gameNetMgr;
+        let localIndex = net.getLocalIndex(seatIndex);
+        let side = net.getSide(localIndex);
+        let sideHolds = cc.find('game/' + side + '/layout/holds', this.node);
+        let mjcnt = sideHolds.childrenCount;
+        let swap = (side == 'east');
+        let myself = (0 == localIndex);
+        let seatData = net.seats[seatIndex];
+        let showBoard = (pai >= 0) && (seatData.hued || cc.vv.replayMgr.isReplay());
+        let pgs = this.getPengGangsNum(seatData);
+        let pos = net.numOfHolds - pgs;
+        let index = swap ? 0 : pos;
 
         console.log('showMopai');
 
         if (pai == null) {
-            if (mjcnt <= pos) {
+            if (mjcnt <= pos)
                 return;
-            }
 
-            var mjnode = sideHolds.children[index];
+            let mjnode = sideHolds.children[index];
 
             this.putMJItem(sideHolds, localIndex, mjnode);
             return;
@@ -1792,63 +1879,59 @@ cc.Class({
         if (!seatData.hued)
             cc.vv.audioMgr.playSFX('Sound/SEND_CARD0.mp3');
 
-        var mjnode = this.getMJItem(sideHolds, localIndex, pos);
-        var mj = mjnode.getComponent('SmartMJ');
+        let mjnode = this.getMJItem(sideHolds, localIndex, pos);
+        let mj = mjnode.getComponent('SmartMJ');
 
         this.setMJLocation(mjnode, localIndex, pos, showBoard, true);
 
         mjnode.active = true;
         mj.setFunction(showBoard ? 1 : 0);
 
-        if (showBoard || myself) {
+        if (showBoard || myself)
             mj.setMJID(pai);
-        }
 
         if (swap) {
-            var holds = [];
+            let holds = [];
 
-            for (var i = 0; i < sideHolds.childrenCount; i++) {
+            for (let i = 0; i < sideHolds.childrenCount; i++)
                 holds.push(sideHolds.children[i]);
-            }
 
-            for (var i = 0; i < holds.length; i++) {
-                var child = holds[i];
+            for (let i = 0; i < holds.length; i++) {
+                let child = holds[i];
                 child.setSiblingIndex(i == holds.length - 1 ? 0 : i + 1);
             }
         }
 
-		console.log('end showMopai');
+        console.log('end showMopai');
     },
 
     updateHolds: function() {
-        var net = cc.vv.gameNetMgr;
-        var seats = net.seats;
-        var seatData = seats[cc.vv.gameNetMgr.seatIndex];
-        var holds = seatData.holds;
-        if (holds == null) {
+        let net = cc.vv.gameNetMgr;
+        let seats = net.seats;
+        let seatData = seats[cc.vv.gameNetMgr.seatIndex];
+        let holds = seatData.holds;
+        if (holds == null)
             return;
-        }
 
         console.log('updateHolds');
 
         cc.vv.audioMgr.playSFX('Sound/SEND_CARD0.mp3');
 
-        var _holds = holds.slice(0);
-
-        var show = (seatData.hued || cc.vv.replayMgr.isReplay());
-        var sideHolds = cc.find("game/south/layout/holds", this.node);
-        var total = _holds.length;
+        let _holds = holds.slice(0);
+        let show = (seatData.hued || cc.vv.replayMgr.isReplay());
+        let sideHolds = cc.find("game/south/layout/holds", this.node);
+        let total = _holds.length;
 
         while (sideHolds.childrenCount > total) {
-            var mjnode = sideHolds.children[total];
+            let mjnode = sideHolds.children[total];
 
             this.putMJItem(sideHolds, 0, mjnode);
         }
 
-        for (var i = 0; i < total; ++i) {
-            var mjid = _holds[i];
-            var mjnode = this.getMJItem(sideHolds, 0, i);
-            var mj = mjnode.getComponent('SmartMJ');
+        for (let i = 0; i < total; ++i) {
+            let mjid = _holds[i];
+            let mjnode = this.getMJItem(sideHolds, 0, i);
+            let mj = mjnode.getComponent('SmartMJ');
 
             this.setMJLocation(mjnode, 0, i, show, (i == net.numOfHolds));
 
@@ -1867,15 +1950,15 @@ cc.Class({
     },
 
     holdsUpdated: function() {
-        var sideHolds = cc.find("game/south/layout/holds", this.node);
-        var total = sideHolds.childrenCount;
-        var self = this;
+        let sideHolds = cc.find("game/south/layout/holds", this.node);
+        let total = sideHolds.childrenCount;
+        let self = this;
 
         cc.vv.audioMgr.playSFX('Sound/SEND_CARD0.mp3');
 
-        for (var i = 0; i < total; i++) {
-            var mjnode = sideHolds.children[i];
-            var mj = mjnode.getComponent('SmartMJ');
+        for (let i = 0; i < total; i++) {
+            let mjnode = sideHolds.children[i];
+            let mj = mjnode.getComponent('SmartMJ');
 
             mj.setFunction(2);
         }
@@ -1884,45 +1967,43 @@ cc.Class({
             cc.vv.audioMgr.playSFX('Sound/SEND_CARD0.mp3');
             self.initMahjongs('reset');
 
-            var net = cc.vv.gameNetMgr;
-            if (net.seatIndex == net.turn) {
+            let net = cc.vv.gameNetMgr;
+            if (net.seatIndex == net.turn)
                 self.checkChuPai(true);
-            }
         }, 500);
     },
 
     updateOtherHolds: function(seatData) {
-        var localIndex = this.getLocalIndex(seatData.seatindex);
-        if (localIndex == 0) {
+        let localIndex = this.getLocalIndex(seatData.seatindex);
+        if (localIndex == 0)
             return;
-        }
 
-        var net = cc.vv.gameNetMgr;
-        var side = net.getSide(localIndex);
-        var game = this.node.getChildByName("game");
-        var sideRoot = game.getChildByName(side);
-        var sideHolds = cc.find("layout/holds", sideRoot);
-        var swap = 'east' == side;
+        let net = cc.vv.gameNetMgr;
+        let side = net.getSide(localIndex);
+        let game = this.node.getChildByName("game");
+        let sideRoot = game.getChildByName(side);
+        let sideHolds = cc.find("layout/holds", sideRoot);
+        let swap = 'east' == side;
 
-        var mjnum = seatData.holdsLen;
+        let mjnum = seatData.holdsLen;
 
         cc.vv.audioMgr.playSFX('Sound/SEND_CARD0.mp3');
 
-        for (var i = 0; i < mjnum; i++) {
-            var mjnode = this.getMJItem(sideHolds, localIndex, i);
+        for (let i = 0; i < mjnum; i++) {
+            let mjnode = this.getMJItem(sideHolds, localIndex, i);
             mjnode.active = true;
         }
 
         while (sideHolds.childrenCount > mjnum) {
-            var mjnode = sideHolds.children[mjnum];
+            let mjnode = sideHolds.children[mjnum];
 
             this.putMJItem(sideHolds, localIndex, mjnode);
         }
 
-        for (var i = 0; i < mjnum; i++) {
-            var idx = swap ? (mjnum - 1 - i) : i;
-            var mjnode = this.getMJItem(sideHolds, localIndex, idx);
-            var mj = mjnode.getComponent("SmartMJ");
+        for (let i = 0; i < mjnum; i++) {
+            let idx = swap ? (mjnum - 1 - i) : i;
+            let mjnode = this.getMJItem(sideHolds, localIndex, idx);
+            let mj = mjnode.getComponent("SmartMJ");
 
             this.setMJLocation(mjnode, localIndex, i, false, (i == net.numOfHolds));
 
@@ -1933,34 +2014,33 @@ cc.Class({
     },
 
     initMahjongs: function(act) {
-        var seats = cc.vv.gameNetMgr.seats;
-        var seatData = seats[cc.vv.gameNetMgr.seatIndex];
-        var holds = this.sortHolds(seatData);
+        let net = cc.vv.gameNetMgr;
+        let seats = net.seats;
+        let seatData = seats[net.seatIndex];
+        let holds = this.sortHolds(seatData);
         if (holds == null)
             return;
 
-        var reset = act == 'reset';
-        var refresh = act == 'refresh';
+        let reset = act == 'reset';
+        let refresh = act == 'refresh';
 
         console.log('initMahjongs');
 
-        var _holds = holds.slice(0);
-
-        var show = (seatData.hued || cc.vv.replayMgr.isReplay());
-
-        var sideHolds = cc.find("game/south/layout/holds", this.node);
-        var total = _holds.length;
+        let _holds = holds.slice(0);
+        let show = (seatData.hued || cc.vv.replayMgr.isReplay());
+        let sideHolds = cc.find("game/south/layout/holds", this.node);
+        let total = _holds.length;
 
         while (sideHolds.childrenCount > total) {
-            var mjnode = sideHolds.children[total];
+            let mjnode = sideHolds.children[total];
 
             this.putMJItem(sideHolds, 0, mjnode);
         }
 
-        for (var i = 0; i < total; ++i) {
-            var mjid = _holds[i];
-            var mjnode = this.getMJItem(sideHolds, 0, i);
-            var mj = mjnode.getComponent('SmartMJ');
+        for (let i = 0; i < total; ++i) {
+            let mjid = _holds[i];
+            let mjnode = this.getMJItem(sideHolds, 0, i);
+            let mj = mjnode.getComponent('SmartMJ');
 
             this.setMJLocation(mjnode, 0, i, show, (!this._chipeng && (i == total - 1) && (total % 3 == 2)));
 
@@ -1974,7 +2054,7 @@ cc.Class({
             mjnode.y = 0;
             mjnode.active = true;
 
-            var toSet = show ? 1 : 0;
+            let toSet = show ? 1 : 0;
 
             mj.setFunction(toSet);
 
@@ -1985,44 +2065,42 @@ cc.Class({
     },
 
     initOtherMahjongs: function(seatData, act, hasMopai) {
-        var net = cc.vv.gameNetMgr;
-
-        var localIndex = this.getLocalIndex(seatData.seatindex);
+        let net = cc.vv.gameNetMgr;
+        let localIndex = this.getLocalIndex(seatData.seatindex);
         if (localIndex == 0)
             return;
 
-        var reset = act == 'reset';
-        var refresh = act == 'refresh';
+        let reset = act == 'reset';
+        let refresh = act == 'refresh';
 
         console.log('initOtherMahjongs');
 
-        var side = net.getSide(localIndex);
-        var game = this.node.getChildByName("game");
-        var sideRoot = game.getChildByName(side);
-        let layout = sideRoot.getChildByName('layout');
-        var sideHolds = cc.find("layout/holds", sideRoot);
-        var holds = this.sortHolds(seatData);
-        var swap = 'east' == side;
+        let side = net.getSide(localIndex);
+        let game = this.node.getChildByName("game");
+        let sideRoot = game.getChildByName(side);
+        let sideHolds = cc.find("layout/holds", sideRoot);
+        let holds = this.sortHolds(seatData);
+        let swap = 'east' == side;
 
         if (holds != null && holds.length > 0) {
-            var mjnum = holds.length;
+            let mjnum = holds.length;
 
-            for (var i = 0; i < mjnum; i++) {
-                var mjnode = this.getMJItem(sideHolds, localIndex, i);
+            for (let i = 0; i < mjnum; i++) {
+                let mjnode = this.getMJItem(sideHolds, localIndex, i);
                 mjnode.active = true;
             }
 
             while (sideHolds.childrenCount > mjnum) {
-                var mjnode = sideHolds.children[mjnum];
+                let mjnode = sideHolds.children[mjnum];
 
                 this.putMJItem(sideHolds, localIndex, mjnode);
             }
 
-            for (var i = 0; i < mjnum; i++) {
-                var idx = swap ? (mjnum - 1 - i) : i;
-                var mjnode = this.getMJItem(sideHolds, localIndex, idx);
-                var mj = mjnode.getComponent("SmartMJ");
-                var mjid = holds[i];
+            for (let i = 0; i < mjnum; i++) {
+                let idx = swap ? (mjnum - 1 - i) : i;
+                let mjnode = this.getMJItem(sideHolds, localIndex, idx);
+                let mj = mjnode.getComponent("SmartMJ");
+                let mjid = holds[i];
 
                 this.setMJLocation(mjnode, localIndex, i, true, (i == mjnum - 1) && (mjnum % 3 == 2));
 
@@ -2039,29 +2117,28 @@ cc.Class({
                 mj.setMJID(mjid);
             }
         } else {
-            var penggangs = this.getPengGangsNum(seatData);
-            var mjnum = net.numOfHolds - penggangs;
-            var board = seatData.hastingpai;
+            let penggangs = this.getPengGangsNum(seatData);
+            let mjnum = net.numOfHolds - penggangs;
+            let board = seatData.hastingpai;
 
-            if (hasMopai) {
+            if (hasMopai)
                 mjnum += 1;
-            }
 
-            for (var i = 0; i < mjnum; i++) {
-                var mjnode = this.getMJItem(sideHolds, localIndex, i);
-                    mjnode.active = true;
+            for (let i = 0; i < mjnum; i++) {
+                let mjnode = this.getMJItem(sideHolds, localIndex, i);
+                mjnode.active = true;
             }
 
             while (sideHolds.childrenCount > mjnum) {
-                var mjnode = sideHolds.children[mjnum];
+                let mjnode = sideHolds.children[mjnum];
 
                 this.putMJItem(sideHolds, localIndex, mjnode);
             }
 
-            for (var i = 0; i < mjnum; i++) {
-                var idx = swap ? (mjnum - 1 - i) : i;
-                var mjnode = this.getMJItem(sideHolds, localIndex, idx);
-                var mj = mjnode.getComponent("SmartMJ");
+            for (let i = 0; i < mjnum; i++) {
+                let idx = swap ? (mjnum - 1 - i) : i;
+                let mjnode = this.getMJItem(sideHolds, localIndex, idx);
+                let mj = mjnode.getComponent("SmartMJ");
 
                 this.setMJLocation(mjnode, localIndex, i, board, (i == mjnum - 1) && (mjnum % 3 == 2));
 
@@ -2098,7 +2175,7 @@ cc.Class({
     },
 
      getPengGangsNum: function(seatData) {
-        var num = seatData.pengs.length + seatData.angangs.length +
+        let num = seatData.pengs.length + seatData.angangs.length +
                   seatData.diangangs.length + seatData.wangangs.length +
                   (seatData.chis ? seatData.chis.length : 0);
 
@@ -2106,8 +2183,7 @@ cc.Class({
     },
 
     onDestroy:function(){
-        if (cc.vv) {
+        if (cc.vv)
             cc.vv.gameNetMgr.clear();
-        }
     }
 });

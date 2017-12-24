@@ -212,7 +212,7 @@ cc.Class({
 
     playGangAnimation: function(data) {
         var seatData = data.seatData;
-        var pai = data.pai;
+        var pai = data.pai % 100;
         var gangtype = data.gangtype;
         var localIndex = cc.vv.gameNetMgr.getLocalIndex(seatData.seatindex);
         var side = cc.vv.gameNetMgr.getSide(localIndex);

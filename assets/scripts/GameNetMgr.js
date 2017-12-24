@@ -419,11 +419,10 @@ cc.Class({
             self.dispatchEvent('game_dice', data);
         });
 
+        net.addHandler("game_holds_push", data=>{
 
-        net.addHandler("game_holds_push",function(data) {
-            var seat = self.seats[self.seatIndex];
-            console.log(data);
-            seat.holds = data;
+            let seat = self.seats[data.seatindex];
+            seat.holds = data.holds;
 
             for (var i = 0; i < self.seats.length; ++i) {
                 var s = self.seats[i];
@@ -503,9 +502,9 @@ cc.Class({
 
         net.addHandler("game_begin_push", function(data) {
             console.log('game_begin_push');
-            self.button = data.value;
-            self.turn = self.button;
-            self.gamestate = "begin";
+            self.button = data.button;
+            self.turn = data.turn;
+            self.gamestate = data.state;
             self.maima = null;
 
 			for (var i = 0; i < self.seats.length; i++) {
@@ -597,29 +596,28 @@ cc.Class({
         });
 
         net.addHandler("hangang_notify_push",function(data){
-            self.dispatchEvent('hangang_notify',data.value);
+            self.dispatchEvent('hangang_notify', data.seatindex);
         });
 
         net.addHandler("game_action_push",function(data){
             self.curaction = data;
             console.log("game_action_push");
             console.log(data);
-            self.dispatchEvent('game_action',data);
+            self.dispatchEvent('game_action', data);
         });
 
         net.addHandler("game_chupai_push",function(data){
             console.log('game_chupai_push');
             console.log(data);
-            var turnUserID = data.value;
-            var si = self.getSeatIndexByID(turnUserID);
-            self.doTurnChange(si);
+
+            self.doTurnChange(data.turn);
         });
 
         net.addHandler("game_num_push",function(data){
             console.log('game_num_push');
             console.log(data);
-            self.numOfGames = data.value;
-            self.dispatchEvent('game_num',data);
+            self.numOfGames = data.numofgames;
+            self.dispatchEvent('game_num', data);
         });
 
         net.addHandler("game_over_push", function(data) {
@@ -643,8 +641,8 @@ cc.Class({
 
         net.addHandler("mj_count_push",function(data){
             console.log('mj_count_push');
-            self.numOfMJ = data.value;
-            self.dispatchEvent('mj_count',data.value);
+            self.numOfMJ = data.numofmj;
+            self.dispatchEvent('mj_count', data.numofmj);
         });
 
         net.addHandler("hu_push",function(data){
@@ -1001,9 +999,10 @@ cc.Class({
             return 'unknown';
     },
 
-    doGang: function(seatIndex, pai, gangtype, skip) {
+    doGang: function(seatIndex, ppai, gangtype, skip) {
         var seatData = this.seats[seatIndex];
 		var holds = seatData.holds;
+        let pai = ppai % 100;
 
 		console.log('doGang, si=' + seatIndex);
 
@@ -1031,7 +1030,7 @@ cc.Class({
                 }
             }
 
-            seatData.wangangs.push(pai);
+            seatData.wangangs.push(ppai);
         }
 
         if (holds != null && holds.length > 0) {
@@ -1046,15 +1045,15 @@ cc.Class({
         }
 
         if (gangtype == "angang") {
-            seatData.angangs.push(pai);
+            seatData.angangs.push(ppai);
         } else if (gangtype == "diangang") {
-            seatData.diangangs.push(pai);
+            seatData.diangangs.push(ppai);
         }
 
         if (skip)
             return;
 
-        this.dispatchEvent('gang_notify', { seatData: seatData, gangtype: gangtype, pai: pai });
+        this.dispatchEvent('gang_notify', { seatData: seatData, gangtype: gangtype, pai: ppai });
     },
 
     doHu: function(data, skip) {
