@@ -126,8 +126,8 @@ cc.Class({
 
             seatView.seat.active = true;
 
-            console.log(userData.userId);
-            seatView.icon.setUserID(userData.userId);
+            console.log(userData.userid);
+            seatView.icon.setUserID(userData.userid);
 			
             hupai.active = hued;
 
